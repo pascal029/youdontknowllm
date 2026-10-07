@@ -1,31 +1,10 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import { runInSandbox, WORKER_SRC } from './sandbox'
+import { FakeWorker, installFakeWorker } from '../test-fake-worker'
+import { runInSandbox } from './sandbox'
 
-// jsdom has no Worker: run the real worker source against a fake `self`, async like a real worker.
-const terminated: FakeWorker[] = []
-class FakeWorker {
-  onmessage: ((e: { data: unknown }) => void) | null = null
-  onerror = null
-  private self: { onmessage?: (e: { data: unknown }) => void; postMessage: (d: unknown) => void } = {
-    postMessage: (d) => setTimeout(() => this.onmessage?.({ data: d })),
-  }
-  constructor() {
-    new Function('self', WORKER_SRC)(this.self)
-  }
-  postMessage(data: unknown) {
-    setTimeout(() => this.self.onmessage?.({ data }))
-  }
-  terminate() {
-    terminated.push(this)
-  }
-}
+const terminated = FakeWorker.terminated
 
-beforeEach(() => {
-  terminated.length = 0
-  vi.stubGlobal('Worker', FakeWorker)
-  URL.createObjectURL = () => 'blob:fake'
-  URL.revokeObjectURL = () => {}
-})
+beforeEach(installFakeWorker)
 afterEach(() => vi.unstubAllGlobals())
 
 test('returns the value, captures console.log, terminates the worker', async () => {

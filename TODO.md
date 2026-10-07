@@ -29,7 +29,7 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 3.4 Built-in tools: calculator, get_current_time, random_number, run_javascript, wikipedia_search
 - [x] 3.5 Tool toggle list (enable/disable per tool)
 - [x] 3.6 User custom tool editor: name, description, params schema, JS body; validate JSON; persist
-- [ ] 3.7 Agent loop: model → parse tool call → execute → feed result → repeat (max 5 iterations)
+- [x] 3.7 Agent loop: model → parse tool call → execute → feed result → repeat (max 5 iterations)
 
 ## Phase 4 — Step-by-step visualizer
 - [ ] 4.1 Agent loop emits step events (user prompt, model output, tool chosen + args, tool result, final answer)

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { runAgent, type Step } from './agent/loop'
 import { composeSystemPrompt } from './agent/prompt'
 import AppShell from './components/AppShell'
 import Chat from './components/Chat'
@@ -22,7 +23,11 @@ export default function App() {
   const [provider, setProvider] = useState<Provider | null>(null)
   const [loading, setLoading] = useState<{ progress: number; text: string } | null>(null)
   const [error, setError] = useState('')
+  /** what the model sees next turn (includes tool calls/responses) */
+  const [history, setHistory] = useState<Message[]>([])
+  /** what the chat shows: user messages + final answers */
   const [messages, setMessages] = useState<Message[]>([])
+  const [steps, setSteps] = useState<Step[]>([])
   const [streaming, setStreaming] = useState<string>()
   const abortRef = useRef<AbortController>(null)
   // stored as { items } because useLocalStorage merges objects
@@ -53,17 +58,29 @@ export default function App() {
 
   async function send(text: string) {
     if (!provider) return
-    const history: Message[] = [...messages, { role: 'user', content: text }]
-    setMessages(history)
+    setMessages((m) => [...m, { role: 'user', content: text }])
+    setSteps([])
     setStreaming('')
     setError('')
     const ac = new AbortController()
     abortRef.current = ac
-    let out = ''
     try {
-      const sent: Message[] = systemText ? [{ role: 'system', content: systemText }, ...history] : history
-      for await (const c of provider.chat(sent, ac.signal)) {
-        if (c.type === 'delta') setStreaming((out += c.text))
+      const gen = runAgent({ provider, systemPrompt: prefs.systemPrompt, tools: tools.filter((t) => t.enabled), history, userText: text, signal: ac.signal })
+      for (;;) {
+        const r = await gen.next()
+        if (r.done) {
+          setHistory(r.value)
+          break
+        }
+        const e = r.value
+        if (e.type === 'delta') {
+          setStreaming((s) => (s ?? '') + e.text)
+          continue
+        }
+        setSteps((s) => [...s, e])
+        if (e.type === 'model') setStreaming('')
+        if (e.type === 'answer') setMessages((m) => [...m, { role: 'assistant', content: e.text }])
+        if (e.type === 'error') setError(e.error)
       }
     } catch (e) {
       if (!ac.signal.aborted) {
@@ -75,7 +92,6 @@ export default function App() {
         } else setError(msg)
       }
     } finally {
-      if (out) setMessages([...history, { role: 'assistant', content: out }])
       setStreaming(undefined)
     }
   }
@@ -127,7 +143,7 @@ export default function App() {
           onStop={() => abortRef.current?.abort()}
         />
       }
-      inspector={<p>Steps &amp; stats</p>}
+      inspector={<p>{steps.length} steps</p>}
     />
   )
 }
