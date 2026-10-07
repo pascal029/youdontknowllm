@@ -32,7 +32,7 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 3.7 Agent loop: model → parse tool call → execute → feed result → repeat (max 5 iterations)
 
 ## Phase 4 — Step-by-step visualizer
-- [ ] 4.1 Agent loop emits step events (user prompt, model output, tool chosen + args, tool result, final answer)
+- [x] 4.1 Agent loop emits step events (user prompt, model output, tool chosen + args, tool result, final answer) — delivered with 3.7 (src/agent/loop.ts `Step`)
 - [ ] 4.2 StepTimeline component: expandable cards per step with raw JSON
 - [ ] 4.3 Highlight errors (parse failure, tool timeout) as steps
 
