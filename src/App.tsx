@@ -56,7 +56,8 @@ export default function App() {
   const [activeModelId, setActiveModelId] = useState<string>()
 
   const refreshCached = useCallback(() => {
-    cachedModelIds(LOCAL_MODELS.map((m) => m.id)).then(setCached, () => setCached(new Set()))
+    // a failed check means "unknown", not "not downloaded": hide the status rather than guess
+    cachedModelIds(LOCAL_MODELS.map((m) => m.id)).then(setCached, () => setCached(undefined))
   }, [])
 
   useEffect(() => {
