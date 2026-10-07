@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- @include head -->
+    <title>What Is a Token in an LLM? | youdontknowllm</title>
+    <meta name="description" content="LLMs don&#x27;t read words, they read tokens. Learn what tokens are, why models use them, and why they explain odd mistakes, prices and limits." />
+    <link rel="canonical" href="%SITE_URL%/learn/what-is-a-token/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%SITE_NAME%" />
+    <meta property="og:title" content="What Is a Token in an LLM?" />
+    <meta property="og:description" content="Why language models read pieces of words, and how tokens explain their limits, prices and strange mistakes." />
+    <meta property="og:url" content="%SITE_URL%/learn/what-is-a-token/" />
+    <meta property="og:image" content="%SITE_URL%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">
+      [
+        {
+          "@context": "https://schema.org",
+          "@type": "TechArticle",
+          "headline": "What is a token?",
+          "description": "LLMs don't read words, they read tokens. Learn what tokens are, why models use them, and why they explain odd mistakes, prices and limits.",
+          "url": "%SITE_URL%/learn/what-is-a-token/",
+          "image": "%SITE_URL%/og.png",
+          "datePublished": "2026-10-07",
+          "dateModified": "2026-10-07",
+          "author": {
+            "@type": "Organization",
+            "name": "youdontknowllm",
+            "url": "%SITE_URL%/"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "youdontknowllm",
+            "url": "%SITE_URL%/"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "%SITE_URL%/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Learn",
+              "item": "%SITE_URL%/learn/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "What is a token?",
+              "item": "%SITE_URL%/learn/what-is-a-token/"
+            }
+          ]
+        }
+      ]
+    </script>
+    <link rel="stylesheet" href="/src/site/site.css" />
+  </head>
+  <body>
+    <!-- @include header -->
+    <main class="page">
+      <article class="article">
+        <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/learn/">Learn</a> / <span aria-current="page">What is a token?</span></nav>
+        <h1>What is a token?</h1>
+        <p class="lead">When you type a message to a chatbot, the model never sees your words. Your text is first chopped into <strong>tokens</strong>: small pieces of text, each mapped to a number. The model reads numbers, predicts numbers, and those numbers are turned back into text. Almost everything about LLMs is measured in tokens: limits, prices and speed.</p>
+
+        <h2 id="what">A token is a piece of text</h2>
+        <p>A token can be a whole word, part of a word, a single character, or punctuation. Common words are usually one token. Rare or long words are split into several:</p>
+<pre><code>"The cat sat"     →  ["The", " cat", " sat"]                 3 tokens
+"unbelievably"    →  ["un", "belie", "vably"]                3 tokens (example split)
+"ChatGPT"         →  ["Chat", "G", "PT"]                     3 tokens (example split)</code></pre>
+        <p>Notice the leading spaces: <code>" cat"</code> with a space is a different token from <code>"cat"</code>. The exact split depends on the model's <strong>tokenizer</strong>. Qwen, Llama and GPT models each have their own, so the same sentence can be a different number of tokens on each.</p>
+        <p>A useful rule of thumb for English: <strong>1 token ≈ 4 characters ≈ ¾ of a word</strong>. So 1,000 tokens is roughly 750 words.</p>
+
+        <h2 id="numbers">Tokens are numbers</h2>
+        <p>Each token in the tokenizer's vocabulary has an ID. Modern models have vocabularies of around 32,000 to 150,000+ tokens. The model's input is a list of these IDs:</p>
+<pre><code>"The cat sat"  →  [791, 8415, 7731]   (IDs are illustrative)</code></pre>
+        <p>Inside the model, each ID is turned into a long list of numbers (an <em>embedding</em>) that captures something about its meaning. Everything after that is math on those numbers.</p>
+
+        <h2 id="why">Why not just use words or letters?</h2>
+        <ul>
+          <li><strong>Words</strong> would need a gigantic vocabulary and still fail on typos, names, code and new words.</li>
+          <li><strong>Letters</strong> would make every text extremely long, and models get slower and more expensive as input grows.</li>
+          <li><strong>Sub-word tokens</strong> are the compromise. Frequent text gets short codes, and anything else can still be spelled out from smaller pieces. Most tokenizers learn their pieces from data using an algorithm called <em>byte-pair encoding</em> (BPE).</li>
+        </ul>
+
+        <h2 id="generation">The model writes one token at a time</h2>
+        <p>Generation is a loop. The model looks at all the tokens so far and outputs a probability for every token in its vocabulary. One is picked (settings like <em>temperature</em> control how adventurous that pick is), added to the text, and the loop repeats until the model produces a special end token.</p>
+        <p>That's why answers stream in word by word, and why speed is measured in <strong>tokens per second</strong>. See <a href="/learn/prefill-vs-decode/">prefill vs decode</a>.</p>
+
+        <h2 id="special">Special tokens you never see</h2>
+        <p>Chat models also use special tokens to mark structure: where the system prompt starts, where a user message ends, whose turn it is. Qwen models use markers like <code>&lt;|im_start|&gt;</code> and <code>&lt;|im_end|&gt;</code>, and Llama 3 uses <code>&lt;|start_header_id|&gt;</code>. Your conversation is wrapped in these by a <em>chat template</em> before the model sees it. They take up space too.</p>
+
+        <h2 id="consequences">Why tokens explain strange LLM behaviour</h2>
+        <ul>
+          <li><strong>Counting letters is hard.</strong> Ask "how many r's are in strawberry?" and the model sees a few tokens, not ten letters. It can't easily look inside a token.</li>
+          <li><strong>Arithmetic is shaky.</strong> Numbers are split into chunks that don't line up with digits, which is one reason small models need a <a href="/learn/function-calling/">calculator tool</a>.</li>
+          <li><strong>Other languages cost more.</strong> Tokenizers are trained mostly on English, so the same sentence in Indonesian, Thai or Japanese often needs more tokens. That means more cost, slower replies and less room in the <a href="/learn/context-window/">context window</a>.</li>
+          <li><strong>Prices and limits are per token.</strong> APIs bill per input and output token, and every model has a maximum number of tokens it can handle at once.</li>
+        </ul>
+
+        <aside class="try">
+          <h2 id="try">Try it</h2>
+          <ol>
+            <li>Open the <a href="/app/">playground</a> and send any message. Watch the reply stream in. Each chunk is roughly one token.</li>
+            <li>Look at the <strong>Context window</strong> meter. Your conversation is counted in tokens, not words.</li>
+            <li>Ask a small model: <em>How many r's are in "strawberry"?</em> Then enable <code>run_javascript</code> and ask it to count with code.</li>
+            <li>Open <strong>Full prompt sent to the model</strong> to see its approximate token count grow as you enable tools.</li>
+          </ol>
+          <a class="btn btn--primary" href="/app/">Open the playground</a>
+        </aside>
+
+        <nav class="related" aria-label="Related guides">
+          <h2>Keep learning</h2>
+          <ul>
+            <li><a href="/learn/context-window/">The context window</a>: how many tokens a model can see at once</li>
+            <li><a href="/learn/prefill-vs-decode/">Prefill vs decode</a>: tokens per second, explained</li>
+            <li><a href="/learn/function-calling/">How function calling works</a>: the fix for token-level weaknesses</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+    <!-- @include footer -->
+  </body>
+</html>

@@ -51,7 +51,7 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 7.2 Non-blocking fonts (<link> preconnect instead of CSS @import) + shared header/footer partials for static pages
 - [x] 7.3 Static landing page / (no React): hero, what you'll learn, how it works, CTA to /app/, article links, full meta + JSON-LD
 - [x] 7.4 Article template + /learn/ index + "Function calling" article
-- [ ] 7.5 Article: What is a token?
+- [x] 7.5 Article: What is a token?
 - [ ] 7.6 Article: Context window
 - [ ] 7.7 Article: System prompt
 - [ ] 7.8 Article: Prefill vs decode (tokens/sec)
