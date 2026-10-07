@@ -1,9 +1,20 @@
 <footer class="site-footer">
-      <nav aria-label="Footer">
-        <a href="/">Home</a>
-        <a href="/learn/">Learn</a>
-        <a href="/app/">Playground</a>
-        <a href="https://github.com/pascal029/youdontknowllm" rel="noopener">GitHub</a>
-      </nav>
-      <p>Learn how LLMs work by running one in your browser. Open source.</p>
+      <div class="site-footer__inner">
+        <div class="site-footer__brand">
+          <a class="site-logo" href="/"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8l5 4-5 4M12 17h7"/></svg>youdontknowllm</a>
+          <p>Learn how LLMs work by running one in your browser.</p>
+        </div>
+        <nav class="site-footer__col" aria-label="Lessons">
+          <h2>Lessons</h2>
+          <!-- @lessons:links -->
+        </nav>
+        <nav class="site-footer__col" aria-label="Product">
+          <h2>Product</h2>
+          <ul>
+            <li><a href="/app/">Playground</a></li>
+            <li><a href="/learn/">All lessons</a></li>
+            <li><a href="https://github.com/pascal029/youdontknowllm" rel="noopener">GitHub</a></li>
+          </ul>
+        </nav>
+      </div>
     </footer>

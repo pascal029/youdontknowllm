@@ -75,3 +75,13 @@ test('summary counts lessons and total minutes', async () => {
   const { lessonSummary } = await import('../../site.build')
   expect(lessonSummary(fixed)).toBe(`${LESSONS.length} lessons · ${LESSONS.length * 4} min total`)
 })
+
+test('Learn nav is marked current only on /learn/ pages; footer lists every lesson', () => {
+  const header = '<a href="/learn/"%NAV_LEARN%>Learn</a>'
+  const read = () => ''
+  expect(applyPartials(header, read, join(ROOT, 'learn', 'index.html'))).toContain('aria-current="page"')
+  expect(applyPartials(header, read, join(ROOT, 'learn', LESSONS[0].slug, 'index.html'))).toContain('aria-current="page"')
+  expect(applyPartials(header, read, join(ROOT, 'index.html'))).toBe('<a href="/learn/">Learn</a>')
+  const footer = dom(applyPartials('<!-- @lessons:links -->', read))
+  expect([...footer.querySelectorAll('a')].map((a) => a.textContent)).toEqual(LESSONS.map((l) => l.title))
+})

@@ -51,6 +51,10 @@ export function lessonList(heading = 'h2', minutes = readingMinutes): string {
 export const lessonSummary = (minutes = readingMinutes) =>
   `${LESSONS.length} lessons · ${LESSONS.reduce((n, l) => n + minutes(l.slug), 0)} min total`
 
+/** Plain list of lesson links (footer). */
+export const lessonLinks = () =>
+  `<ul>\n${LESSONS.map((l) => `            <li><a href="/learn/${l.slug}/">${esc(l.title)}</a></li>`).join('\n')}\n          </ul>`
+
 /** ItemList JSON-LD for the lesson index. */
 export const lessonItemList = () =>
   `<script type="application/ld+json">${JSON.stringify({
@@ -95,6 +99,8 @@ const slugOf = (file?: string) => file?.match(/learn\/([^/]+)\/index\.html$/)?.[
  *  `<!-- @lessons:list [h2|h3] -->` → numbered lesson path
  *  `<!-- @lessons:itemlist -->`     → ItemList JSON-LD
  *  `<!-- @lessons:summary -->`      → "6 lessons · 18 min total"
+ *  `<!-- @lessons:links -->`        → plain lesson link list
+ *  `%NAV_LEARN%`                    → aria-current="page" on /learn/ pages"
  *  `<!-- @lesson:meta -->` / `<!-- @lesson:nav -->` → for the current lesson page
  *  `%SITE_URL%` / `%SITE_NAME%`     → site.config values
  */
@@ -109,6 +115,8 @@ export function applyPartials(html: string, read = (name: string) => readFileSyn
     .replace(/<!--\s*@lessons:list(?:\s+(h2|h3))?\s*-->/g, (_, h?: string) => lessonList(h ?? 'h2'))
     .replace(/<!--\s*@lessons:itemlist\s*-->/g, () => lessonItemList())
     .replace(/<!--\s*@lessons:summary\s*-->/g, () => lessonSummary())
+    .replace(/<!--\s*@lessons:links\s*-->/g, () => lessonLinks())
+    .replaceAll('%NAV_LEARN%', /(^|\/)learn\//.test(file ?? '') ? ' aria-current="page"' : '')
     .replace(/<!--\s*@lesson:meta\s*-->/g, () => lessonMeta(needSlug('@lesson:meta')))
     .replace(/<!--\s*@lesson:nav\s*-->/g, () => lessonNav(needSlug('@lesson:nav')))
     .replaceAll('%SITE_URL%', SITE_URL)
