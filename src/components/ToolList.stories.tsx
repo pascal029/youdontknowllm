@@ -3,17 +3,19 @@ import { useState } from 'react'
 import { BUILTIN_TOOLS } from '../tools/builtin'
 import ToolList from './ToolList'
 
+function Stateful(args: Parameters<typeof ToolList>[0]) {
+  const [tools, setTools] = useState(args.tools)
+  return (
+    <div style={{ maxWidth: 280 }}>
+      <ToolList {...args} tools={tools} onToggle={(name, enabled) => setTools(tools.map((t) => (t.name === name ? { ...t, enabled } : t)))} />
+    </div>
+  )
+}
+
 const meta = {
   component: ToolList,
   args: { tools: BUILTIN_TOOLS, onToggle: () => {} },
-  render: (args) => {
-    const [tools, setTools] = useState(args.tools)
-    return (
-      <div style={{ maxWidth: 280 }}>
-        <ToolList {...args} tools={tools} onToggle={(name, enabled) => setTools(tools.map((t) => (t.name === name ? { ...t, enabled } : t)))} />
-      </div>
-    )
-  },
+  render: (args) => <Stateful {...args} />,
 } satisfies Meta<typeof ToolList>
 export default meta
 type Story = StoryObj<typeof meta>

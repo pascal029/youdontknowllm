@@ -107,6 +107,7 @@ describe('system prompt', () => {
 })
 
 test('provider errors propagate (caller decides how to show them)', async () => {
+  // oxlint-disable-next-line require-yield
   const provider: Provider = { name: 'x', contextWindow: 1, chat: async function* () { throw new Error('API error 500') } }
   await expect(drain(runAgent({ ...base, provider, tools: [] }))).rejects.toThrow('API error 500')
 })

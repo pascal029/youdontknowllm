@@ -2,13 +2,17 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import ProviderSettings, { DEFAULT_PROVIDER_SETTINGS } from './ProviderSettings'
 
+type Props = Parameters<typeof ProviderSettings>[0]
+
+function Stateful(args: Props) {
+  const [v, setV] = useState(args.value)
+  return <div style={{ maxWidth: 280 }}><ProviderSettings {...args} value={v} onChange={setV} /></div>
+}
+
 const meta = {
   component: ProviderSettings,
   args: { value: DEFAULT_PROVIDER_SETTINGS, onChange: () => {}, onActivate: () => {}, webgpu: true },
-  render: (args) => {
-    const [v, setV] = useState(args.value)
-    return <div style={{ maxWidth: 280 }}><ProviderSettings {...args} value={v} onChange={setV} /></div>
-  },
+  render: (args) => <Stateful {...args} />,
 } satisfies Meta<typeof ProviderSettings>
 export default meta
 type Story = StoryObj<typeof meta>

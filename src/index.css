@@ -102,3 +102,10 @@ button { cursor: pointer; }
 .btn--sm { min-height: 28px; padding: var(--space-xs) var(--space-md); font-size: 0.75rem; }
 .add-tool { margin-top: var(--space-sm); width: 100%; }
 .stats { display: grid; gap: var(--space-lg); margin-bottom: var(--space-xl); padding: var(--space-lg); border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-bg); }
+
+/* Touch devices: 44px minimum hit targets */
+@media (pointer: coarse) {
+  .btn, .btn--sm, .tool__toggle, .segmented__opt span { min-height: 44px; }
+  .step__raw summary, .composed summary { display: flex; align-items: center; min-height: 44px; }
+  .field input, .field select { min-height: 44px; }
+}

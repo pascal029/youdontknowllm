@@ -21,7 +21,7 @@
 .step__body { margin: var(--space-sm) 0 0; max-height: 220px; overflow: auto; font-size: 0.75rem; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--color-fg); }
 
 .step__raw { margin-top: var(--space-sm); font-size: 0.6875rem; }
-.step__raw summary { cursor: pointer; color: var(--color-fg-muted); width: max-content; }
+.step__raw summary { cursor: pointer; color: var(--color-fg-muted); width: max-content; padding: var(--space-xs) 0; }
 .step__raw summary:hover { color: var(--color-fg); }
 .step__raw pre { margin: var(--space-sm) 0 0; padding: var(--space-sm); max-height: 200px; overflow: auto; border-radius: var(--radius); background: var(--color-muted); font-size: 0.6875rem; white-space: pre-wrap; overflow-wrap: anywhere; }
 
