@@ -1,4 +1,4 @@
-.tool-editor { display: grid; gap: var(--space-lg); padding: var(--space-lg); border: 1px solid var(--color-accent); border-radius: var(--radius); background: var(--color-bg); }
+.tool-editor { display: grid; gap: var(--space-lg); }
 .tool-editor textarea { resize: vertical; }
 .tool-editor__test { display: grid; gap: var(--space-sm); padding: var(--space-md); border-radius: var(--radius); background: var(--color-muted); }
 .tool-editor__test .btn { justify-self: start; }

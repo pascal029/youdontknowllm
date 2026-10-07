@@ -76,7 +76,7 @@ export default function ToolEditor({ initial, takenNames, onSave, onCancel, run 
       <div className="field">
         <label>
           <span>Code</span>
-          <textarea className="mono" rows={5} value={code} onChange={(e) => setCode(e.target.value)} spellCheck={false} />
+          <textarea className="mono" rows={10} value={code} onChange={(e) => setCode(e.target.value)} spellCheck={false} />
         </label>
         <small>Async function body. Use <code>args</code>, <code>return</code> a value. Runs in a sandboxed worker (3s limit).</small>
       </div>

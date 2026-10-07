@@ -6,6 +6,7 @@ import Chat from './components/Chat'
 import ComposedPrompt from './components/ComposedPrompt'
 import ContextMeter from './components/ContextMeter'
 import LoadProgress from './components/LoadProgress'
+import Modal from './components/Modal'
 import ProviderSettings, { DEFAULT_PROVIDER_SETTINGS } from './components/ProviderSettings'
 import StepTimeline from './components/StepTimeline'
 import SpeedStats, { liveRate, type LiveSpeed } from './components/SpeedStats'
@@ -42,6 +43,7 @@ export default function App() {
   // stored as { items } because useLocalStorage merges objects
   const [custom, setCustom] = useLocalStorage('ydkl.customTools', { items: [] as Tool[] })
   const [editing, setEditing] = useState<Tool | null>(null)
+  const [deletingTool, setDeletingTool] = useState<Tool | null>(null)
   const tools = [...BUILTIN_TOOLS, ...custom.items].map((t) => ({ ...t, enabled: !prefs.disabledTools.includes(t.name) }))
   const systemText = composeSystemPrompt(prefs.systemPrompt.trim(), tools.filter((t) => t.enabled))
   const toggleTool = (name: string, enabled: boolean) =>
@@ -180,23 +182,51 @@ export default function App() {
               tools={tools}
               onToggle={toggleTool}
               onEdit={setEditing}
-              onDelete={(t) => setCustom({ items: custom.items.filter((x) => x.name !== t.name) })}
+              onDelete={setDeletingTool}
             />
-            {editing ? (
-              <ToolEditor
-                key={editing.name}
-                initial={editing}
-                takenNames={tools.map((t) => t.name).filter((n) => n !== editing.name || editing === NEW_TOOL_TEMPLATE)}
-                onCancel={() => setEditing(null)}
-                onSave={(t) => {
-                  const rest = editing === NEW_TOOL_TEMPLATE ? custom.items : custom.items.filter((x) => x.name !== editing.name)
-                  setCustom({ items: [...rest, t] })
-                  setEditing(null)
-                }}
-              />
-            ) : (
-              <button type="button" className="btn btn--sm add-tool" onClick={() => setEditing(NEW_TOOL_TEMPLATE)}>+ Add tool</button>
-            )}
+            <button type="button" className="btn btn--sm add-tool" onClick={() => setEditing(NEW_TOOL_TEMPLATE)}>+ Add tool</button>
+            <Modal
+              open={!!editing}
+              size="lg"
+              title={editing === NEW_TOOL_TEMPLATE ? 'Add tool' : `Edit ${editing?.name ?? ''}`}
+              onClose={() => setEditing(null)}
+            >
+              {editing && (
+                <ToolEditor
+                  initial={editing}
+                  takenNames={tools.map((t) => t.name).filter((n) => n !== editing.name || editing === NEW_TOOL_TEMPLATE)}
+                  onCancel={() => setEditing(null)}
+                  onSave={(t) => {
+                    const rest = editing === NEW_TOOL_TEMPLATE ? custom.items : custom.items.filter((x) => x.name !== editing.name)
+                    setCustom({ items: [...rest, t] })
+                    setEditing(null)
+                  }}
+                />
+              )}
+            </Modal>
+            <Modal
+              open={!!deletingTool}
+              size="sm"
+              title={`Delete ${deletingTool?.name ?? ''}?`}
+              onClose={() => setDeletingTool(null)}
+              footer={
+                <>
+                  <button type="button" className="btn btn--ghost" onClick={() => setDeletingTool(null)}>Cancel</button>
+                  <button
+                    type="button"
+                    className="btn btn--danger-solid"
+                    onClick={() => {
+                      setCustom({ items: custom.items.filter((x) => x.name !== deletingTool?.name) })
+                      setDeletingTool(null)
+                    }}
+                  >
+                    Delete tool
+                  </button>
+                </>
+              }
+            >
+              <p className="modal-text">This removes the tool and its code from this browser. It can't be undone.</p>
+            </Modal>
           </section>
           <ComposedPrompt text={systemText} />
         </>

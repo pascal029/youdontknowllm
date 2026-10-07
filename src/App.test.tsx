@@ -56,23 +56,32 @@ test('disabling a tool removes it from the composed prompt', async () => {
   expect(screen.queryByText(/"name":"calculator"/)).not.toBeInTheDocument()
 })
 
-test('add, persist, edit and delete a custom tool', async () => {
+test('add, persist, edit and delete a custom tool (editor and confirm in modals)', async () => {
   const { unmount } = render(<App />)
   await userEvent.click(screen.getByRole('button', { name: '+ Add tool' }))
-  await userEvent.click(screen.getByRole('button', { name: 'Save tool' }))
+  const add = screen.getByRole('dialog', { name: 'Add tool' })
+  await userEvent.click(within(add).getByRole('button', { name: 'Save tool' }))
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   expect(screen.getByRole('checkbox', { name: /reverse_text/ })).toBeChecked()
   expect(screen.getByText(/"name":"reverse_text"/)).toBeInTheDocument()
   unmount()
 
   render(<App />) // survives reload
   await userEvent.click(screen.getByRole('button', { name: 'Edit reverse_text' }))
-  const desc = screen.getByLabelText('Description')
+  const edit = screen.getByRole('dialog', { name: 'Edit reverse_text' })
+  const desc = within(edit).getByLabelText('Description')
   await userEvent.clear(desc)
   await userEvent.type(desc, 'Flip text')
-  await userEvent.click(screen.getByRole('button', { name: 'Save tool' }))
+  await userEvent.click(within(edit).getByRole('button', { name: 'Save tool' }))
   expect(screen.getByText('Flip text')).toBeInTheDocument()
 
   await userEvent.click(screen.getByRole('button', { name: 'Delete reverse_text' }))
+  const confirm = screen.getByRole('dialog', { name: 'Delete reverse_text?' })
+  await userEvent.click(within(confirm).getByRole('button', { name: 'Cancel' }))
+  expect(screen.getByRole('checkbox', { name: /reverse_text/ })).toBeInTheDocument()
+
+  await userEvent.click(screen.getByRole('button', { name: 'Delete reverse_text' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Delete tool' }))
   expect(screen.queryByRole('checkbox', { name: /reverse_text/ })).not.toBeInTheDocument()
 })
 
