@@ -23,3 +23,6 @@ export const NoWebGPU: Story = { args: { webgpu: false } }
 export const Remote: Story = { args: { value: { ...DEFAULT_PROVIDER_SETTINGS, mode: 'remote' } } }
 export const LocalDownloaded: Story = { args: { cached: new Set([DEFAULT_PROVIDER_SETTINGS.localModelId]), onDelete: async () => {} } }
 export const LocalNotDownloaded: Story = { args: { cached: new Set(), onDelete: async () => {} } }
+export const RemoteViaRelay: Story = {
+  args: { value: { ...DEFAULT_PROVIDER_SETTINGS, mode: 'remote', remote: { ...DEFAULT_PROVIDER_SETTINGS.remote, baseURL: 'https://ollama.com/v1', model: 'gpt-oss:20b' } } },
+}

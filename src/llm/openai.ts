@@ -1,3 +1,4 @@
+import { resolveBaseURL } from './relay'
 import { fromOpenAIChunks, type OpenAIChunk } from './stream'
 import type { Message, Provider, StreamChunk } from './types'
 
@@ -67,8 +68,19 @@ export async function* withTiming(
   }
 }
 
+/** fetch() only says "Failed to fetch"; explain the usual causes instead. */
+export function networkErrorMessage(baseURL: string, err: unknown): string {
+  let host = baseURL
+  try {
+    host = new URL(baseURL).host
+  } catch {
+    /* keep raw */
+  }
+  return `Couldn't reach ${host} (${err instanceof Error ? err.message : String(err)}). Check the base URL and that the server is running. If it works with curl but not here, the server is blocking browser requests (CORS).`
+}
+
 export function createOpenAIProvider(cfg: RemoteConfig): Provider {
-  const url = cfg.baseURL.replace(/\/+$/, '') + '/chat/completions'
+  const url = resolveBaseURL(cfg.baseURL).url + '/chat/completions'
   return {
     name: cfg.model,
     contextWindow: cfg.contextWindow,
@@ -87,6 +99,9 @@ export function createOpenAIProvider(cfg: RemoteConfig): Provider {
           stream: true,
           stream_options: { include_usage: true },
         }),
+      }).catch((e: unknown) => {
+        if (signal?.aborted) throw e
+        throw new Error(networkErrorMessage(cfg.baseURL, e))
       })
       if (!res.ok || !res.body) throw new Error(`API error ${res.status}: ${(await res.text()).slice(0, 300)}`)
       yield* withTiming(fromOpenAIChunks(parseSSE(res.body)), messages.map((m) => m.content).join('\n'), start)

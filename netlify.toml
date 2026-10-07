@@ -10,3 +10,11 @@
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Relay for APIs that block browser requests (no CORS). Keep in sync with RELAYED_ORIGINS in src/llm/relay.ts.
+# Server-side proxy: the browser only talks to this site, Netlify forwards to the API (headers incl. Authorization).
+[[redirects]]
+  from = "/relay/ollama/*"
+  to = "https://ollama.com/:splat"
+  status = 200
+  force = true

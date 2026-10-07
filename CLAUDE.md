@@ -33,7 +33,8 @@ Follow `design-system/youdontknowllm/MASTER.md`. Short version:
 ## Conventions
 - Tool calling is prompt-based for all providers: tools described in the system prompt, model replies with `<tool_call>{"name":..., "arguments":{...}}</tool_call>`.
 - Tool code always runs in a fresh Web Worker with a timeout, then `terminate()`. Never `eval` on the main thread.
-- API keys live only in localStorage and are sent only to the user's own baseURL. Never log them.
+- API keys live only in localStorage and are sent only with requests to the user's baseURL. Exception: hosts in `RELAYED_ORIGINS` (`src/llm/relay.ts`, e.g. ollama.com, which has no CORS) go through this site's Netlify/Vite relay; the UI says so. Never log keys.
+- Native `tool_calls` from a server are converted to `<tool_call>` text in `stream.ts`, so the prompt-based tool pipeline handles every model.
 - No new dependency when a few lines will do.
 
 ## Workflow

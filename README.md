@@ -43,6 +43,14 @@ npm run dev        # site: http://localhost:5173  ·  playground: http://localho
 1. Base URL: `http://<host>:11434/v1`. The API key can be empty. Model name: e.g. `gemma4:e2b`.
 2. Ollama only accepts browser requests from allowed origins. `localhost` is allowed by default. If you serve the app from elsewhere, start Ollama with `OLLAMA_ORIGINS=https://your-site`.
 
+### Using ollama.com (Ollama Cloud)
+
+Base URL `https://ollama.com/v1`, your ollama.com API key, and a model such as `gpt-oss:20b`.
+
+ollama.com doesn't allow requests from web pages (no CORS headers), so the app sends those requests to this site's `/relay/ollama/*` path instead. Netlify forwards them server-side (`netlify.toml`), and Vite does the same in `npm run dev` / `npm run preview`. Your key passes through that relay on the way to ollama.com and isn't stored. Only hosts listed in `RELAYED_ORIGINS` (`src/llm/relay.ts`) are relayed; everything else is called directly.
+
+Models like gpt-oss return native `tool_calls` instead of text. The app converts them into its `<tool_call>` format, so tools work the same way with every model.
+
 ## How tool calling works (the part you don't know)
 
 Small models have no native "function calling". It is just text:

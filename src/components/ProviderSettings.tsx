@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { LOCAL_MODELS } from '../llm/models'
 import type { RemoteConfig } from '../llm/openai'
+import { resolveBaseURL } from '../llm/relay'
 import Modal from './Modal'
 import './ProviderSettings.css'
 
@@ -126,16 +127,24 @@ export default function ProviderSettings({ value, onChange, onActivate, busy, we
         </>
       ) : (
         <>
-          <label className="field">
-            <span>Base URL</span>
-            <input type="url" value={value.remote.baseURL} onChange={(e) => setRemote({ baseURL: e.target.value })} placeholder="https://api.openai.com/v1" />
-          </label>
+          <div className="field">
+            <label>
+              <span>Base URL</span>
+              <input type="url" value={value.remote.baseURL} onChange={(e) => setRemote({ baseURL: e.target.value })} placeholder="https://api.openai.com/v1" />
+            </label>
+            {resolveBaseURL(value.remote.baseURL).relayed && (
+              <small className="relay-note">
+                This API blocks requests from web pages, so calls go through this site's relay (Netlify). Your key passes through it on
+                the way and isn't stored.
+              </small>
+            )}
+          </div>
           <div className="field">
             <label>
               <span>API key</span>
               <input type="password" autoComplete="off" value={value.remote.apiKey} onChange={(e) => setRemote({ apiKey: e.target.value })} />
             </label>
-            <small>Stored only in this browser. Sent only to the base URL above.</small>
+            <small>Stored only in this browser. Sent only with requests to the base URL above.</small>
           </div>
           <label className="field">
             <span>Model name</span>

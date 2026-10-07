@@ -65,3 +65,25 @@ test('provider surfaces HTTP errors', async () => {
   const p = createOpenAIProvider({ baseURL: 'https://x', apiKey: '', model: 'm', contextWindow: 1 })
   await expect(collect(p.chat([]))).rejects.toThrow('API error 401: bad key')
 })
+
+test('ollama.com is called through the site relay; other hosts directly', async () => {
+  const fetchMock = vi.fn().mockImplementation(async () => new Response(sse('data: [DONE]\n\n')))
+  vi.stubGlobal('fetch', fetchMock)
+  await collect(createOpenAIProvider({ baseURL: 'https://ollama.com/v1', apiKey: 'k', model: 'gpt-oss:20b', contextWindow: 1 }).chat([]))
+  expect(fetchMock.mock.calls[0][0]).toBe(`${location.origin}/relay/ollama/v1/chat/completions`)
+  expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe('Bearer k')
+})
+
+test('network failures explain the likely cause instead of "Failed to fetch"', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')))
+  const p = createOpenAIProvider({ baseURL: 'https://api.example.com/v1', apiKey: '', model: 'm', contextWindow: 1 })
+  await expect(collect(p.chat([]))).rejects.toThrow(/Couldn't reach api\.example\.com \(Failed to fetch\).*CORS/)
+})
+
+test('abort is passed through untouched', async () => {
+  const ac = new AbortController()
+  ac.abort()
+  vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new DOMException('aborted', 'AbortError')))
+  const p = createOpenAIProvider({ baseURL: 'https://api.example.com/v1', apiKey: '', model: 'm', contextWindow: 1 })
+  await expect(collect(p.chat([], ac.signal))).rejects.toThrow('aborted')
+})

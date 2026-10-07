@@ -85,3 +85,13 @@ describe('downloaded models', () => {
     expect(screen.getByRole('button', { name: 'Load model' })).toBeInTheDocument()
   })
 })
+
+test('explains the relay when the base URL is ollama.com', async () => {
+  render(<Harness />)
+  await userEvent.click(screen.getByRole('radio', { name: 'API' }))
+  expect(screen.queryByText(/through this site's relay/)).not.toBeInTheDocument()
+  const url = screen.getByLabelText('Base URL')
+  await userEvent.clear(url)
+  await userEvent.type(url, 'https://ollama.com/v1')
+  expect(screen.getByText(/through this site's relay/)).toBeInTheDocument()
+})
