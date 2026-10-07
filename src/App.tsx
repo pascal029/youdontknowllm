@@ -6,22 +6,27 @@ import ComposedPrompt from './components/ComposedPrompt'
 import LoadProgress from './components/LoadProgress'
 import ProviderSettings, { DEFAULT_PROVIDER_SETTINGS } from './components/ProviderSettings'
 import SystemPromptEditor, { DEFAULT_SYSTEM_PROMPT } from './components/SystemPromptEditor'
+import ToolList from './components/ToolList'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { LOCAL_MODELS } from './llm/models'
 import { createOpenAIProvider } from './llm/openai'
 import type { Message, Provider } from './llm/types'
 import { hasWebGPU } from './llm/webgpu'
+import { BUILTIN_TOOLS } from './tools/builtin'
 
 export default function App() {
   const [settings, setSettings] = useLocalStorage('ydkl.provider', DEFAULT_PROVIDER_SETTINGS)
-  const [prefs, setPrefs] = useLocalStorage('ydkl.prefs', { systemPrompt: DEFAULT_SYSTEM_PROMPT })
+  const [prefs, setPrefs] = useLocalStorage('ydkl.prefs', { systemPrompt: DEFAULT_SYSTEM_PROMPT, disabledTools: [] as string[] })
   const [provider, setProvider] = useState<Provider | null>(null)
   const [loading, setLoading] = useState<{ progress: number; text: string } | null>(null)
   const [error, setError] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const [streaming, setStreaming] = useState<string>()
   const abortRef = useRef<AbortController>(null)
-  const systemText = composeSystemPrompt(prefs.systemPrompt.trim(), [])
+  const tools = BUILTIN_TOOLS.map((t) => ({ ...t, enabled: !prefs.disabledTools.includes(t.name) }))
+  const systemText = composeSystemPrompt(prefs.systemPrompt.trim(), tools.filter((t) => t.enabled))
+  const toggleTool = (name: string, enabled: boolean) =>
+    setPrefs({ ...prefs, disabledTools: enabled ? prefs.disabledTools.filter((n) => n !== name) : [...prefs.disabledTools, name] })
 
   async function activate() {
     setError('')
@@ -79,6 +84,10 @@ export default function App() {
           {provider && !loading && <p className="status-ok">Ready: {provider.name}</p>}
           {error && <p className="error-text" role="alert">{error}</p>}
           <SystemPromptEditor value={prefs.systemPrompt} onChange={(systemPrompt) => setPrefs({ ...prefs, systemPrompt })} />
+          <section aria-labelledby="tools-title">
+            <h2 id="tools-title" className="panel-title">Tools</h2>
+            <ToolList tools={tools} onToggle={toggleTool} />
+          </section>
           <ComposedPrompt text={systemText} />
         </>
       }

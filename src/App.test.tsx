@@ -43,3 +43,10 @@ test('shows API errors', async () => {
   await userEvent.type(screen.getByLabelText('Message'), 'hi{Enter}')
   expect(await screen.findByRole('alert')).toHaveTextContent('API error 500')
 })
+
+test('disabling a tool removes it from the composed prompt', async () => {
+  render(<App />)
+  expect(screen.getByText(/"name":"calculator"/)).toBeInTheDocument()
+  await userEvent.click(screen.getByRole('checkbox', { name: /calculator/ }))
+  expect(screen.queryByText(/"name":"calculator"/)).not.toBeInTheDocument()
+})

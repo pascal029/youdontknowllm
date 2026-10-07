@@ -1,0 +1,8 @@
+.tools { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-sm); }
+.tool { padding: var(--space-md); border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-bg); }
+.tool__toggle { display: flex; align-items: center; gap: var(--space-md); min-height: 28px; cursor: pointer; }
+.tool__toggle input { width: 16px; height: 16px; margin: 0; accent-color: var(--color-accent); cursor: pointer; }
+.tool__name { font-family: var(--font-mono); font-size: 0.8125rem; }
+.tool__desc { margin: var(--space-xs) 0 0 24px; font-size: 0.75rem; color: var(--color-fg-muted); }
+.tool__actions { display: flex; gap: var(--space-sm); margin: var(--space-sm) 0 0 18px; }
+.badge { margin-left: auto; padding: 0 var(--space-sm); border-radius: 999px; background: var(--color-muted); color: var(--color-info); font-size: 0.6875rem; font-family: var(--font-mono); }
