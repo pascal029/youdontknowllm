@@ -21,3 +21,5 @@ export const Local: Story = {}
 export const Loading: Story = { args: { busy: true } }
 export const NoWebGPU: Story = { args: { webgpu: false } }
 export const Remote: Story = { args: { value: { ...DEFAULT_PROVIDER_SETTINGS, mode: 'remote' } } }
+export const LocalDownloaded: Story = { args: { cached: new Set([DEFAULT_PROVIDER_SETTINGS.localModelId]), onDelete: async () => {} } }
+export const LocalNotDownloaded: Story = { args: { cached: new Set(), onDelete: async () => {} } }

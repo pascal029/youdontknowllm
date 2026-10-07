@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { LOCAL_MODELS } from '../llm/models'
 import type { RemoteConfig } from '../llm/openai'
+import Modal from './Modal'
 import './ProviderSettings.css'
 
 export type ProviderSettingsValue = {
@@ -20,13 +22,39 @@ type Props = {
   onActivate: () => void
   busy?: boolean
   webgpu: boolean
+  /** local model ids already downloaded; undefined while checking */
+  cached?: Set<string>
+  /** id of the local model currently loaded, if any */
+  activeModelId?: string
+  /** delete a downloaded model from the browser cache */
+  onDelete?: (id: string) => Promise<void>
 }
 
-export default function ProviderSettings({ value, onChange, onActivate, busy, webgpu }: Props) {
+const gb = (mb: number) => `${(mb / 1024).toFixed(1)} GB`
+
+export default function ProviderSettings({ value, onChange, onActivate, busy, webgpu, cached, activeModelId, onDelete }: Props) {
+  const [confirming, setConfirming] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
   const set = (patch: Partial<ProviderSettingsValue>) => onChange({ ...value, ...patch })
   const setRemote = (patch: Partial<RemoteConfig>) => set({ remote: { ...value.remote, ...patch } })
   const model = LOCAL_MODELS.find((m) => m.id === value.localModelId) ?? LOCAL_MODELS[0]
   const remoteReady = value.remote.baseURL.trim() && value.remote.model.trim()
+  const isCached = cached?.has(model.id)
+
+  const confirmDelete = async () => {
+    if (!onDelete) return
+    setDeleting(true)
+    setDeleteError('')
+    try {
+      await onDelete(model.id)
+      setConfirming(false)
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : String(e))
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   return (
     <section className="provider" aria-labelledby="provider-title">
@@ -50,17 +78,51 @@ export default function ProviderSettings({ value, onChange, onActivate, busy, we
               <select value={model.id} onChange={(e) => set({ localModelId: e.target.value })}>
                 {LOCAL_MODELS.map((m) => (
                   <option key={m.id} value={m.id}>
-                    {m.label} · {(m.sizeMB / 1024).toFixed(1)} GB
+                    {m.label} · {gb(m.sizeMB)}{cached?.has(m.id) ? ' · downloaded' : ''}
                   </option>
                 ))}
               </select>
             </label>
-            <small>{model.note} Context {model.contextWindow.toLocaleString()} tokens. Downloaded once, then cached.</small>
+            <small>{model.note} Context {model.contextWindow.toLocaleString()} tokens.</small>
           </div>
+          {webgpu && cached && (
+            <div className="model-status">
+              {isCached ? (
+                <>
+                  <span className="model-status__pill model-status__pill--ok">Downloaded · {gb(model.sizeMB)}</span>
+                  {onDelete && (
+                    <button type="button" className="btn btn--ghost btn--sm btn--danger" onClick={() => setConfirming(true)} aria-label={`Delete ${model.label} from this browser`}>
+                      Delete
+                    </button>
+                  )}
+                </>
+              ) : (
+                <span className="model-status__pill">Not downloaded · {gb(model.sizeMB)} download</span>
+              )}
+            </div>
+          )}
           {!webgpu && <p className="error-text">WebGPU not available. Use Chrome/Edge, or switch to OpenAI-compatible.</p>}
           <button className="btn btn--primary" onClick={onActivate} disabled={busy || !webgpu}>
-            {busy ? 'Loading…' : 'Load model'}
+            {busy ? 'Loading…' : isCached || !cached ? 'Load model' : `Download & load (${gb(model.sizeMB)})`}
           </button>
+          <Modal
+            open={confirming}
+            size="sm"
+            title={`Delete ${model.label}?`}
+            onClose={() => !deleting && setConfirming(false)}
+            footer={
+              <>
+                <button type="button" className="btn btn--ghost" onClick={() => setConfirming(false)} disabled={deleting}>Cancel</button>
+                <button type="button" className="btn btn--danger-solid" onClick={confirmDelete} disabled={deleting}>
+                  {deleting ? 'Deleting…' : 'Delete model'}
+                </button>
+              </>
+            }
+          >
+            <p className="modal-text">This removes the downloaded model (about {gb(model.sizeMB)}) from this browser. You can download it again any time.</p>
+            {activeModelId === model.id && <p className="modal-text">It's loaded right now, so it will be unloaded first.</p>}
+            {deleteError && <p className="error-text" role="alert">Couldn't delete: {deleteError}</p>}
+          </Modal>
         </>
       ) : (
         <>

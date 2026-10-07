@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { runAgent, type Step } from './agent/loop'
 import { composeSystemPrompt } from './agent/prompt'
 import AppShell from './components/AppShell'
@@ -13,6 +13,7 @@ import SystemPromptEditor, { DEFAULT_SYSTEM_PROMPT } from './components/SystemPr
 import ToolEditor, { NEW_TOOL_TEMPLATE } from './components/ToolEditor'
 import ToolList from './components/ToolList'
 import { useLocalStorage } from './hooks/useLocalStorage'
+import { cachedModelIds, deleteCachedModel } from './llm/cache'
 import { LOCAL_MODELS } from './llm/models'
 import { createOpenAIProvider } from './llm/openai'
 import type { Message, Provider } from './llm/types'
@@ -46,9 +47,30 @@ export default function App() {
   const toggleTool = (name: string, enabled: boolean) =>
     setPrefs({ ...prefs, disabledTools: enabled ? prefs.disabledTools.filter((n) => n !== name) : [...prefs.disabledTools, name] })
 
+  const webgpu = hasWebGPU()
+  /** local model ids already in the browser cache (undefined = not checked yet) */
+  const [cached, setCached] = useState<Set<string>>()
+  const [activeModelId, setActiveModelId] = useState<string>()
+
+  const refreshCached = useCallback(() => {
+    cachedModelIds(LOCAL_MODELS.map((m) => m.id)).then(setCached, () => setCached(new Set()))
+  }, [])
+
+  useEffect(() => {
+    if (settings.mode === 'local' && webgpu) refreshCached()
+  }, [settings.mode, webgpu, refreshCached])
+
+  /** Free the current model (GPU memory + worker) before replacing or deleting it. */
+  async function dropProvider() {
+    await provider?.unload?.()
+    setProvider(null)
+    setActiveModelId(undefined)
+  }
+
   async function activate() {
     setError('')
     try {
+      await dropProvider()
       if (settings.mode === 'remote') {
         setProvider(createOpenAIProvider(settings.remote))
         return
@@ -57,11 +79,19 @@ export default function App() {
       setLoading({ progress: 0, text: 'Starting…' })
       const { loadWebLLM } = await import('./llm/webllm')
       setProvider(await loadWebLLM(model, (r) => setLoading({ progress: r.progress, text: r.text })))
+      setActiveModelId(model.id)
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
     } finally {
       setLoading(null)
+      if (settings.mode === 'local') refreshCached()
     }
+  }
+
+  async function deleteModel(id: string) {
+    if (activeModelId === id) await dropProvider()
+    await deleteCachedModel(id)
+    refreshCached()
   }
 
   async function send(text: string) {
@@ -106,7 +136,7 @@ export default function App() {
         const msg = e instanceof Error ? e.message : String(e)
         if (settings.mode === 'local') {
           // A WebGPU failure (e.g. device lost) leaves the engine unusable; make the user reload it.
-          setProvider(null)
+          void dropProvider()
           setError(`Local model stopped: ${msg} Reload the model, try a smaller one, or use an API.`)
         } else setError(msg)
       }
@@ -130,7 +160,16 @@ export default function App() {
     <AppShell
       sidebar={
         <>
-          <ProviderSettings value={settings} onChange={setSettings} onActivate={activate} busy={!!loading} webgpu={hasWebGPU()} />
+          <ProviderSettings
+            value={settings}
+            onChange={setSettings}
+            onActivate={activate}
+            busy={!!loading}
+            webgpu={webgpu}
+            cached={cached}
+            activeModelId={activeModelId}
+            onDelete={deleteModel}
+          />
           {loading && <LoadProgress {...loading} />}
           {provider && !loading && <p className="status-ok">Ready: {provider.name}</p>}
           {error && <p className="error-text" role="alert">{error}</p>}

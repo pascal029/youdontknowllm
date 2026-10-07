@@ -25,3 +25,4 @@
 .modal__body { padding: var(--space-xl); overflow-y: auto; }
 .modal__foot { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-md); padding: var(--space-lg) var(--space-xl); border-top: 1px solid var(--color-border); background: var(--color-bg); }
 @media (pointer: coarse) { .modal__close { width: 44px; height: 44px; } }
+.modal-text { margin: 0 0 var(--space-md); line-height: 1.6; } .modal-text:last-child { margin-bottom: 0; }
