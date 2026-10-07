@@ -60,3 +60,13 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 7.11 robots.txt, generated sitemap.xml, 1200×630 og:image, favicon, 404.html
 - [x] 7.12 SEO test: every built page has title, description, canonical, og tags, one h1, valid JSON-LD, is in sitemap
 - [x] 7.13 Lighthouse check on the built site (SEO 100, good CWV on landing) + Netlify deploy readiness
+
+## Phase 8 — Redesign landing + learn (ui-ux-pro-max)
+- [ ] 8.1 Design direction: ui-ux-pro-max page overrides for landing + learn, marketing tokens (radius 16, hairline borders, glow, easing)
+- [ ] 8.2 Lessons as one source of truth (site.config LESSONS) → build-time lesson list, ItemList JSON-LD, prev/next (+ tests)
+- [ ] 8.3 Article prev/next navigation with lesson titles (replaces "Keep learning") + "Lesson n of 6 · x min read"
+- [ ] 8.4 Learn index redesign: numbered learning path
+- [ ] 8.5 Landing hero redesign: CSS-animated agent-loop demo window (no JS, reduced-motion safe)
+- [ ] 8.6 Landing sections redesign: bento "inside the model", how it works, learning path, FAQ, final CTA
+- [ ] 8.7 Header/footer refresh: sticky blurred header, active nav state, mobile layout
+- [ ] 8.8 QA: Lighthouse 100s + CLS 0, screenshots at 375/768/1440, SEO tests green
