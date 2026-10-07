@@ -109,6 +109,14 @@ test('no broken internal links', () => {
     for (const a of doc.querySelectorAll('a[href^="/"]')) expect(exists(a.getAttribute('href')!), `${url} → ${a.getAttribute('href')}`).toBe(true)
 })
 
+test('own icons are linked and shipped (otherwise Netlify serves its default /favicon.ico)', () => {
+  for (const f of ['favicon.ico', 'favicon.svg', 'apple-touch-icon.png']) expect(existsSync(join(OUT, f)), f).toBe(true)
+  for (const { url, doc } of pages) {
+    const hrefs = [...doc.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]')].map((l) => l.getAttribute('href'))
+    expect(hrefs, url).toEqual(['/favicon.ico', '/favicon.svg', '/apple-touch-icon.png'])
+  }
+})
+
 test('404 page is noindex and not in the sitemap; robots.txt points at the sitemap', () => {
   const nf = pages.find((p) => p.url === '/404')!
   expect(meta(nf.doc, 'meta[name="robots"]')).toBe('noindex')
