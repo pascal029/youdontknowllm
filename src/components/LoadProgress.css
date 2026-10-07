@@ -1,0 +1,16 @@
+.load-progress { display: grid; gap: var(--space-sm); font-size: 0.875rem; }
+.load-progress__row { display: flex; justify-content: space-between; }
+.load-progress__pct { font-family: var(--font-mono); color: var(--color-accent); }
+.load-progress progress {
+  width: 100%;
+  height: 6px;
+  appearance: none;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--color-muted);
+  overflow: hidden;
+}
+.load-progress progress::-webkit-progress-bar { background: var(--color-muted); }
+.load-progress progress::-webkit-progress-value { background: var(--color-accent); transition: width var(--duration); }
+.load-progress progress::-moz-progress-bar { background: var(--color-accent); }
+.load-progress__text { margin: 0; color: var(--color-fg-muted); font-family: var(--font-mono); font-size: 0.75rem; overflow-wrap: anywhere; }
