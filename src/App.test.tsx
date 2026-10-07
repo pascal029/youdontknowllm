@@ -34,6 +34,7 @@ test('end to end: connect OpenAI-compatible API, send, see streamed reply', asyn
   // no usage from server → estimated, but the meter is live against the configured 8192 window
   expect(Number(screen.getByLabelText('Context window used').getAttribute('value'))).toBeGreaterThan(0)
   expect(screen.getByText(/\/ 8,192 tokens/)).toBeInTheDocument()
+  expect(screen.getByLabelText('Inference speed')).toBeInTheDocument()
   const sent = JSON.parse(fetchMock.mock.calls[0][1].body).messages
   expect(sent[0].role).toBe('system')
   expect(sent.at(-1)).toEqual({ role: 'user', content: 'hi' })

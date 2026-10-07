@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react'
 import { runAgent, type Step } from './agent/loop'
 import { composeSystemPrompt } from './agent/prompt'
-import { contextUsed } from './agent/stats'
 import AppShell from './components/AppShell'
 import Chat from './components/Chat'
 import ComposedPrompt from './components/ComposedPrompt'
@@ -9,6 +8,7 @@ import ContextMeter from './components/ContextMeter'
 import LoadProgress from './components/LoadProgress'
 import ProviderSettings, { DEFAULT_PROVIDER_SETTINGS } from './components/ProviderSettings'
 import StepTimeline from './components/StepTimeline'
+import SpeedStats from './components/SpeedStats'
 import SystemPromptEditor, { DEFAULT_SYSTEM_PROMPT } from './components/SystemPromptEditor'
 import ToolEditor, { NEW_TOOL_TEMPLATE } from './components/ToolEditor'
 import ToolList from './components/ToolList'
@@ -31,8 +31,9 @@ export default function App() {
   /** what the chat shows: user messages + final answers */
   const [messages, setMessages] = useState<Message[]>([])
   const [steps, setSteps] = useState<Step[]>([])
-  /** context used after the last finished turn; steps reset each turn, this carries over */
-  const [ctxUsed, setCtxUsed] = useState(0)
+  /** last model call: drives context + speed stats, carries over between turns */
+  const [lastModel, setLastModel] = useState<Extract<Step, { type: 'model' }> | null>(null)
+  const ctxUsed = lastModel ? lastModel.usage.promptTokens + lastModel.usage.completionTokens : 0
   const [streaming, setStreaming] = useState<string>()
   const abortRef = useRef<AbortController>(null)
   // stored as { items } because useLocalStorage merges objects
@@ -85,7 +86,7 @@ export default function App() {
         setSteps((s) => [...s, e])
         if (e.type === 'model') {
           setStreaming('')
-          setCtxUsed(contextUsed([e]))
+          setLastModel(e)
         }
         if (e.type === 'answer') setMessages((m) => [...m, { role: 'assistant', content: e.text }])
         if (e.type === 'error') setError(e.error)
@@ -156,6 +157,7 @@ export default function App() {
           {provider && (
             <section aria-label="Stats" className="stats">
               <ContextMeter used={ctxUsed} total={provider.contextWindow} />
+              {lastModel && <SpeedStats usage={lastModel.usage} ms={lastModel.ms} />}
             </section>
           )}
           <section aria-labelledby="steps-title">

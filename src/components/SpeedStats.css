@@ -1,0 +1,6 @@
+.speed { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin: 0; }
+.speed__item { min-width: 0; }
+.speed dt { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-fg-muted); }
+.speed dd { margin: 0; font-size: 0.75rem; color: var(--color-fg-muted); }
+.speed__num { font-family: var(--font-mono); font-size: 1.125rem; font-weight: 500; color: var(--color-fg); font-variant-numeric: tabular-nums; }
+.speed .speed__hint { font-size: 0.6875rem; }
