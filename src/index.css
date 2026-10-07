@@ -1,2 +1,59 @@
-:root { font-family: system-ui, sans-serif; color-scheme: light dark; }
-body { margin: 0; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* Tokens from design-system/youdontknowllm/MASTER.md — components use these, never raw hex. */
+:root {
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-secondary: #334155;
+  --color-muted: #272f42;
+  --color-border: #475569;
+  --color-fg: #f8fafc;
+  --color-fg-muted: #94a3b8;
+  --color-accent: #22c55e;
+  --color-on-accent: #052e16;
+  --color-destructive: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #38bdf8;
+  --color-ring: var(--color-accent);
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --space-xs: 2px;
+  --space-sm: 4px;
+  --space-md: 8px;
+  --space-lg: 12px;
+  --space-xl: 16px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+
+  --radius: 6px;
+  --duration: 200ms;
+
+  color-scheme: dark;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-fg);
+  background: var(--color-bg);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100dvh; background: var(--color-bg); }
+
+code, pre, kbd, textarea.mono { font-family: var(--font-mono); font-size: 0.875rem; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
