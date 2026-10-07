@@ -36,6 +36,8 @@ a.btn:not(.btn--primary) { color: var(--color-fg); }
 @media (min-width: 720px) { .site-footer__inner { grid-template-columns: 1.4fr 1.2fr 1fr; } }
 @media (pointer: coarse) { .site-footer__col a { min-height: 44px; } }
 
+/* Decorative glows may extend past the viewport; clip (not hidden) keeps the sticky header working. */
+html, body { overflow-x: clip; }
 main.page { max-width: var(--page-max); margin: 0 auto; padding: 0 var(--space-xl); }
 
 :where(main.page) h3 { margin: 0 0 var(--space-sm); font-size: 1rem; }
@@ -250,3 +252,16 @@ main.page { max-width: var(--page-max); margin: 0 auto; padding: 0 var(--space-x
 
 .not-found { padding: var(--space-3xl) var(--space-xl); text-align: center; } .not-found .hero__cta { justify-content: center; } .not-found h1 { margin: var(--space-md) 0; font-size: clamp(2rem, 4vw, 2.75rem); }
 @media (prefers-reduced-motion: reduce) { .lesson-nav__link:hover { transform: none; } }
+
+/* Compact header on phones: one-line CTA, tighter spacing */
+.show-sm { display: none; }
+.site-header__cta { white-space: nowrap; }
+@media (max-width: 480px) {
+  .hide-sm { display: none; }
+  .site-header__inner { padding: var(--space-sm) var(--space-lg); gap: var(--space-md); }
+  .site-header nav { gap: var(--space-xs); }
+  .site-logo { font-size: 0.875rem; }
+  .site-header__cta { padding: var(--space-sm) var(--space-lg); }
+  .show-sm { display: inline; }
+  .hero__cta .btn { flex: 1 1 100%; }
+}

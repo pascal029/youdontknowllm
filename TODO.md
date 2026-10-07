@@ -69,4 +69,4 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 8.5 Landing hero redesign: CSS-animated agent-loop demo window (no JS, reduced-motion safe)
 - [x] 8.6 Landing sections redesign: bento "inside the model", how it works, learning path, FAQ, final CTA
 - [x] 8.7 Header/footer refresh: sticky blurred header, active nav state, mobile layout
-- [ ] 8.8 QA: Lighthouse 100s + CLS 0, screenshots at 375/768/1440, SEO tests green
+- [x] 8.8 QA: Lighthouse 100s + CLS 0, screenshots at 375/768/1440, SEO tests green
