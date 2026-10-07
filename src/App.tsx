@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react'
 import { runAgent, type Step } from './agent/loop'
 import { composeSystemPrompt } from './agent/prompt'
+import { contextUsed } from './agent/stats'
 import AppShell from './components/AppShell'
 import Chat from './components/Chat'
 import ComposedPrompt from './components/ComposedPrompt'
+import ContextMeter from './components/ContextMeter'
 import LoadProgress from './components/LoadProgress'
 import ProviderSettings, { DEFAULT_PROVIDER_SETTINGS } from './components/ProviderSettings'
 import StepTimeline from './components/StepTimeline'
@@ -29,6 +31,8 @@ export default function App() {
   /** what the chat shows: user messages + final answers */
   const [messages, setMessages] = useState<Message[]>([])
   const [steps, setSteps] = useState<Step[]>([])
+  /** context used after the last finished turn; steps reset each turn, this carries over */
+  const [ctxUsed, setCtxUsed] = useState(0)
   const [streaming, setStreaming] = useState<string>()
   const abortRef = useRef<AbortController>(null)
   // stored as { items } because useLocalStorage merges objects
@@ -79,7 +83,10 @@ export default function App() {
           continue
         }
         setSteps((s) => [...s, e])
-        if (e.type === 'model') setStreaming('')
+        if (e.type === 'model') {
+          setStreaming('')
+          setCtxUsed(contextUsed([e]))
+        }
         if (e.type === 'answer') setMessages((m) => [...m, { role: 'assistant', content: e.text }])
         if (e.type === 'error') setError(e.error)
       }
@@ -145,10 +152,17 @@ export default function App() {
         />
       }
       inspector={
-        <section aria-labelledby="steps-title">
-          <h2 id="steps-title" className="panel-title">What happened</h2>
-          <StepTimeline steps={steps} streaming={streaming} />
-        </section>
+        <>
+          {provider && (
+            <section aria-label="Stats" className="stats">
+              <ContextMeter used={ctxUsed} total={provider.contextWindow} />
+            </section>
+          )}
+          <section aria-labelledby="steps-title">
+            <h2 id="steps-title" className="panel-title">What happened</h2>
+            <StepTimeline steps={steps} streaming={streaming} />
+          </section>
+        </>
       }
     />
   )

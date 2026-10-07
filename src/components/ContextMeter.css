@@ -1,0 +1,12 @@
+.ctx { display: grid; gap: var(--space-sm); }
+.ctx__row { display: flex; justify-content: space-between; align-items: baseline; }
+.ctx__label { font-size: 0.8125rem; font-weight: 600; }
+.ctx__num { font-family: var(--font-mono); font-size: 0.875rem; }
+.ctx meter { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.ctx__bar { height: 8px; border-radius: 999px; background: var(--color-muted); overflow: hidden; }
+.ctx__bar span { display: block; height: 100%; border-radius: inherit; background: var(--ctx-color); transition: width var(--duration) ease-out; }
+.ctx__detail { margin: 0; font-family: var(--font-mono); font-size: 0.6875rem; color: var(--color-fg-muted); }
+.ctx--ok { --ctx-color: var(--color-accent); }
+.ctx--warn { --ctx-color: var(--color-warning); }
+.ctx--danger { --ctx-color: var(--color-destructive); }
+.ctx--warn .ctx__num, .ctx--danger .ctx__num { color: var(--ctx-color); }

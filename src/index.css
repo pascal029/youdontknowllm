@@ -101,3 +101,4 @@ button { cursor: pointer; }
 .status-ok { margin: 0; color: var(--color-accent); font-size: 0.875rem; font-family: var(--font-mono); }
 .btn--sm { min-height: 28px; padding: var(--space-xs) var(--space-md); font-size: 0.75rem; }
 .add-tool { margin-top: var(--space-sm); width: 100%; }
+.stats { display: grid; gap: var(--space-lg); margin-bottom: var(--space-xl); padding: var(--space-lg); border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-bg); }

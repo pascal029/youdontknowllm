@@ -37,7 +37,7 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 4.3 Highlight errors (parse failure, tool timeout) as steps
 
 ## Phase 5 — Stats
-- [ ] 5.1 Context window meter: tokens used / model context size
+- [x] 5.1 Context window meter: tokens used / model context size
 - [ ] 5.2 Inference speed: prefill + decode tok/s
 - [ ] 5.3 StatsBar shows both live during generation
 
