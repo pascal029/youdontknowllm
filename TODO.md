@@ -70,3 +70,11 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 8.6 Landing sections redesign: bento "inside the model", how it works, learning path, FAQ, final CTA
 - [x] 8.7 Header/footer refresh: sticky blurred header, active nav state, mobile layout
 - [x] 8.8 QA: Lighthouse 100s + CLS 0, screenshots at 375/768/1440, SEO tests green
+
+## Phase 9 — Model cleanup + tool modals (committed locally; push only when asked)
+- [ ] 9.1 Reusable Modal component (native <dialog>: Esc, backdrop click, focus, aria) + test + story
+- [ ] 9.2 Model cache helpers (isModelCached / deleteCachedModel via lazy WebLLM) + Provider.unload + tests
+- [ ] 9.3 Model picker: "Downloaded" status + Delete button with confirm modal (unloads the model if active)
+- [ ] 9.4 Tool editor in a modal: "Add tool" and "Edit" for custom tools (replaces inline editor)
+- [ ] 9.5 Built-in tools: "View code" read-only modal with Test run + example arguments
+- [ ] 9.6 Browser QA: delete flow, modals, keyboard + a11y
