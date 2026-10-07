@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- @include head -->
+    <title>What Is an LLM Context Window? | youdontknowllm</title>
+    <meta name="description" content="The context window is everything an LLM can see at once. Learn what fills it, why models forget, and what happens when it runs out." />
+    <link rel="canonical" href="%SITE_URL%/learn/context-window/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%SITE_NAME%" />
+    <meta property="og:title" content="The Context Window: An LLM&#x27;s Working Memory" />
+    <meta property="og:description" content="What fills an LLM&#x27;s context window, why chatbots forget, and what happens when it runs out of tokens." />
+    <meta property="og:url" content="%SITE_URL%/learn/context-window/" />
+    <meta property="og:image" content="%SITE_URL%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">
+      [
+        {
+          "@context": "https://schema.org",
+          "@type": "TechArticle",
+          "headline": "The context window: an LLM's working memory",
+          "description": "The context window is everything an LLM can see at once. Learn what fills it, why models forget, and what happens when it runs out.",
+          "url": "%SITE_URL%/learn/context-window/",
+          "image": "%SITE_URL%/og.png",
+          "datePublished": "2026-10-07",
+          "dateModified": "2026-10-07",
+          "author": {
+            "@type": "Organization",
+            "name": "youdontknowllm",
+            "url": "%SITE_URL%/"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "youdontknowllm",
+            "url": "%SITE_URL%/"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "%SITE_URL%/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Learn",
+              "item": "%SITE_URL%/learn/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Context window",
+              "item": "%SITE_URL%/learn/context-window/"
+            }
+          ]
+        }
+      ]
+    </script>
+    <link rel="stylesheet" href="/src/site/site.css" />
+  </head>
+  <body>
+    <!-- @include header -->
+    <main class="page">
+      <article class="article">
+        <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/learn/">Learn</a> / <span aria-current="page">Context window</span></nav>
+        <h1>The context window: an LLM&#x27;s working memory</h1>
+        <p class="lead">A language model has no memory between messages. Every time you hit send, the app gives it the <em>whole conversation again</em>: instructions, every earlier message, tool results, all of it. The maximum amount of text it can take in at once is its <strong>context window</strong>, measured in <a href="/learn/what-is-a-token/">tokens</a>.</p>
+
+        <h2 id="stateless">Models don't remember. Apps resend.</h2>
+        <p>It feels like a chatbot remembers what you said five messages ago. It doesn't. On your sixth message, the app sends something like this:</p>
+<pre><code>[system]     You are a helpful assistant…  + tool definitions
+[user]       message 1
+[assistant]  reply 1
+…
+[user]       message 6   ← the new one</code></pre>
+        <p>The model reads all of it from scratch, then writes reply 6. Its "memory" is exactly what fits in this package. Anything not in the context window does not exist for the model.</p>
+
+        <h2 id="size">How big is it?</h2>
+        <p>It depends on the model and how it's run:</p>
+        <ul>
+          <li>The small models in the playground run with a <strong>4,096-token</strong> window. That's about 3,000 words, a handful of back-and-forth messages.</li>
+          <li>Large hosted models commonly offer <strong>128,000 tokens or more</strong>, and some reach a million.</li>
+        </ul>
+        <p>The window holds the input <em>and</em> the reply being written. If 4,000 of 4,096 tokens are used by the conversation, the model only has room for about 96 tokens of answer.</p>
+
+        <h2 id="what-fills-it">What fills the window</h2>
+        <ul>
+          <li><strong>The <a href="/learn/system-prompt/">system prompt</a></strong>, sent with every request.</li>
+          <li><strong>Tool definitions.</strong> Every enabled tool's description and JSON Schema. Enable five tools and you've used a few hundred tokens before saying hello.</li>
+          <li><strong>The conversation history</strong>, both your messages and the model's replies.</li>
+          <li><strong>Tool calls and results.</strong> A <a href="/learn/function-calling/">tool call</a> and its result stay in the history. A Wikipedia search result can be bigger than your whole question.</li>
+          <li><strong>Thinking.</strong> Reasoning models write a hidden chain of thought, and those tokens count while they're being generated.</li>
+        </ul>
+
+        <h2 id="full">What happens when it's full</h2>
+        <p>Something has to give. Depending on the app:</p>
+        <ul>
+          <li>The request <strong>fails</strong> with an error that the input is too long.</li>
+          <li>The app <strong>drops the oldest messages</strong>. The model "forgets" how the conversation started, and that's often when chatbots lose track of instructions or facts you gave them early on.</li>
+          <li>The app <strong>summarises</strong> older messages into a shorter note, losing detail.</li>
+        </ul>
+        <p>Even before it's full, very long contexts can hurt quality. Models tend to pay most attention to the beginning and the end, and can miss details buried in the middle.</p>
+
+        <h2 id="cost">Longer context = slower and more expensive</h2>
+        <p>Every token in the window has to be processed before the first word of the answer appears. That's the <a href="/learn/prefill-vs-decode/">prefill</a> phase. A longer conversation means a longer wait, more memory for the model's cache and, on paid APIs, a higher bill on every single message.</p>
+
+        <h2 id="tips">Practical tips</h2>
+        <ul>
+          <li><strong>Start a new chat</strong> when you change topic. Old messages cost tokens and can confuse the model.</li>
+          <li><strong>Keep the system prompt short</strong>, and only enable the tools you need.</li>
+          <li><strong>Put important instructions near the end</strong> of a long prompt, or repeat them.</li>
+          <li>For long documents, send only the relevant parts. That's the idea behind "retrieval" (RAG) systems.</li>
+        </ul>
+
+        <aside class="try">
+          <h2 id="try">Try it</h2>
+          <ol>
+            <li>Open the <a href="/app/">playground</a> and send a message. Check the <strong>Context window</strong> meter: tokens used, tokens left.</li>
+            <li>Toggle tools on and off and watch the token count of <strong>Full prompt sent to the model</strong> change.</li>
+            <li>With a 4,096-token local model, keep chatting until the meter turns amber, then red.</li>
+            <li>Press <strong>New chat</strong>. The meter drops back, because the model now sees nothing from before.</li>
+          </ol>
+          <a class="btn btn--primary" href="/app/">Open the playground</a>
+        </aside>
+
+        <nav class="related" aria-label="Related guides">
+          <h2>Keep learning</h2>
+          <ul>
+            <li><a href="/learn/what-is-a-token/">What is a token?</a>: the unit the window is measured in</li>
+            <li><a href="/learn/system-prompt/">The system prompt</a>: the first thing in every context window</li>
+            <li><a href="/learn/prefill-vs-decode/">Prefill vs decode</a>: why long contexts feel slow</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+    <!-- @include footer -->
+  </body>
+</html>
