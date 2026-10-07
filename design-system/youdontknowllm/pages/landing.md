@@ -9,10 +9,10 @@ Section order: 1. Hero with live-looking product demo (the agent loop) · 2. "In
 3. How it works (3 steps) · 4. Learning path (01–06) · 5. FAQ · 6. Final CTA.
 Primary CTA "Open the playground" in hero + final section; secondary "Start learning".
 
-## Style — Modern Dark (adapted)
-- Keep brand accent green `#22C55E` (not the style's default indigo) so site + app feel like one product.
-- Layered surfaces: page `--color-bg`, elevated cards `--color-surface`, glass header `rgba(15,23,42,.72)` + `backdrop-filter: blur(12px)`.
-- Hairline borders `rgba(248,250,252,.08)` instead of solid grey; hover border → accent.
+## Style — Modern layered (light cream/green palette)
+- Palette from MASTER.md (cream `#FBF5DD`, khaki `#E7E1B1`, green `#306D29`, dark green `#0D530E`); originally Modern Dark, switched to light at the user's request.
+- Layered surfaces: page `--color-bg`, elevated cards `--color-surface`, glass header `rgba(251,245,221,.82)` + `backdrop-filter: blur(12px)`.
+- Hairline borders `rgba(13,83,14,.10–.18)`; hover border → accent.
 - Radius 16px for cards/windows (`--radius-lg`), 999px for pills.
 - Ambient light: 1–2 static radial-gradient glows (accent / info), opacity ≤ .18. No animated blobs (perf).
 - Accent glow behind the primary button only.
@@ -28,4 +28,4 @@ Primary CTA "Open the playground" in hero + final section; secondary "Start lear
 - Body 16–18px, line-height 1.6.
 
 ## Avoid
-Light-mode default · emoji icons · hover-only affordances · text < 12px · layout shift from fonts/animation.
+Emoji icons · hover-only affordances · text < 12px · layout shift from fonts/animation.

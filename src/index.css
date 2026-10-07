@@ -11,18 +11,20 @@
 }
 
 :root {
-  --color-bg: #0f172a;
-  --color-surface: #1e293b;
-  --color-secondary: #334155;
-  --color-muted: #272f42;
-  --color-border: #475569;
-  --color-fg: #f8fafc;
-  --color-fg-muted: #94a3b8;
-  --color-accent: #22c55e;
-  --color-on-accent: #052e16;
-  --color-destructive: #ef4444;
-  --color-warning: #f59e0b;
-  --color-info: #38bdf8;
+  /* Palette: #FBF5DD cream · #E7E1B1 khaki · #306D29 green · #0D530E dark green */
+  --color-bg: #fbf5dd;
+  --color-surface: #fdfaee; /* cream lifted toward white for cards/panels */
+  --color-secondary: #e7e1b1;
+  --color-muted: #f0eac5; /* khaki/cream blend: tracks, inline code */
+  --color-border: #b9c48f; /* khaki blended with green */
+  --color-fg: #0d530e; /* 8.5:1 on bg */
+  --color-fg-muted: #41773c; /* dark green toward cream, 4.9:1 on bg */
+  --color-accent: #306d29; /* 5.7:1 on bg */
+  --color-accent-strong: #0d530e;
+  --color-on-accent: #fbf5dd;
+  --color-destructive: #b42318;
+  --color-warning: #9a5b00;
+  --color-info: #1d5e8c;
   --color-ring: var(--color-accent);
 
   --font-sans: 'Inter', 'Inter Fallback', system-ui, sans-serif;
@@ -39,7 +41,7 @@
   --radius: 6px;
   --duration: 200ms;
 
-  color-scheme: dark;
+  color-scheme: light;
   font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.5;
@@ -99,7 +101,7 @@ button { cursor: pointer; }
 .btn:hover { border-color: var(--color-fg-muted); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn--primary { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-on-accent); }
-.btn--primary:hover { filter: brightness(0.9); }
+.btn--primary:hover { background: var(--color-accent-strong); border-color: var(--color-accent-strong); }
 .btn--ghost { background: transparent; }
 .btn--danger { color: var(--color-destructive); }
 

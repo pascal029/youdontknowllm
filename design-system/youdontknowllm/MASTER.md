@@ -19,18 +19,22 @@
 
 | Role | Hex | CSS Variable |
 |------|-----|--------------|
-| Primary | `#1E293B` | `--color-primary` |
-| On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#334155` | `--color-secondary` |
-| Accent/CTA | `#22C55E` | `--color-accent` |
-| Background | `#0F172A` | `--color-background` |
-| Foreground | `#F8FAFC` | `--color-foreground` |
-| Muted | `#272F42` | `--color-muted` |
-| Border | `#475569` | `--color-border` |
-| Destructive | `#EF4444` | `--color-destructive` |
-| Ring | `#22C55E` | `--color-ring` |  <!-- overridden: #1E293B was invisible on the dark bg -->
+| Background (cream) | `#FBF5DD` | `--color-bg` |
+| Surface (lifted cream) | `#FDFAEE` | `--color-surface` |
+| Secondary (khaki) | `#E7E1B1` | `--color-secondary` |
+| Muted | `#F0EAC5` | `--color-muted` |
+| Border | `#B9C48F` | `--color-border` |
+| Foreground (dark green) | `#0D530E` | `--color-fg` |
+| Foreground muted | `#41773C` | `--color-fg-muted` |
+| Accent / CTA (green) | `#306D29` | `--color-accent` |
+| Accent hover | `#0D530E` | `--color-accent-strong` |
+| On accent | `#FBF5DD` | `--color-on-accent` |
+| Destructive | `#B42318` | `--color-destructive` |
+| Warning | `#9A5B00` | `--color-warning` |
+| Info | `#1D5E8C` | `--color-info` |
+| Ring | `#306D29` | `--color-ring` |
 
-**Color Notes:** Code dark + run green
+**Color Notes:** User-chosen palette (2026-10-07) replaces the original dark theme: #FBF5DD · #E7E1B1 · #306D29 · #0D530E. Light mode is now the default. Contrast on bg: fg 8.5:1, fg-muted 4.9:1, accent 5.7:1, on-accent text on accent 5.7:1.
 
 ### Typography
 
