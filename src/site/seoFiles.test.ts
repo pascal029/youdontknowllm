@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { expect, test } from 'vitest'
 import { SITE_URL } from '../../site.config'
-import { findPages, pagePath, robotsTxt, sitemapXml } from '../../vite.config'
+import { findPages, pagePath, robotsTxt, sitemapXml } from '../../site.build'
 
 test('page keys map to clean URLs', () => {
   expect(pagePath('index')).toBe('/')
@@ -25,7 +25,7 @@ test('robots.txt allows crawling and points at the sitemap', () => {
 })
 
 test('llms.txt follows llmstxt.org: H1, summary quote, sections with absolute links to every guide + the app', async () => {
-  const { llmsTxt, pageInfo } = await import('../../vite.config')
+  const { llmsTxt, pageInfo } = await import('../../site.build')
   const txt = llmsTxt(pageInfo())
   expect(txt.startsWith('# youdontknowllm\n\n> ')).toBe(true)
   expect(txt).toContain('## Guides')

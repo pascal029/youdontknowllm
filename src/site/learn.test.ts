@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs'
 import { expect, test } from 'vitest'
 import { SITE_URL } from '../../site.config'
-import { applyPartials, findPages } from '../../vite.config'
+import { applyPartials, findPages } from '../../site.build'
 
 const load = (file: string) => new DOMParser().parseFromString(applyPartials(readFileSync(file, 'utf8')), 'text/html')
 const jsonLd = (doc: Document) => [...doc.querySelectorAll('script[type="application/ld+json"]')].flatMap((s) => [JSON.parse(s.textContent!)].flat())

@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { expect, test } from 'vitest'
 import { SITE_URL } from '../../site.config'
-import { applyPartials, findPages } from '../../vite.config'
+import { applyPartials, findPages } from '../../site.build'
 
 test('includes partials by name and fills site variables', () => {
   const read = (name: string) => `[${name}]`

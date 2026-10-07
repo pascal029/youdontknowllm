@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { expect, test } from 'vitest'
 import { SITE_URL } from '../../site.config'
-import { applyPartials } from '../../vite.config'
+import { applyPartials } from '../../site.build'
 
 const doc = new DOMParser().parseFromString(applyPartials(readFileSync(join(import.meta.dirname, '../../index.html'), 'utf8')), 'text/html')
 const meta = (sel: string) => doc.querySelector(sel)?.getAttribute('content') ?? ''

@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { expect, test } from 'vitest'
-import { findPages } from '../../vite.config'
+import { findPages } from '../../site.build'
 
 test('every page html is a build entry; deps and build output are skipped', () => {
   const pages = findPages()
