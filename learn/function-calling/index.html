@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- @include head -->
+    <title>How LLM Function Calling Works | youdontknowllm</title>
+    <meta name="description" content="LLMs can only write text, so how do they use tools? See the exact prompt, the tool_call format, the agent loop and how small models get it wrong." />
+    <link rel="canonical" href="%SITE_URL%/learn/function-calling/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%SITE_NAME%" />
+    <meta property="og:title" content="How LLM Function Calling Works (It's Just Text)" />
+    <meta property="og:description" content="The exact prompt, the tool_call format and the agent loop behind every AI tool call, with a demo you can run in your browser." />
+    <meta property="og:url" content="%SITE_URL%/learn/function-calling/" />
+    <meta property="og:image" content="%SITE_URL%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">
+      [
+        {
+          "@context": "https://schema.org",
+          "@type": "TechArticle",
+          "headline": "How LLM function calling works",
+          "description": "LLMs can only write text, so how do they use tools? The exact prompt, the tool_call format, the agent loop and how small models get it wrong.",
+          "url": "%SITE_URL%/learn/function-calling/",
+          "image": "%SITE_URL%/og.png",
+          "datePublished": "2026-10-07",
+          "dateModified": "2026-10-07",
+          "author": { "@type": "Organization", "name": "youdontknowllm", "url": "%SITE_URL%/" },
+          "publisher": { "@type": "Organization", "name": "youdontknowllm", "url": "%SITE_URL%/" }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "%SITE_URL%/" },
+            { "@type": "ListItem", "position": 2, "name": "Learn", "item": "%SITE_URL%/learn/" },
+            { "@type": "ListItem", "position": 3, "name": "Function calling", "item": "%SITE_URL%/learn/function-calling/" }
+          ]
+        }
+      ]
+    </script>
+    <link rel="stylesheet" href="/src/site/site.css" />
+  </head>
+  <body>
+    <!-- @include header -->
+    <main class="page">
+      <article class="article">
+        <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/learn/">Learn</a> / <span aria-current="page">Function calling</span></nav>
+        <h1>How LLM function calling works</h1>
+        <p class="lead">A language model can only do one thing: predict the next piece of text. It can't run code, open a website or check the time. Yet AI assistants "use tools" all the time. The trick is simple. The model <em>writes text that asks for a tool</em>, and an ordinary program does the rest.</p>
+
+        <h2 id="four-pieces">The four pieces</h2>
+        <p>Every function-calling system, from ChatGPT plugins to a 1B-parameter model in your browser, has the same four parts:</p>
+        <ol>
+          <li><strong>Describe the tools</strong> to the model in its prompt.</li>
+          <li><strong>The model replies</strong> with text in an agreed format that names a tool and its arguments.</li>
+          <li><strong>Your code parses that text</strong>, runs the real function and gets a result.</li>
+          <li><strong>The result goes back to the model</strong> as more text, and it writes the final answer (or asks for another tool).</li>
+        </ol>
+        <p>That's it. There's no hidden channel between the model and the tool. Let's look at each step with the exact text the playground sends.</p>
+
+        <h2 id="describe">1. Describe the tools</h2>
+        <p>Tools are described with a name, a sentence about what they do, and a <a href="https://json-schema.org/" rel="noopener">JSON Schema</a> for the arguments. The description matters most: it's how the model decides <em>when</em> to use the tool.</p>
+<pre><code>{"name": "calculator",
+ "description": "Evaluate a math expression. Supports + - * / % ^ ( ) and Math functions.",
+ "parameters": {
+   "type": "object",
+   "properties": { "expression": { "type": "string" } },
+   "required": ["expression"]
+ }}</code></pre>
+        <p>This JSON is pasted into the system prompt, together with instructions on how to call it:</p>
+<pre><code>To call a tool, reply with ONLY this, nothing else:
+&lt;tool_call&gt;{"name": "&lt;tool name&gt;", "arguments": {...}}&lt;/tool_call&gt;
+You will then get the result inside &lt;tool_response&gt;&lt;/tool_response&gt;.</code></pre>
+        <p>Tool definitions cost tokens. Every enabled tool takes space in the <a href="/learn/context-window/">context window</a> on every request, so a model with 20 tools has less room for your conversation.</p>
+
+        <h2 id="call">2. The model writes a tool call</h2>
+        <p>Ask "What is 23 × 19?" and a model that has learned this format replies with text like:</p>
+<pre><code>&lt;tool_call&gt;{"name": "calculator", "arguments": {"expression": "23*19"}}&lt;/tool_call&gt;</code></pre>
+        <p>To the model this is just more <a href="/learn/what-is-a-token/">tokens</a>. It chose these tokens because, during training, it saw many examples where a math question was followed by a call like this. Many open models (Qwen, Hermes and others) are fine-tuned on exactly this <code>&lt;tool_call&gt;</code> style.</p>
+
+        <h2 id="run">3. Your code runs the tool</h2>
+        <p>The app scans the reply for <code>&lt;tool_call&gt;</code>, parses the JSON, finds the tool by name and runs it with those arguments. In the playground, tools run in a sandboxed Web Worker with a 3-second limit. The model's arguments are untrusted input, so never run them with more access than they need.</p>
+        <p>The result is wrapped and sent back as a new message:</p>
+<pre><code>&lt;tool_response&gt;{"name": "calculator", "result": 437}&lt;/tool_response&gt;</code></pre>
+
+        <h2 id="loop">4. Back to the model: the agent loop</h2>
+        <p>The model now sees the original question, its own tool call and the result. Usually it writes a plain-text answer: "23 × 19 = 437". Sometimes it calls another tool first. So the app runs a loop:</p>
+        <ol>
+          <li>Send the conversation to the model.</li>
+          <li>If the reply contains a tool call, run it, add the result, and go to step 1.</li>
+          <li>If the reply is plain text, that's the final answer.</li>
+        </ol>
+        <p>The loop needs a limit (the playground stops after 5 model calls). Otherwise a confused model can call tools forever. This loop is what people mean by an <strong>AI agent</strong>: a model, some tools, and a loop.</p>
+
+        <h2 id="native">What about "native" function calling?</h2>
+        <p>APIs like OpenAI's accept a <code>tools</code> parameter and return structured <code>tool_calls</code> instead of text. It's the same mechanism with the formatting done for you. The server inserts your tool schemas into the prompt using the model's own chat template, and parses the model's output back into JSON. Underneath, the model is still generating tokens.</p>
+
+        <h2 id="small-models">Why small models get it wrong</h2>
+        <p>Small models (0.5B–2B parameters) follow the format less reliably. In the playground you'll see them:</p>
+        <ul>
+          <li><strong>Break the JSON</strong>: missing quotes, a missing closing tag, or arguments encoded as a string.</li>
+          <li><strong>Invent tools</strong> that don't exist, like <code>weather</code> when only <code>calculator</code> is enabled.</li>
+          <li><strong>Skip the tool</strong> and guess the answer, often wrongly for math.</li>
+          <li><strong>Call tools for no reason</strong>, like using the calculator to say hello.</li>
+        </ul>
+        <p>Robust apps expect this. The playground accepts common mistakes (code fences, missing tags), sends errors back to the model so it can retry, and highlights every failure in red so you can see what went wrong.</p>
+
+        <aside class="try">
+          <h2 id="try">Try it</h2>
+          <ol>
+            <li>Open the <a href="/app/">playground</a> and load a model (or connect an API).</li>
+            <li>Make sure <code>calculator</code> is enabled, then ask: <em>What is 1234 × 5678?</em></li>
+            <li>Watch the <strong>What happened</strong> panel: model → tool call → result → answer.</li>
+            <li>Now disable the calculator and ask again. Small models often get the multiplication wrong without it.</li>
+            <li>Open <strong>Full prompt sent to the model</strong> to see exactly how the tools were described.</li>
+          </ol>
+          <a class="btn btn--primary" href="/app/">Open the playground</a>
+        </aside>
+
+        <nav class="related" aria-label="Related guides">
+          <h2>Keep learning</h2>
+          <ul>
+            <li><a href="/learn/system-prompt/">The system prompt</a>: where tool instructions live</li>
+            <li><a href="/learn/context-window/">The context window</a>: why every tool costs space</li>
+            <li><a href="/learn/prefill-vs-decode/">Prefill vs decode</a>: why the second model call is faster</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+    <!-- @include footer -->
+  </body>
+</html>

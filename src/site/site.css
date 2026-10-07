@@ -74,3 +74,28 @@ a.card:hover { border-color: var(--color-accent); }
 @media (max-width: 520px) {
   .site-header nav a:not(.btn) { display: none; }
 }
+
+/* Learn index */
+.learn-hero { margin-top: var(--space-2xl) !important; }
+.learn-hero h1 { margin: 0 0 var(--space-lg); font-size: clamp(2rem, 4vw, 2.75rem); line-height: 1.15; }
+.learn-list { margin-top: var(--space-2xl); }
+.learn-list .card h2 { margin: var(--space-sm) 0; font-size: 1.125rem; color: var(--color-fg); }
+.card__num { font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-accent); }
+
+/* Article */
+.article { max-width: 72ch; margin: 0 auto; padding-top: var(--space-xl); font-size: 1.0625rem; line-height: 1.7; }
+.article h1 { margin: var(--space-lg) 0; font-size: clamp(2rem, 4vw, 2.75rem); line-height: 1.15; letter-spacing: -0.01em; }
+.article h2 { margin: var(--space-3xl) 0 var(--space-md) !important; font-size: 1.5rem; }
+.article p, .article ul, .article ol { margin: 0 0 var(--space-xl) !important; }
+.article li { margin-bottom: var(--space-sm); }
+.article a:not(.btn) { color: var(--color-accent); }
+.article code { font-size: 0.875em; padding: 0 var(--space-xs); border-radius: 4px; background: var(--color-muted); }
+.article pre { margin: 0 0 var(--space-xl); padding: var(--space-lg); overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); line-height: 1.5; }
+.article pre code { padding: 0; background: none; font-size: 0.8125rem; }
+.breadcrumb { font-size: 0.8125rem; color: var(--color-fg-muted); }
+.breadcrumb a { color: var(--color-fg-muted) !important; }
+.try { margin: var(--space-3xl) 0; padding: var(--space-xl) var(--space-2xl); border: 1px solid var(--color-accent); border-radius: var(--radius); background: color-mix(in srgb, var(--color-accent) 6%, var(--color-surface)); }
+.try h2 { margin-top: 0 !important; }
+.related { padding-top: var(--space-xl); border-top: 1px solid var(--color-border); }
+.related h2 { margin-top: 0 !important; font-size: 1.125rem; }
+.related ul { padding-left: var(--space-xl); }
