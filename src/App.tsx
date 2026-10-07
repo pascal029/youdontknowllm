@@ -117,6 +117,15 @@ export default function App() {
     }
   }
 
+  function newChat() {
+    abortRef.current?.abort()
+    setHistory([])
+    setMessages([])
+    setSteps([])
+    setLastModel(null)
+    setError('')
+  }
+
   return (
     <AppShell
       sidebar={
@@ -162,6 +171,7 @@ export default function App() {
           disabledReason="Load a model or connect an API to start."
           onSend={send}
           onStop={() => abortRef.current?.abort()}
+          onClear={newChat}
         />
       }
       inspector={

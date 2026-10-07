@@ -29,3 +29,4 @@
   background: var(--color-surface);
 }
 .chat__composer .btn { min-height: 44px; }
+.chat__bar { display: flex; justify-content: flex-end; }

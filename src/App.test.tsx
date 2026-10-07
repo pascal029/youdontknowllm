@@ -98,3 +98,23 @@ test('end to end with a tool: model calls calculator, sandbox runs it, model ans
     'You asked', 'Model call #1', 'Model chose tool: calculator', 'calculator returned', 'Model call #2', 'Final answer',
   ])
 })
+
+test('New chat clears messages, steps and context, and the model starts fresh', async () => {
+  const fetchMock = vi.fn().mockImplementation(async () => new Response(sse({ choices: [{ delta: { content: 'Hello' } }] })))
+  vi.stubGlobal('fetch', fetchMock)
+  render(<App />)
+  await userEvent.click(screen.getByRole('radio', { name: 'API' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Connect' }))
+  await userEvent.type(screen.getByLabelText('Message'), 'first{Enter}')
+  await within(screen.getByRole('main')).findByText('Hello')
+
+  await userEvent.click(screen.getByRole('button', { name: 'New chat' }))
+  expect(within(screen.getByRole('main')).queryByText('first')).not.toBeInTheDocument()
+  expect(screen.queryByRole('list', { name: 'Agent steps' })).not.toBeInTheDocument()
+  expect(screen.getByText(/^0 \/ 8,192 tokens/)).toBeInTheDocument()
+
+  await userEvent.type(screen.getByLabelText('Message'), 'second{Enter}')
+  await within(screen.getByRole('main')).findByText('Hello')
+  const sent = JSON.parse(fetchMock.mock.calls[1][1].body).messages
+  expect(sent.map((m: { content: string }) => m.content)).not.toContain('first')
+})

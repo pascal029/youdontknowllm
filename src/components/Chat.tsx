@@ -11,9 +11,11 @@ type Props = {
   disabledReason?: string
   onSend: (text: string) => void
   onStop: () => void
+  /** start a new session; button hidden when there is nothing to clear */
+  onClear?: () => void
 }
 
-export default function Chat({ messages, streaming, busy, disabled, disabledReason, onSend, onStop }: Props) {
+export default function Chat({ messages, streaming, busy, disabled, disabledReason, onSend, onStop, onClear }: Props) {
   const [draft, setDraft] = useState('')
   const endRef = useRef<HTMLDivElement>(null)
   const visible = messages.filter((m) => m.role !== 'system')
@@ -36,6 +38,11 @@ export default function Chat({ messages, streaming, busy, disabled, disabledReas
 
   return (
     <div className="chat">
+      {onClear && visible.length > 0 && (
+        <div className="chat__bar">
+          <button type="button" className="btn btn--ghost btn--sm" onClick={onClear}>New chat</button>
+        </div>
+      )}
       <div className="chat__log" aria-live="polite">
         {visible.length === 0 && streaming === undefined && (
           <p className="chat__empty">{disabled ? disabledReason : 'Say hi, or ask something that needs a tool, like "what is 23 * 19?"'}</p>

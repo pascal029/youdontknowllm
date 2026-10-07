@@ -37,3 +37,12 @@ test('disabled shows the reason and blocks sending', () => {
   expect(screen.getByLabelText('Message')).toBeDisabled()
   expect(screen.getByText('Load a model first')).toBeInTheDocument()
 })
+
+test('New chat appears only when there are messages', async () => {
+  const onClear = vi.fn()
+  const { rerender } = render(<Chat {...base} onClear={onClear} />)
+  expect(screen.queryByRole('button', { name: 'New chat' })).not.toBeInTheDocument()
+  rerender(<Chat {...base} onClear={onClear} messages={[{ role: 'user', content: 'hi' }]} />)
+  await userEvent.click(screen.getByRole('button', { name: 'New chat' }))
+  expect(onClear).toHaveBeenCalled()
+})
