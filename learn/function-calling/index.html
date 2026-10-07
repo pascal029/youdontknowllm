@@ -46,6 +46,7 @@
     <main class="page">
       <article class="article">
         <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/learn/">Learn</a> / <span aria-current="page">Function calling</span></nav>
+        <!-- @lesson:meta -->
         <h1>How LLM function calling works</h1>
         <p class="lead">A language model can only do one thing: predict the next piece of text. It can't run code, open a website or check the time. Yet AI assistants "use tools" all the time. The trick is simple. The model <em>writes text that asks for a tool</em>, and an ordinary program does the rest.</p>
 
@@ -117,15 +118,7 @@ You will then get the result inside &lt;tool_response&gt;&lt;/tool_response&gt;.
           </ol>
           <a class="btn btn--primary" href="/app/">Open the playground</a>
         </aside>
-
-        <nav class="related" aria-label="Related guides">
-          <h2>Keep learning</h2>
-          <ul>
-            <li><a href="/learn/system-prompt/">The system prompt</a>: where tool instructions live</li>
-            <li><a href="/learn/context-window/">The context window</a>: why every tool costs space</li>
-            <li><a href="/learn/prefill-vs-decode/">Prefill vs decode</a>: why the second model call is faster</li>
-          </ul>
-        </nav>
+        <!-- @lesson:nav -->
       </article>
     </main>
     <!-- @include footer -->

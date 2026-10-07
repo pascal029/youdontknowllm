@@ -4,7 +4,7 @@ import { expect, test } from 'vitest'
 import { SITE_URL } from '../../site.config'
 import { applyPartials, findPages } from '../../site.build'
 
-const load = (file: string) => new DOMParser().parseFromString(applyPartials(readFileSync(file, 'utf8')), 'text/html')
+const load = (file: string) => new DOMParser().parseFromString(applyPartials(readFileSync(file, 'utf8'), undefined, file), 'text/html')
 const jsonLd = (doc: Document) => [...doc.querySelectorAll('script[type="application/ld+json"]')].flatMap((s) => [JSON.parse(s.textContent!)].flat())
 const pages = findPages()
 const articles = Object.entries(pages).filter(([k]) => /^learn\/[^/]+\/index$/.test(k))

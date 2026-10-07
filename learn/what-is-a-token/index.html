@@ -69,6 +69,7 @@
     <main class="page">
       <article class="article">
         <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/learn/">Learn</a> / <span aria-current="page">What is a token?</span></nav>
+        <!-- @lesson:meta -->
         <h1>What is a token?</h1>
         <p class="lead">When you type a message to a chatbot, the model never sees your words. Your text is first chopped into <strong>tokens</strong>: small pieces of text, each mapped to a number. The model reads numbers, predicts numbers, and those numbers are turned back into text. Almost everything about LLMs is measured in tokens: limits, prices and speed.</p>
 
@@ -117,15 +118,7 @@
           </ol>
           <a class="btn btn--primary" href="/app/">Open the playground</a>
         </aside>
-
-        <nav class="related" aria-label="Related guides">
-          <h2>Keep learning</h2>
-          <ul>
-            <li><a href="/learn/context-window/">The context window</a>: how many tokens a model can see at once</li>
-            <li><a href="/learn/prefill-vs-decode/">Prefill vs decode</a>: tokens per second, explained</li>
-            <li><a href="/learn/function-calling/">How function calling works</a>: the fix for token-level weaknesses</li>
-          </ul>
-        </nav>
+        <!-- @lesson:nav -->
       </article>
     </main>
     <!-- @include footer -->

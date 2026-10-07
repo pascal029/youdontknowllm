@@ -69,6 +69,7 @@
     <main class="page">
       <article class="article">
         <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/learn/">Learn</a> / <span aria-current="page">Context window</span></nav>
+        <!-- @lesson:meta -->
         <h1>The context window: an LLM&#x27;s working memory</h1>
         <p class="lead">A language model has no memory between messages. Every time you hit send, the app gives it the <em>whole conversation again</em>: instructions, every earlier message, tool results, all of it. The maximum amount of text it can take in at once is its <strong>context window</strong>, measured in <a href="/learn/what-is-a-token/">tokens</a>.</p>
 
@@ -128,15 +129,7 @@
           </ol>
           <a class="btn btn--primary" href="/app/">Open the playground</a>
         </aside>
-
-        <nav class="related" aria-label="Related guides">
-          <h2>Keep learning</h2>
-          <ul>
-            <li><a href="/learn/what-is-a-token/">What is a token?</a>: the unit the window is measured in</li>
-            <li><a href="/learn/system-prompt/">The system prompt</a>: the first thing in every context window</li>
-            <li><a href="/learn/prefill-vs-decode/">Prefill vs decode</a>: why long contexts feel slow</li>
-          </ul>
-        </nav>
+        <!-- @lesson:nav -->
       </article>
     </main>
     <!-- @include footer -->

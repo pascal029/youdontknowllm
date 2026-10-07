@@ -69,6 +69,7 @@
     <main class="page">
       <article class="article">
         <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/learn/">Learn</a> / <span aria-current="page">Prefill vs decode</span></nav>
+        <!-- @lesson:meta -->
         <h1>Prefill vs decode: the two speeds of an LLM</h1>
         <p class="lead">Every LLM request has two phases. First the model <strong>reads</strong> your whole prompt: that's <em>prefill</em>. Then it <strong>writes</strong> the answer one <a href="/learn/what-is-a-token/">token</a> at a time: that's <em>decode</em>. They run at very different speeds, and knowing why explains most of what "fast" and "slow" mean for language models.</p>
 
@@ -117,15 +118,7 @@ answer   200 tokens at  25 tok/s  →  8.0 s of typing
           </ol>
           <a class="btn btn--primary" href="/app/">Open the playground</a>
         </aside>
-
-        <nav class="related" aria-label="Related guides">
-          <h2>Keep learning</h2>
-          <ul>
-            <li><a href="/learn/run-llm-in-browser/">Run an LLM in your browser</a>: what speeds to expect on your own GPU</li>
-            <li><a href="/learn/context-window/">The context window</a>: why long prompts slow down prefill</li>
-            <li><a href="/learn/what-is-a-token/">What is a token?</a>: the unit of speed</li>
-          </ul>
-        </nav>
+        <!-- @lesson:nav -->
       </article>
     </main>
     <!-- @include footer -->

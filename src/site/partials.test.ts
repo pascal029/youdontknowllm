@@ -12,6 +12,6 @@ test('includes partials by name and fills site variables', () => {
 test('real partials exist for every include used by the pages', async () => {
   const { readFileSync } = await import('node:fs')
   for (const file of Object.values(findPages())) {
-    expect(() => applyPartials(readFileSync(file, 'utf8')), file).not.toThrow()
+    expect(() => applyPartials(readFileSync(file, 'utf8'), undefined, file), file).not.toThrow()
   }
 })
