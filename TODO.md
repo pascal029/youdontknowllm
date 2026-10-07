@@ -62,7 +62,7 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 7.13 Lighthouse check on the built site (SEO 100, good CWV on landing) + Netlify deploy readiness
 
 ## Phase 8 — Redesign landing + learn (ui-ux-pro-max)
-- [ ] 8.1 Design direction: ui-ux-pro-max page overrides for landing + learn, marketing tokens (radius 16, hairline borders, glow, easing)
+- [x] 8.1 Design direction: ui-ux-pro-max page overrides for landing + learn, marketing tokens (radius 16, hairline borders, glow, easing)
 - [ ] 8.2 Lessons as one source of truth (site.config LESSONS) → build-time lesson list, ItemList JSON-LD, prev/next (+ tests)
 - [ ] 8.3 Article prev/next navigation with lesson titles (replaces "Keep learning") + "Lesson n of 6 · x min read"
 - [ ] 8.4 Learn index redesign: numbered learning path
