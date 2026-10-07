@@ -1,0 +1,5 @@
+.composed { border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-bg); font-size: 0.8125rem; }
+.composed summary { display: flex; justify-content: space-between; gap: var(--space-md); padding: var(--space-md); cursor: pointer; color: var(--color-fg-muted); }
+.composed summary:hover { color: var(--color-fg); }
+.composed__meta { font-family: var(--font-mono); color: var(--color-info); }
+.composed__body { margin: 0; padding: var(--space-md); max-height: 320px; overflow: auto; border-top: 1px solid var(--color-border); white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.75rem; }

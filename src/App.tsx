@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react'
+import { composeSystemPrompt } from './agent/prompt'
 import AppShell from './components/AppShell'
 import Chat from './components/Chat'
+import ComposedPrompt from './components/ComposedPrompt'
 import LoadProgress from './components/LoadProgress'
 import ProviderSettings, { DEFAULT_PROVIDER_SETTINGS } from './components/ProviderSettings'
 import SystemPromptEditor, { DEFAULT_SYSTEM_PROMPT } from './components/SystemPromptEditor'
@@ -19,6 +21,7 @@ export default function App() {
   const [messages, setMessages] = useState<Message[]>([])
   const [streaming, setStreaming] = useState<string>()
   const abortRef = useRef<AbortController>(null)
+  const systemText = composeSystemPrompt(prefs.systemPrompt.trim(), [])
 
   async function activate() {
     setError('')
@@ -48,7 +51,7 @@ export default function App() {
     abortRef.current = ac
     let out = ''
     try {
-      const sent: Message[] = prefs.systemPrompt.trim() ? [{ role: 'system', content: prefs.systemPrompt }, ...history] : history
+      const sent: Message[] = systemText ? [{ role: 'system', content: systemText }, ...history] : history
       for await (const c of provider.chat(sent, ac.signal)) {
         if (c.type === 'delta') setStreaming((out += c.text))
       }
@@ -76,6 +79,7 @@ export default function App() {
           {provider && !loading && <p className="status-ok">Ready: {provider.name}</p>}
           {error && <p className="error-text" role="alert">{error}</p>}
           <SystemPromptEditor value={prefs.systemPrompt} onChange={(systemPrompt) => setPrefs({ ...prefs, systemPrompt })} />
+          <ComposedPrompt text={systemText} />
         </>
       }
       main={
