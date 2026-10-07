@@ -1,0 +1,8 @@
+.tool-editor { display: grid; gap: var(--space-lg); padding: var(--space-lg); border: 1px solid var(--color-accent); border-radius: var(--radius); background: var(--color-bg); }
+.tool-editor textarea { resize: vertical; }
+.tool-editor__test { display: grid; gap: var(--space-sm); padding: var(--space-md); border-radius: var(--radius); background: var(--color-muted); }
+.tool-editor__test .btn { justify-self: start; }
+.tool-editor__out { margin: 0; padding: var(--space-md); border-radius: var(--radius); background: var(--color-bg); color: var(--color-accent); font-size: 0.75rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.tool-editor__out.is-error { color: var(--color-destructive); }
+.tool-editor__errors { margin: 0; padding-left: var(--space-xl); color: var(--color-destructive); font-size: 0.8125rem; }
+.tool-editor__actions { display: flex; justify-content: flex-end; gap: var(--space-md); }

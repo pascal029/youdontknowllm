@@ -50,3 +50,23 @@ test('disabling a tool removes it from the composed prompt', async () => {
   await userEvent.click(screen.getByRole('checkbox', { name: /calculator/ }))
   expect(screen.queryByText(/"name":"calculator"/)).not.toBeInTheDocument()
 })
+
+test('add, persist, edit and delete a custom tool', async () => {
+  const { unmount } = render(<App />)
+  await userEvent.click(screen.getByRole('button', { name: '+ Add tool' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Save tool' }))
+  expect(screen.getByRole('checkbox', { name: /reverse_text/ })).toBeChecked()
+  expect(screen.getByText(/"name":"reverse_text"/)).toBeInTheDocument()
+  unmount()
+
+  render(<App />) // survives reload
+  await userEvent.click(screen.getByRole('button', { name: 'Edit reverse_text' }))
+  const desc = screen.getByLabelText('Description')
+  await userEvent.clear(desc)
+  await userEvent.type(desc, 'Flip text')
+  await userEvent.click(screen.getByRole('button', { name: 'Save tool' }))
+  expect(screen.getByText('Flip text')).toBeInTheDocument()
+
+  await userEvent.click(screen.getByRole('button', { name: 'Delete reverse_text' }))
+  expect(screen.queryByRole('checkbox', { name: /reverse_text/ })).not.toBeInTheDocument()
+})

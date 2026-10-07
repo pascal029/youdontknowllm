@@ -6,6 +6,7 @@ import ComposedPrompt from './components/ComposedPrompt'
 import LoadProgress from './components/LoadProgress'
 import ProviderSettings, { DEFAULT_PROVIDER_SETTINGS } from './components/ProviderSettings'
 import SystemPromptEditor, { DEFAULT_SYSTEM_PROMPT } from './components/SystemPromptEditor'
+import ToolEditor, { NEW_TOOL_TEMPLATE } from './components/ToolEditor'
 import ToolList from './components/ToolList'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { LOCAL_MODELS } from './llm/models'
@@ -13,6 +14,7 @@ import { createOpenAIProvider } from './llm/openai'
 import type { Message, Provider } from './llm/types'
 import { hasWebGPU } from './llm/webgpu'
 import { BUILTIN_TOOLS } from './tools/builtin'
+import type { Tool } from './tools/types'
 
 export default function App() {
   const [settings, setSettings] = useLocalStorage('ydkl.provider', DEFAULT_PROVIDER_SETTINGS)
@@ -23,7 +25,10 @@ export default function App() {
   const [messages, setMessages] = useState<Message[]>([])
   const [streaming, setStreaming] = useState<string>()
   const abortRef = useRef<AbortController>(null)
-  const tools = BUILTIN_TOOLS.map((t) => ({ ...t, enabled: !prefs.disabledTools.includes(t.name) }))
+  // stored as { items } because useLocalStorage merges objects
+  const [custom, setCustom] = useLocalStorage('ydkl.customTools', { items: [] as Tool[] })
+  const [editing, setEditing] = useState<Tool | null>(null)
+  const tools = [...BUILTIN_TOOLS, ...custom.items].map((t) => ({ ...t, enabled: !prefs.disabledTools.includes(t.name) }))
   const systemText = composeSystemPrompt(prefs.systemPrompt.trim(), tools.filter((t) => t.enabled))
   const toggleTool = (name: string, enabled: boolean) =>
     setPrefs({ ...prefs, disabledTools: enabled ? prefs.disabledTools.filter((n) => n !== name) : [...prefs.disabledTools, name] })
@@ -86,7 +91,27 @@ export default function App() {
           <SystemPromptEditor value={prefs.systemPrompt} onChange={(systemPrompt) => setPrefs({ ...prefs, systemPrompt })} />
           <section aria-labelledby="tools-title">
             <h2 id="tools-title" className="panel-title">Tools</h2>
-            <ToolList tools={tools} onToggle={toggleTool} />
+            <ToolList
+              tools={tools}
+              onToggle={toggleTool}
+              onEdit={setEditing}
+              onDelete={(t) => setCustom({ items: custom.items.filter((x) => x.name !== t.name) })}
+            />
+            {editing ? (
+              <ToolEditor
+                key={editing.name}
+                initial={editing}
+                takenNames={tools.map((t) => t.name).filter((n) => n !== editing.name || editing === NEW_TOOL_TEMPLATE)}
+                onCancel={() => setEditing(null)}
+                onSave={(t) => {
+                  const rest = editing === NEW_TOOL_TEMPLATE ? custom.items : custom.items.filter((x) => x.name !== editing.name)
+                  setCustom({ items: [...rest, t] })
+                  setEditing(null)
+                }}
+              />
+            ) : (
+              <button type="button" className="btn btn--sm add-tool" onClick={() => setEditing(NEW_TOOL_TEMPLATE)}>+ Add tool</button>
+            )}
           </section>
           <ComposedPrompt text={systemText} />
         </>
