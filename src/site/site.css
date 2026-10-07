@@ -1,0 +1,24 @@
+/* Static pages (landing, learn). Tokens + primitives come from index.css. */
+@import '../index.css';
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xl);
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--space-xl);
+}
+.site-logo { font-family: var(--font-mono); font-weight: 500; color: var(--color-accent); text-decoration: none; }
+.site-header nav { display: flex; align-items: center; gap: var(--space-xl); }
+.site-header nav a:not(.btn) { color: var(--color-fg-muted); text-decoration: none; }
+.site-header nav a:not(.btn):hover { color: var(--color-fg); }
+a.btn { text-decoration: none; }
+
+.site-footer { max-width: 1100px; margin: var(--space-3xl) auto 0; padding: var(--space-2xl) var(--space-xl); border-top: 1px solid var(--color-border); color: var(--color-fg-muted); font-size: 0.875rem; }
+.site-footer nav { display: flex; flex-wrap: wrap; gap: var(--space-xl); }
+.site-footer a { color: var(--color-fg-muted); }
+.site-footer a:hover { color: var(--color-fg); }
+
+main.page { max-width: 1100px; margin: 0 auto; padding: 0 var(--space-xl); }
