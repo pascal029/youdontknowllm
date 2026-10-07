@@ -65,7 +65,7 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 8.1 Design direction: ui-ux-pro-max page overrides for landing + learn, marketing tokens (radius 16, hairline borders, glow, easing)
 - [x] 8.2 Lessons as one source of truth (site.config LESSONS) → build-time lesson list, ItemList JSON-LD, prev/next (+ tests)
 - [x] 8.3 Article prev/next navigation with lesson titles (replaces "Keep learning") + "Lesson n of 6 · x min read"
-- [ ] 8.4 Learn index redesign: numbered learning path
+- [x] 8.4 Learn index redesign: numbered learning path
 - [ ] 8.5 Landing hero redesign: CSS-animated agent-loop demo window (no JS, reduced-motion safe)
 - [ ] 8.6 Landing sections redesign: bento "inside the model", how it works, learning path, FAQ, final CTA
 - [ ] 8.7 Header/footer refresh: sticky blurred header, active nav state, mobile layout

@@ -14,38 +14,25 @@
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        "name": "Learn how LLMs work",
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "url": "%SITE_URL%/learn/what-is-a-token/", "name": "What is a token?" },
-          { "@type": "ListItem", "position": 2, "url": "%SITE_URL%/learn/context-window/", "name": "The context window" },
-          { "@type": "ListItem", "position": 3, "url": "%SITE_URL%/learn/system-prompt/", "name": "The system prompt" },
-          { "@type": "ListItem", "position": 4, "url": "%SITE_URL%/learn/function-calling/", "name": "How function calling works" },
-          { "@type": "ListItem", "position": 5, "url": "%SITE_URL%/learn/prefill-vs-decode/", "name": "Prefill vs decode" },
-          { "@type": "ListItem", "position": 6, "url": "%SITE_URL%/learn/run-llm-in-browser/", "name": "Run an LLM in your browser" }
-        ]
-      }
-    </script>
+    <!-- @lessons:itemlist -->
     <link rel="stylesheet" href="/src/site/site.css" />
   </head>
   <body>
     <!-- @include header -->
     <main class="page">
       <section class="learn-hero">
+        <div class="glow" aria-hidden="true"></div>
+        <p class="eyebrow">Learning path · <!-- @lessons:summary --></p>
         <h1>Learn how LLMs work</h1>
-        <p class="lead">Short guides to the ideas behind chatbots and AI agents. Each one ends with something to try in the playground, so you can see it happen instead of just reading about it.</p>
+        <p class="lead">Six short lessons on the ideas behind chatbots and AI agents. Each one ends with something to try in the playground, so you see it happen instead of just reading about it.</p>
+        <div class="hero__cta">
+          <a class="btn btn--primary btn--lg" href="/learn/what-is-a-token/">Start with lesson 01</a>
+          <a class="btn btn--lg" href="/app/">Skip to the playground</a>
+        </div>
       </section>
-      <ol class="cards cards--links learn-list">
-        <li><a class="card" href="/learn/what-is-a-token/"><span class="card__num">01</span><h2>What is a token?</h2><p>Models don't read words. They read tokens: pieces of words mapped to numbers.</p></a></li>
-        <li><a class="card" href="/learn/context-window/"><span class="card__num">02</span><h2>The context window</h2><p>The model's working memory: everything it can see at once, and what happens when it's full.</p></a></li>
-        <li><a class="card" href="/learn/system-prompt/"><span class="card__num">03</span><h2>The system prompt</h2><p>The hidden instructions sent before every conversation, and how much they change the answers.</p></a></li>
-        <li><a class="card" href="/learn/function-calling/"><span class="card__num">04</span><h2>How function calling works</h2><p>A model can only write text. Here's how that text turns into a tool call.</p></a></li>
-        <li><a class="card" href="/learn/prefill-vs-decode/"><span class="card__num">05</span><h2>Prefill vs decode</h2><p>The two speeds of every LLM: reading your prompt, and writing the answer.</p></a></li>
-        <li><a class="card" href="/learn/run-llm-in-browser/"><span class="card__num">06</span><h2>Run an LLM in your browser</h2><p>WebGPU, small models, and what to expect from a 1B-parameter model on your laptop.</p></a></li>
-      </ol>
+      <section class="learn-path" aria-label="Lessons">
+        <!-- @lessons:list h2 -->
+      </section>
     </main>
     <!-- @include footer -->
   </body>

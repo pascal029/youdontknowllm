@@ -11,7 +11,7 @@ const articles = Object.entries(pages).filter(([k]) => /^learn\/[^/]+\/index$/.t
 
 test('learn index lists every article (links + ItemList JSON-LD), plus the planned ones', () => {
   const doc = load(pages['learn/index'])
-  const links = [...doc.querySelectorAll('main a')].map((a) => a.getAttribute('href'))
+  const links = [...doc.querySelectorAll('.path a')].map((a) => a.getAttribute('href'))
   const listed = jsonLd(doc).find((x) => x['@type'] === 'ItemList').itemListElement.map((i: { url: string }) => i.url)
   expect(listed).toEqual(links.map((l) => SITE_URL + l))
   for (const [key] of articles) expect(links).toContain('/' + key.replace(/index$/, ''))

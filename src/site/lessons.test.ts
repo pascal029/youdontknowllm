@@ -70,3 +70,8 @@ test('markers resolve per file; lesson markers outside a lesson page throw', () 
   expect(applyPartials('<!-- @lessons:list h3 -->', read)).toContain('<h3 class="path__title">')
   expect(() => applyPartials('<!-- @lesson:nav -->', read, join(ROOT, 'index.html'))).toThrow(/outside a lesson page/)
 })
+
+test('summary counts lessons and total minutes', async () => {
+  const { lessonSummary } = await import('../../site.build')
+  expect(lessonSummary(fixed)).toBe(`${LESSONS.length} lessons · ${LESSONS.length * 4} min total`)
+})
