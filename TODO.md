@@ -26,7 +26,7 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 3.1 Tool definition type (name, description, JSON schema params, code)
 - [x] 3.2 Tool-call prompt template + parser for <tool_call>{...}</tool_call> (+ unit tests)
 - [x] 3.3 Worker sandbox runner with timeout + terminate (+ unit test)
-- [ ] 3.4 Built-in tools: calculator, get_current_time, random_number, run_javascript, wikipedia_search
+- [x] 3.4 Built-in tools: calculator, get_current_time, random_number, run_javascript, wikipedia_search
 - [ ] 3.5 Tool toggle list (enable/disable per tool)
 - [ ] 3.6 User custom tool editor: name, description, params schema, JS body; validate JSON; persist
 - [ ] 3.7 Agent loop: model → parse tool call → execute → feed result → repeat (max 5 iterations)
