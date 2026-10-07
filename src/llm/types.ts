@@ -23,4 +23,6 @@ export interface Provider {
   /** max tokens the model can see at once */
   contextWindow: number
   chat(messages: Message[], signal?: AbortSignal): AsyncIterable<StreamChunk>
+  /** free resources (local models: GPU memory + worker). Remote providers have nothing to free. */
+  unload?(): Promise<void>
 }

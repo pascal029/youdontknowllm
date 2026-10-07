@@ -27,5 +27,9 @@ export async function loadWebLLM(model: LocalModel, onProgress: (r: InitProgress
         signal?.removeEventListener('abort', onAbort)
       }
     },
+    async unload() {
+      await engine.unload().catch(() => {}) // a lost GPU device can make unload throw; we're discarding it anyway
+      worker.terminate()
+    },
   }
 }
