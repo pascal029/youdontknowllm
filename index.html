@@ -29,32 +29,49 @@
     <!-- @include header -->
     <main class="page">
       <section class="hero">
+        <div class="glow glow--accent" aria-hidden="true"></div>
+        <div class="glow glow--info" aria-hidden="true"></div>
         <div class="hero__text">
-          <p class="eyebrow">Free · open source · no sign-up</p>
+          <p class="eyebrow">Free · runs in your browser · no sign-up</p>
           <h1>Learn how LLMs work by running one in your browser</h1>
           <p class="lead">
             Chat with a small language model on your own GPU, or plug in any OpenAI-compatible API. Then look inside:
             the system prompt, the tokens, the context window, every tool call and how fast it thinks.
           </p>
           <div class="hero__cta">
-            <a class="btn btn--primary btn--lg" href="/app/">Open the playground</a>
+            <a class="btn btn--primary btn--lg btn--glow" href="/app/">Open the playground</a>
             <a class="btn btn--lg" href="/learn/">Start learning</a>
           </div>
-          <p class="hero__note">Runs locally with WebGPU (Chrome/Edge). Your prompts never leave your machine.</p>
+          <ul class="chips" aria-label="Highlights">
+            <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h12v12H6zM9 9h6v6H9zM9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg>WebGPU, on your machine</li>
+            <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>5 models ≤ 2B</li>
+            <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Any OpenAI-compatible API</li>
+          </ul>
         </div>
 
-        <figure class="demo" aria-label="Example of the step-by-step view">
-          <ol class="demo__steps">
-            <li><span class="demo__tag">you</span> What is 23 × 19?</li>
-            <li><span class="demo__tag">model</span> <code>&lt;tool_call&gt;{"name":"calculator","arguments":{"expression":"23*19"}}&lt;/tool_call&gt;</code></li>
-            <li><span class="demo__tag demo__tag--tool">tool</span> calculator → <code>437</code> <span class="demo__meta">4 ms in sandbox</span></li>
-            <li><span class="demo__tag demo__tag--ok">answer</span> 23 × 19 = 437</li>
-          </ol>
-          <div class="demo__stats">
-            <span>Context <b>3,610</b> tokens left</span>
-            <span>Decode <b>38</b> tok/s</span>
+        <figure class="window" aria-label="Example: what the playground shows for one question">
+          <div class="window__bar">
+            <span class="window__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="window__title">agent loop · qwen3-1.7b</span>
           </div>
-          <figcaption>What the playground shows for one question: the model decides to call a tool, the tool runs, the model answers.</figcaption>
+          <ol class="window__steps">
+            <li class="wstep" style="--i: 0"><span class="wstep__tag">you</span><span>What is 23 × 19?</span></li>
+            <li class="wstep" style="--i: 1"><span class="wstep__tag">model</span><code>&lt;tool_call&gt;{"name":"calculator","arguments":{"expression":"23*19"}}&lt;/tool_call&gt;</code></li>
+            <li class="wstep wstep--tool" style="--i: 2"><span class="wstep__tag">tool</span><span>calculator → <code>437</code></span><span class="wstep__meta">4 ms · sandbox</span></li>
+            <li class="wstep wstep--ok" style="--i: 3"><span class="wstep__tag">answer</span><span>23 × 19 = 437</span></li>
+          </ol>
+          <div class="window__stats">
+            <div class="wstat">
+              <span class="wstat__label">Context</span>
+              <span class="wstat__bar" aria-hidden="true"><span></span></span>
+              <span class="wstat__value">486 / 4,096</span>
+            </div>
+            <div class="wstat">
+              <span class="wstat__label">Decode</span>
+              <span class="wstat__value wstat__value--big">38 <small>tok/s</small></span>
+            </div>
+          </div>
+          <figcaption>The model decides to call a tool, the tool runs in a sandbox, the model answers. You see every step.</figcaption>
         </figure>
       </section>
 
