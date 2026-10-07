@@ -65,6 +65,24 @@ All of it is visible in the **What happened** panel.
 | `npm run build-storybook` | Static Storybook to `storybook-static/` |
 | `npm run lint` | oxlint |
 
+## Deploy (Netlify)
+
+`netlify.toml` is ready: build `npm run build`, publish `dist`, Node 20.19. Connect the GitHub repo in Netlify and deploy. Netlify serves `/learn/x/` folders as clean URLs and `404.html` for unknown paths automatically.
+
+The public URL is set once in `site.config.ts` (`https://youdontknowllm.netlify.app`). Canonical links, Open Graph tags, `sitemap.xml`, `robots.txt` and `llms.txt` are all generated from it. Change it there if you move to a custom domain.
+
+After the first deploy:
+1. Add the site in [Google Search Console](https://search.google.com/search-console) and submit `https://youdontknowllm.netlify.app/sitemap.xml`.
+2. Do the same in [Bing Webmaster Tools](https://www.bing.com/webmasters) (it can import from Search Console).
+3. Check a link preview with any social-card validator.
+
+## SEO
+
+- `/` and `/learn/*` are static HTML with no JavaScript bundle, fully readable by any crawler.
+- Every page has a unique title and description, a canonical URL, Open Graph and Twitter tags, and JSON-LD (`WebSite`, `ItemList`, `TechArticle` + `BreadcrumbList`, `SoftwareApplication`).
+- `npm test` builds the site and fails on missing or duplicate meta, more or fewer than one `h1`, invalid JSON-LD, pages missing from the sitemap, or broken internal links.
+- Lighthouse (mobile): 100 Accessibility / Best Practices / SEO on `/`, `/learn/`, an article and `/app/`.
+
 ## Project layout
 
 ```
@@ -74,6 +92,8 @@ src/
   tools/       builtin.ts, sandbox.ts (Web Worker runner), types.ts (+ validator)
   components/  UI. Each X.tsx has X.test.tsx and X.stories.tsx
   hooks/       useLocalStorage
+learn/         SEO guides (static HTML), index.html = landing page, app/ = playground entry
+partials/      head/header/footer included into static pages at build time
 design-system/ UI tokens and rules (ui-ux-pro-max)
 ```
 

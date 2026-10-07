@@ -114,6 +114,7 @@ test('404 page is noindex and not in the sitemap; robots.txt points at the sitem
   expect(meta(nf.doc, 'meta[name="robots"]')).toBe('noindex')
   expect(sitemap).not.toContain('404')
   expect(readFileSync(join(OUT, 'robots.txt'), 'utf8')).toContain(`Sitemap: ${SITE_URL}/sitemap.xml`)
+  expect(readFileSync(join(OUT, 'llms.txt'), 'utf8')).toContain('## Guides')
 })
 
 test('static pages ship no JavaScript bundles (fast + fully crawlable)', () => {

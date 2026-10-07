@@ -59,4 +59,4 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 7.10 Playground /app/ metadata (title, description, OG, SoftwareApplication JSON-LD)
 - [x] 7.11 robots.txt, generated sitemap.xml, 1200×630 og:image, favicon, 404.html
 - [x] 7.12 SEO test: every built page has title, description, canonical, og tags, one h1, valid JSON-LD, is in sitemap
-- [ ] 7.13 Lighthouse check on the built site (SEO 100, good CWV on landing) + Netlify deploy readiness
+- [x] 7.13 Lighthouse check on the built site (SEO 100, good CWV on landing) + Netlify deploy readiness

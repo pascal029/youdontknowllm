@@ -23,3 +23,16 @@ test('sitemap lists every real page with absolute URLs, but not the 404', () => 
 test('robots.txt allows crawling and points at the sitemap', () => {
   expect(robotsTxt()).toBe(`User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`)
 })
+
+test('llms.txt follows llmstxt.org: H1, summary quote, sections with absolute links to every guide + the app', async () => {
+  const { llmsTxt, pageInfo } = await import('../../vite.config')
+  const txt = llmsTxt(pageInfo())
+  expect(txt.startsWith('# youdontknowllm\n\n> ')).toBe(true)
+  expect(txt).toContain('## Guides')
+  const guideKeys = Object.keys(findPages()).filter((k) => /^learn\/[^/]+\/index$/.test(k))
+  for (const k of guideKeys) expect(txt).toContain(`](${SITE_URL}${pagePath(k)}): `)
+  expect(txt).toContain(`](${SITE_URL}/app/): `)
+  expect(txt).not.toMatch(/\]\([^)]*\): \n/) // every link has a description
+  expect(txt).not.toMatch(/&(#x?[0-9a-f]+|quot|amp|lt|gt);/i) // plain text, not HTML entities
+  expect(txt).toContain("they're good at")
+})

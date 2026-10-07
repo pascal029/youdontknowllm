@@ -48,6 +48,44 @@ ${keys
 
 export const robotsTxt = () => `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`
 
+type PageInfo = { key: string; title: string; description: string }
+
+const decodeEntities = (s: string) =>
+  s.replace(/&#x([0-9a-f]+);/gi, (_, h: string) => String.fromCodePoint(parseInt(h, 16))).replace(/&(quot|lt|gt|amp);/g, (_, e: string) => ({ quot: '"', lt: '<', gt: '>', amp: '&' })[e]!)
+
+/** Title + description of every page, read from the source HTML (template markers resolved). */
+export const pageInfo = (): PageInfo[] =>
+  Object.entries(findPages()).map(([key, file]) => {
+    const html = applyPartials(readFileSync(file, 'utf8'))
+    const title = html.match(/<title>([^<]*)<\/title>/)?.[1].replace(/ \| youdontknowllm$/, '') ?? key
+    const description = html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? ''
+    return { key, title: decodeEntities(title), description: decodeEntities(description) }
+  })
+
+/** llms.txt (https://llmstxt.org): a Markdown map of the site for AI assistants. */
+export const llmsTxt = (pages: PageInfo[]) => {
+  const link = (p: PageInfo) => `- [${p.title}](${SITE_URL}${pagePath(p.key)}): ${p.description}`
+  const guides = pages.filter((p) => /^learn\/[^/]+\/index$/.test(p.key)).sort((a, b) => a.key.localeCompare(b.key))
+  const app = pages.find((p) => p.key === 'app/index')!
+  return `# ${SITE_NAME}
+
+> Learn how large language models work by running one in your browser. A free, open-source playground (local WebGPU models or any OpenAI-compatible API) that shows the system prompt, tokens, context window, tool calls and inference speed, plus short guides to each concept.
+
+## Guides
+
+${guides.map(link).join('\n')}
+
+## Playground
+
+${link(app)}
+
+## Optional
+
+- [All guides](${SITE_URL}/learn/): index of the guides above
+- [Source code](https://github.com/pascal029/youdontknowllm): GitHub repository
+`
+}
+
 const seoFiles = (): Plugin => ({
   name: 'seo-files',
   apply: 'build',
@@ -55,6 +93,7 @@ const seoFiles = (): Plugin => ({
     const date = new Date().toISOString().slice(0, 10)
     this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: sitemapXml(Object.keys(findPages()), date) })
     this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robotsTxt() })
+    this.emitFile({ type: 'asset', fileName: 'llms.txt', source: llmsTxt(pageInfo()) })
   },
 })
 
