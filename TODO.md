@@ -39,7 +39,7 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 ## Phase 5 — Stats
 - [x] 5.1 Context window meter: tokens used / model context size
 - [x] 5.2 Inference speed: prefill + decode tok/s
-- [ ] 5.3 StatsBar shows both live during generation
+- [x] 5.3 StatsBar shows both live during generation
 
 ## Phase 6 — Polish
 - [ ] 6.1 Clear chat / new session

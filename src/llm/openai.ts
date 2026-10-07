@@ -37,9 +37,10 @@ const estimateTokens = (s: string) => Math.ceil(s.length / 4) // ponytail: rough
 export async function* withTiming(
   stream: AsyncIterable<StreamChunk>,
   promptText: string,
+  /** when the request was sent (before fetch), so time-to-first-token includes the server's prefill */
+  start: number,
   now: () => number = () => performance.now(),
 ): AsyncGenerator<StreamChunk> {
-  const start = now()
   let first = 0
   let out = ''
   for await (const c of stream) {
@@ -72,6 +73,7 @@ export function createOpenAIProvider(cfg: RemoteConfig): Provider {
     name: cfg.model,
     contextWindow: cfg.contextWindow,
     async *chat(messages: Message[], signal?: AbortSignal) {
+      const start = performance.now()
       const res = await fetch(url, {
         method: 'POST',
         signal,
@@ -87,7 +89,7 @@ export function createOpenAIProvider(cfg: RemoteConfig): Provider {
         }),
       })
       if (!res.ok || !res.body) throw new Error(`API error ${res.status}: ${(await res.text()).slice(0, 300)}`)
-      yield* withTiming(fromOpenAIChunks(parseSSE(res.body)), messages.map((m) => m.content).join('\n'))
+      yield* withTiming(fromOpenAIChunks(parseSSE(res.body)), messages.map((m) => m.content).join('\n'), start)
     },
   }
 }

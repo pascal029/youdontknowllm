@@ -8,7 +8,7 @@ import ContextMeter from './components/ContextMeter'
 import LoadProgress from './components/LoadProgress'
 import ProviderSettings, { DEFAULT_PROVIDER_SETTINGS } from './components/ProviderSettings'
 import StepTimeline from './components/StepTimeline'
-import SpeedStats from './components/SpeedStats'
+import SpeedStats, { liveRate, type LiveSpeed } from './components/SpeedStats'
 import SystemPromptEditor, { DEFAULT_SYSTEM_PROMPT } from './components/SystemPromptEditor'
 import ToolEditor, { NEW_TOOL_TEMPLATE } from './components/ToolEditor'
 import ToolList from './components/ToolList'
@@ -33,7 +33,9 @@ export default function App() {
   const [steps, setSteps] = useState<Step[]>([])
   /** last model call: drives context + speed stats, carries over between turns */
   const [lastModel, setLastModel] = useState<Extract<Step, { type: 'model' }> | null>(null)
-  const ctxUsed = lastModel ? lastModel.usage.promptTokens + lastModel.usage.completionTokens : 0
+  const [live, setLive] = useState<LiveSpeed>()
+  const liveRef = useRef({ first: 0, tokens: 0 })
+  const ctxUsed = (lastModel ? lastModel.usage.promptTokens + lastModel.usage.completionTokens : 0) + (live?.tokens ?? 0)
   const [streaming, setStreaming] = useState<string>()
   const abortRef = useRef<AbortController>(null)
   // stored as { items } because useLocalStorage merges objects
@@ -81,12 +83,20 @@ export default function App() {
         const e = r.value
         if (e.type === 'delta') {
           setStreaming((s) => (s ?? '') + e.text)
+          // ~1 streamed chunk per token for WebLLM and most OpenAI-compatible servers
+          const now = performance.now()
+          const l = liveRef.current
+          if (!l.first) l.first = now
+          l.tokens++
+          setLive({ tokens: l.tokens, tps: liveRate(l.tokens, l.first, now) })
           continue
         }
         setSteps((s) => [...s, e])
         if (e.type === 'model') {
           setStreaming('')
           setLastModel(e)
+          liveRef.current = { first: 0, tokens: 0 }
+          setLive(undefined)
         }
         if (e.type === 'answer') setMessages((m) => [...m, { role: 'assistant', content: e.text }])
         if (e.type === 'error') setError(e.error)
@@ -102,6 +112,8 @@ export default function App() {
       }
     } finally {
       setStreaming(undefined)
+      liveRef.current = { first: 0, tokens: 0 }
+      setLive(undefined)
     }
   }
 
@@ -157,7 +169,7 @@ export default function App() {
           {provider && (
             <section aria-label="Stats" className="stats">
               <ContextMeter used={ctxUsed} total={provider.contextWindow} />
-              {lastModel && <SpeedStats usage={lastModel.usage} ms={lastModel.ms} />}
+              {(lastModel || live) && <SpeedStats usage={lastModel?.usage ?? { promptTokens: 0, completionTokens: 0 }} ms={lastModel?.ms ?? 0} live={live} />}
             </section>
           )}
           <section aria-labelledby="steps-title">

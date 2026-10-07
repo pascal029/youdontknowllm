@@ -25,13 +25,13 @@ test('parseSSE handles events split across reads and stops at [DONE]', async () 
 })
 
 test('withTiming measures speed when the server sends none', async () => {
-  const times = [0, 1000, 3000] // start, first token, end (ms)
+  const times = [1000, 3000] // first token, end (ms); request sent at 0
   const now = () => times.shift()!
   async function* src(): AsyncGenerator<StreamChunk> {
     yield { type: 'delta', text: 'hi' }
     yield { type: 'done', usage: { promptTokens: 50, completionTokens: 10 } }
   }
-  const out = await collect(withTiming(src(), 'prompt', now))
+  const out = await collect(withTiming(src(), 'prompt', 0, now))
   expect(out.at(-1)).toEqual({ type: 'done', usage: { promptTokens: 50, completionTokens: 10, prefillTps: 50, decodeTps: 5 } })
 })
 
@@ -40,7 +40,7 @@ test('withTiming estimates tokens when usage is missing', async () => {
     yield { type: 'delta', text: '12345678' }
     yield { type: 'done', usage: { promptTokens: 0, completionTokens: 0 } }
   }
-  const out = await collect(withTiming(src(), 'abcd'))
+  const out = await collect(withTiming(src(), 'abcd', performance.now()))
   const done = out.at(-1) as Extract<StreamChunk, { type: 'done' }>
   expect(done.usage.promptTokens).toBe(1)
   expect(done.usage.completionTokens).toBe(2)

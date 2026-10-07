@@ -26,3 +26,14 @@ test('still ends with done when the server sends no usage', async () => {
   const out = await collect([{ choices: [{ delta: { content: 'x' } }] }])
   expect(out.at(-1)).toEqual({ type: 'done', usage: { promptTokens: 0, completionTokens: 0 } })
 })
+
+test('reasoning fields are inlined as <think>…</think> before the content', async () => {
+  const out = await collect([
+    { choices: [{ delta: { content: '', reasoning: 'Let me' } }] },
+    { choices: [{ delta: { reasoning: ' think' } }] },
+    { choices: [{ delta: { content: 'Hi' } }] },
+    { choices: [{ delta: { reasoning_content: 'more?' } }] },
+  ])
+  const text = out.filter((c) => c.type === 'delta').map((c) => (c as { text: string }).text).join('')
+  expect(text).toBe('<think>Let me think</think>\nHi<think>more?</think>')
+})

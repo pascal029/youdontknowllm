@@ -15,3 +15,17 @@ test('unknown speeds show a dash', () => {
   render(<SpeedStats usage={{ promptTokens: 0, completionTokens: 0 }} ms={0} />)
   expect(screen.getAllByText('—')).toHaveLength(2)
 })
+
+test('live mode shows the live decode rate and tokens so far', () => {
+  render(<SpeedStats usage={{ promptTokens: 400, completionTokens: 42, decodeTps: 10 }} ms={2150} live={{ tokens: 17, tps: 31.2 }} />)
+  expect(screen.getByText('live')).toBeInTheDocument()
+  expect(screen.getByText('31.2')).toBeInTheDocument()
+  expect(screen.getByText('17')).toBeInTheDocument()
+  expect(screen.getByText('Generating')).toBeInTheDocument()
+})
+
+test('liveRate waits for 250ms of data, then tokens/sec', async () => {
+  const { liveRate } = await import('./SpeedStats')
+  expect(liveRate(3, 1000, 1100)).toBeUndefined()
+  expect(liveRate(10, 1000, 1500)).toBe(20)
+})
