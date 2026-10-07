@@ -120,3 +120,5 @@ button { cursor: pointer; }
   .step__raw summary, .composed summary { display: flex; align-items: center; min-height: 44px; }
   .field input, .field select { min-height: 44px; }
 }
+.btn--danger-solid { background: var(--color-destructive); border-color: var(--color-destructive); color: #fff; }
+.btn--danger-solid:hover { filter: brightness(0.92); }
