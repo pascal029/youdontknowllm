@@ -19,7 +19,7 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 1.6 Basic streaming chat working end-to-end
 
 ## Phase 2 — System prompt
-- [ ] 2.1 System prompt editor with default prompt + reset button
+- [x] 2.1 System prompt editor with default prompt + reset button
 - [ ] 2.2 Show the final composed prompt (system + tool definitions) read-only
 
 ## Phase 3 — Function calling

@@ -3,6 +3,7 @@ import AppShell from './components/AppShell'
 import Chat from './components/Chat'
 import LoadProgress from './components/LoadProgress'
 import ProviderSettings, { DEFAULT_PROVIDER_SETTINGS } from './components/ProviderSettings'
+import SystemPromptEditor, { DEFAULT_SYSTEM_PROMPT } from './components/SystemPromptEditor'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { LOCAL_MODELS } from './llm/models'
 import { createOpenAIProvider } from './llm/openai'
@@ -11,6 +12,7 @@ import { hasWebGPU } from './llm/webgpu'
 
 export default function App() {
   const [settings, setSettings] = useLocalStorage('ydkl.provider', DEFAULT_PROVIDER_SETTINGS)
+  const [prefs, setPrefs] = useLocalStorage('ydkl.prefs', { systemPrompt: DEFAULT_SYSTEM_PROMPT })
   const [provider, setProvider] = useState<Provider | null>(null)
   const [loading, setLoading] = useState<{ progress: number; text: string } | null>(null)
   const [error, setError] = useState('')
@@ -46,7 +48,8 @@ export default function App() {
     abortRef.current = ac
     let out = ''
     try {
-      for await (const c of provider.chat(history, ac.signal)) {
+      const sent: Message[] = prefs.systemPrompt.trim() ? [{ role: 'system', content: prefs.systemPrompt }, ...history] : history
+      for await (const c of provider.chat(sent, ac.signal)) {
         if (c.type === 'delta') setStreaming((out += c.text))
       }
     } catch (e) {
@@ -72,6 +75,7 @@ export default function App() {
           {loading && <LoadProgress {...loading} />}
           {provider && !loading && <p className="status-ok">Ready: {provider.name}</p>}
           {error && <p className="error-text" role="alert">{error}</p>}
+          <SystemPromptEditor value={prefs.systemPrompt} onChange={(systemPrompt) => setPrefs({ ...prefs, systemPrompt })} />
         </>
       }
       main={

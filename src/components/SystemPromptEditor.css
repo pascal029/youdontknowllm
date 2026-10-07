@@ -1,0 +1,4 @@
+.sysprompt { display: grid; gap: var(--space-sm); }
+.sysprompt__head { display: flex; align-items: center; justify-content: space-between; }
+.sysprompt__head .panel-title { margin: 0; }
+.sysprompt textarea { resize: vertical; line-height: 1.5; }

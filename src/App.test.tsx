@@ -30,7 +30,9 @@ test('end to end: connect OpenAI-compatible API, send, see streamed reply', asyn
   await userEvent.type(screen.getByLabelText('Message'), 'hi{Enter}')
 
   expect(await screen.findByText('Hello there')).toBeInTheDocument()
-  expect(JSON.parse(fetchMock.mock.calls[0][1].body).messages).toEqual([{ role: 'user', content: 'hi' }])
+  const sent = JSON.parse(fetchMock.mock.calls[0][1].body).messages
+  expect(sent[0].role).toBe('system')
+  expect(sent.at(-1)).toEqual({ role: 'user', content: 'hi' })
 })
 
 test('shows API errors', async () => {
