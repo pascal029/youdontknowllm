@@ -12,7 +12,7 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 
 ## Phase 1 — LLM providers
 - [x] 1.1 Define Provider interface + Message/Usage types (src/llm/types.ts)
-- [ ] 1.2 Model list: 5 ≤2B WebLLM models with size/context metadata (src/llm/models.ts)
+- [x] 1.2 Model list: 5 ≤2B WebLLM models with size/context metadata (src/llm/models.ts)
 - [ ] 1.3 WebLLM provider: load model with download progress bar, WebGPU support check
 - [ ] 1.4 OpenAI-compatible provider: baseURL + apiKey + model name, SSE streaming
 - [ ] 1.5 Provider settings UI: switch Local / OpenAI-compatible, persist in localStorage (key never logged)
