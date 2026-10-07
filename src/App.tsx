@@ -6,6 +6,7 @@ import Chat from './components/Chat'
 import ComposedPrompt from './components/ComposedPrompt'
 import LoadProgress from './components/LoadProgress'
 import ProviderSettings, { DEFAULT_PROVIDER_SETTINGS } from './components/ProviderSettings'
+import StepTimeline from './components/StepTimeline'
 import SystemPromptEditor, { DEFAULT_SYSTEM_PROMPT } from './components/SystemPromptEditor'
 import ToolEditor, { NEW_TOOL_TEMPLATE } from './components/ToolEditor'
 import ToolList from './components/ToolList'
@@ -143,7 +144,12 @@ export default function App() {
           onStop={() => abortRef.current?.abort()}
         />
       }
-      inspector={<p>{steps.length} steps</p>}
+      inspector={
+        <section aria-labelledby="steps-title">
+          <h2 id="steps-title" className="panel-title">What happened</h2>
+          <StepTimeline steps={steps} streaming={streaming} />
+        </section>
+      }
     />
   )
 }

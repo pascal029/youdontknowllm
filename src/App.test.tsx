@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import App from './App'
@@ -30,7 +30,7 @@ test('end to end: connect OpenAI-compatible API, send, see streamed reply', asyn
   await userEvent.click(screen.getByRole('button', { name: 'Connect' }))
   await userEvent.type(screen.getByLabelText('Message'), 'hi{Enter}')
 
-  expect(await screen.findByText('Hello there')).toBeInTheDocument()
+  expect(await within(screen.getByRole('main')).findByText('Hello there')).toBeInTheDocument()
   const sent = JSON.parse(fetchMock.mock.calls[0][1].body).messages
   expect(sent[0].role).toBe('system')
   expect(sent.at(-1)).toEqual({ role: 'user', content: 'hi' })
@@ -84,9 +84,13 @@ test('end to end with a tool: model calls calculator, sandbox runs it, model ans
   await userEvent.click(screen.getByRole('button', { name: 'Connect' }))
   await userEvent.type(screen.getByLabelText('Message'), 'what is 23*19?{Enter}')
 
-  expect(await screen.findByText('23 × 19 = 437')).toBeInTheDocument()
+  expect(await within(screen.getByRole('main')).findByText('23 × 19 = 437')).toBeInTheDocument()
   const second = JSON.parse(fetchMock.mock.calls[1][1].body).messages
   expect(second.at(-1).content).toBe('<tool_response>{"name":"calculator","result":437}</tool_response>')
-  // the raw tool call is not shown as a chat bubble
-  expect(screen.queryByText(/"expression":"23\*19"/)).not.toBeInTheDocument()
+  // the raw tool call is not a chat bubble, but the timeline shows every step
+  expect(within(screen.getByRole('main')).queryByText(/"expression":"23\*19"/)).not.toBeInTheDocument()
+  const steps = within(screen.getByRole('list', { name: 'Agent steps' })).getAllByRole('listitem')
+  expect(steps.map((li) => li.querySelector('.step__title')?.textContent)).toEqual([
+    'You asked', 'Model call #1', 'Model chose tool: calculator', 'calculator returned', 'Model call #2', 'Final answer',
+  ])
 })
