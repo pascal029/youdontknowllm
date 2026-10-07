@@ -10,7 +10,7 @@ Browser playground for learning how LLMs work: chat with a small model running l
 - `npm run storybook` / `npm run build-storybook` — component stories
 
 ## Stack
-Vite + React + TypeScript, static SPA, no backend. Plain CSS, no UI library.
+Vite + React + TypeScript, no backend. Multi-page static site: `/` and `/learn/*` are plain HTML (SEO), `/app/` is the React playground. Every `*.html` outside src/public/dist is a build entry (`findPages` in vite.config.ts). Public URL lives in `site.config.ts`. Hosted on Netlify (`netlify.toml`). Plain CSS, no UI library.
 `@mlc-ai/web-llm` for local models (≤2B params only).
 
 ## Layout

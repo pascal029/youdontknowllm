@@ -47,7 +47,7 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 6.3 Build passes, deploy-ready static output
 
 ## Phase 7 — SEO (site: https://youdontknowllm.netlify.app, hosted on Netlify)
-- [ ] 7.1 Multi-page setup: playground moves to /app/, Vite builds every *.html, SITE_URL in one place, netlify.toml
+- [x] 7.1 Multi-page setup: playground moves to /app/, Vite builds every *.html, SITE_URL in one place, netlify.toml
 - [ ] 7.2 Non-blocking fonts (<link> preconnect instead of CSS @import) + shared header/footer partials for static pages
 - [ ] 7.3 Static landing page / (no React): hero, what you'll learn, how it works, CTA to /app/, article links, full meta + JSON-LD
 - [ ] 7.4 Article template + /learn/ index + "Function calling" article

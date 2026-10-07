@@ -29,7 +29,7 @@ Chat with a small language model running entirely on your own GPU (no server, no
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173
+npm run dev        # site: http://localhost:5173  ·  playground: http://localhost:5173/app/
 ```
 
 ### Browser requirements
