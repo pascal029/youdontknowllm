@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { expect, test } from 'vitest'
-import { SITE_URL } from '../../site.config'
+import { LESSONS, SITE_URL } from '../../site.config'
 import { applyPartials } from '../../site.build'
 
 const doc = new DOMParser().parseFromString(applyPartials(readFileSync(join(import.meta.dirname, '../../index.html'), 'utf8')), 'text/html')
@@ -23,7 +23,8 @@ test('one h1, links to the playground and every learn article', () => {
   expect(doc.querySelectorAll('h1')).toHaveLength(1)
   const hrefs = [...doc.querySelectorAll('a')].map((a) => a.getAttribute('href'))
   expect(hrefs).toContain('/app/')
-  expect(hrefs.filter((h) => h?.startsWith('/learn/') && h !== '/learn/')).toHaveLength(6)
+  const lessonLinks = new Set(hrefs.filter((h) => h?.startsWith('/learn/') && h !== '/learn/'))
+  expect([...lessonLinks].sort()).toEqual(LESSONS.map((l) => `/learn/${l.slug}/`).sort())
 })
 
 test('ships no app JavaScript (only JSON-LD)', () => {

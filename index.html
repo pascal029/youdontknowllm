@@ -75,38 +75,79 @@
         </figure>
       </section>
 
-      <section aria-labelledby="see-title">
+      <section class="section" aria-labelledby="see-title">
+        <p class="eyebrow">Inside the model</p>
         <h2 id="see-title">What you'll see that chat apps hide</h2>
-        <ul class="cards">
-          <li class="card">
-            <h3>The system prompt</h3>
-            <p>Edit the hidden instructions and see the full prompt the model actually receives, tool definitions included.</p>
+        <ul class="bento">
+          <li class="tile tile--wide">
+            <div class="tile__text">
+              <h3>The system prompt</h3>
+              <p>Edit the hidden instructions and see the full prompt the model actually receives, tool definitions included.</p>
+            </div>
+            <pre class="tile__visual tile__code" aria-hidden="true"><span class="c-dim">[system]</span> You are a helpful assistant.
+Answer briefly and clearly.
+
+<span class="c-dim"># Tools</span>
+<span class="c-info">{"name":"calculator", …}</span></pre>
           </li>
-          <li class="card">
-            <h3>Tokens and the context window</h3>
-            <p>A live meter shows how many tokens your conversation uses and how much room the model has left.</p>
+          <li class="tile">
+            <div class="tile__text">
+              <h3>Tokens and the context window</h3>
+              <p>A live meter shows how many tokens your conversation uses and how much room is left.</p>
+            </div>
+            <div class="tile__visual" aria-hidden="true">
+              <div class="tokens"><span>The</span><span>␣cat</span><span>␣sat</span><span>␣on</span><span>…</span></div>
+              <div class="meter"><span style="--w: 62%"></span></div>
+              <div class="meter__label"><span>2,540 used</span><span>1,556 left</span></div>
+            </div>
           </li>
-          <li class="card">
-            <h3>Function calling</h3>
-            <p>Give the model a calculator, a clock, Wikipedia or your own JavaScript tool, and watch it decide when to use them.</p>
+          <li class="tile tile--tall">
+            <div class="tile__text">
+              <h3>Function calling</h3>
+              <p>Give the model a calculator, a clock, Wikipedia or your own JavaScript tool, and watch it decide when to use them.</p>
+            </div>
+            <pre class="tile__visual tile__code" aria-hidden="true"><span class="c-info">&lt;tool_call&gt;</span>
+{"name": "wikipedia_search",
+ "arguments": {
+   "query": "WebGPU"
+ }}
+<span class="c-info">&lt;/tool_call&gt;</span>
+
+<span class="c-dim">→ 3 results · 842 ms</span></pre>
           </li>
-          <li class="card">
-            <h3>The agent loop, step by step</h3>
-            <p>Prompt → model → tool call → tool result → answer. Every step, with the raw text and JSON behind it.</p>
+          <li class="tile">
+            <div class="tile__text">
+              <h3>The agent loop, step by step</h3>
+              <p>Prompt → model → tool call → result → answer, with the raw text and JSON behind each step.</p>
+            </div>
+            <ol class="tile__visual loop" aria-hidden="true"><li>you</li><li>model</li><li class="loop--tool">tool</li><li class="loop--ok">answer</li></ol>
           </li>
-          <li class="card">
-            <h3>Speed: prefill vs decode</h3>
-            <p>See how fast the model reads your prompt and how fast it writes, in tokens per second, live.</p>
+          <li class="tile">
+            <div class="tile__text">
+              <h3>Speed: prefill vs decode</h3>
+              <p>How fast the model reads your prompt, and how fast it writes. In tokens per second, live.</p>
+            </div>
+            <div class="tile__visual speeds" aria-hidden="true">
+              <div><span class="speeds__num">640</span><span class="speeds__label">prefill tok/s</span></div>
+              <div><span class="speeds__num speeds__num--accent">38</span><span class="speeds__label">decode tok/s</span></div>
+            </div>
           </li>
-          <li class="card">
-            <h3>Private by default</h3>
-            <p>Local models run entirely on your GPU. Tool code runs in a locked-down sandbox. No account, no server.</p>
+          <li class="tile tile--wide">
+            <div class="tile__text">
+              <h3>Private by default</h3>
+              <p>Local models run entirely on your GPU. Tool code runs in a locked-down sandbox. No account, no server, and your API key never leaves your browser.</p>
+            </div>
+            <div class="tile__visual lock" aria-hidden="true">
+              <svg class="icon icon--xl" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+              <span>runs on your machine</span>
+            </div>
           </li>
         </ul>
       </section>
 
-      <section aria-labelledby="how-title">
-        <h2 id="how-title">How it works</h2>
+      <section class="section" aria-labelledby="how-title">
+        <p class="eyebrow">How it works</p>
+        <h2 id="how-title">Three steps, no setup</h2>
         <ol class="how">
           <li>
             <h3>Pick a model</h3>
@@ -123,23 +164,23 @@
         </ol>
       </section>
 
-      <section aria-labelledby="learn-title">
-        <h2 id="learn-title">Learn the concepts</h2>
-        <ul class="cards cards--links">
-          <li><a class="card" href="/learn/what-is-a-token/"><h3>What is a token?</h3><p>Why models read pieces of words, not words.</p></a></li>
-          <li><a class="card" href="/learn/context-window/"><h3>The context window</h3><p>The model's working memory, and what happens when it fills up.</p></a></li>
-          <li><a class="card" href="/learn/system-prompt/"><h3>The system prompt</h3><p>The hidden instructions behind every chat.</p></a></li>
-          <li><a class="card" href="/learn/function-calling/"><h3>Function calling</h3><p>How a text model "uses tools" when it can only write text.</p></a></li>
-          <li><a class="card" href="/learn/prefill-vs-decode/"><h3>Prefill vs decode</h3><p>The two speeds of an LLM, and why they differ.</p></a></li>
-          <li><a class="card" href="/learn/run-llm-in-browser/"><h3>Run an LLM in your browser</h3><p>WebGPU, small models and what to expect.</p></a></li>
-        </ul>
+      <section class="section" aria-labelledby="learn-title">
+        <div class="section__head">
+          <div>
+            <p class="eyebrow">Learning path · <!-- @lessons:summary --></p>
+            <h2 id="learn-title">Learn the concepts</h2>
+          </div>
+          <a class="link-arrow" href="/learn/">All lessons <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <!-- @lessons:list h3 -->
       </section>
 
-      <section aria-labelledby="faq-title" class="faq">
+      <section class="section faq" aria-labelledby="faq-title">
+        <p class="eyebrow">FAQ</p>
         <h2 id="faq-title">Questions</h2>
         <details>
           <summary>Is it free?</summary>
-          <p>Yes. It is open source and runs in your browser. Local models cost nothing to run. If you connect a paid API, you pay that provider directly.</p>
+          <p>Yes. It runs in your browser and the code is on GitHub. Local models cost nothing to run. If you connect a paid API, you pay that provider directly.</p>
         </details>
         <details>
           <summary>What do I need to run a model locally?</summary>
@@ -156,8 +197,13 @@
       </section>
 
       <section class="final-cta">
+        <div class="glow glow--accent" aria-hidden="true"></div>
         <h2>See what an LLM is actually doing</h2>
-        <a class="btn btn--primary btn--lg" href="/app/">Open the playground</a>
+        <p class="lead">Load a model, ask a question, and watch every step. It takes about a minute.</p>
+        <div class="hero__cta">
+          <a class="btn btn--primary btn--lg btn--glow" href="/app/">Open the playground</a>
+          <a class="btn btn--lg" href="/learn/what-is-a-token/">Start with lesson 01</a>
+        </div>
       </section>
     </main>
     <!-- @include footer -->
