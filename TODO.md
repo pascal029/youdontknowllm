@@ -4,7 +4,7 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 
 ## Phase 0 — Setup
 - [x] 0.0 Initial skeleton (git, CLAUDE.md, TODO.md, folders, design system)
-- [ ] 0.1 Install deps: @mlc-ai/web-llm
+- [x] 0.1 Install deps: @mlc-ai/web-llm
 - [ ] 0.2 Unit test setup: vitest + jsdom + React Testing Library, `npm test` script, 1 smoke test
 - [ ] 0.3 Storybook setup (react-vite), `npm run storybook` + `build-storybook`, global CSS loaded in preview
 - [ ] 0.4 Design tokens in src/index.css (colors, Inter + JetBrains Mono, spacing, focus ring, reduced-motion)
