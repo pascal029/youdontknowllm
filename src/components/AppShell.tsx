@@ -11,7 +11,10 @@ export default function AppShell({ sidebar, main, inspector }: Props) {
   return (
     <div className="shell">
       <header className="shell__header">
-        <span className="shell__logo">youdontknowllm</span>
+        <a className="shell__logo" href="/">youdontknowllm</a>
+        <nav className="shell__nav" aria-label="Main">
+          <a href="/learn/">Learn</a>
+        </nav>
       </header>
       <aside className="shell__sidebar" aria-label="Settings">{sidebar}</aside>
       <main className="shell__main">{main}</main>

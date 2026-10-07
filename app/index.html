@@ -2,10 +2,37 @@
 <html lang="en">
   <head>
     <!-- @include head -->
-    <title>youdontknowllm</title>
+    <title>LLM Playground in Your Browser | youdontknowllm</title>
+    <meta name="description" content="Run a small LLM on your GPU or any OpenAI-compatible API. Edit the system prompt, add tools and watch every step, token and tokens/sec live." />
+    <link rel="canonical" href="%SITE_URL%/app/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="%SITE_NAME%" />
+    <meta property="og:title" content="LLM Playground in Your Browser" />
+    <meta property="og:description" content="Run a small LLM locally with WebGPU, give it tools, and watch every step of the agent loop, the context window and tokens per second." />
+    <meta property="og:url" content="%SITE_URL%/app/" />
+    <meta property="og:image" content="%SITE_URL%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "youdontknowllm playground",
+        "url": "%SITE_URL%/app/",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Any browser with WebGPU (Chrome, Edge)",
+        "description": "Browser playground for learning how LLMs work: local WebGPU models or OpenAI-compatible APIs, editable system prompt, sandboxed tools, step-by-step agent timeline, context window and inference speed.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>LLM playground</h1>
+      <p>This playground runs a language model in your browser and needs JavaScript. Meanwhile, read the guides: <a href="/learn/">Learn how LLMs work</a>.</p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

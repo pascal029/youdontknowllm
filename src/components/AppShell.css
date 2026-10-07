@@ -14,7 +14,10 @@
   background: var(--color-surface);
 }
 
-.shell__logo { font-family: var(--font-mono); font-weight: 500; color: var(--color-accent); }
+.shell__header { justify-content: space-between; }
+.shell__logo { font-family: var(--font-mono); font-weight: 500; color: var(--color-accent); text-decoration: none; }
+.shell__nav a { color: var(--color-fg-muted); font-size: 0.875rem; text-decoration: none; }
+.shell__nav a:hover { color: var(--color-fg); }
 
 .shell__sidebar,
 .shell__inspector {
