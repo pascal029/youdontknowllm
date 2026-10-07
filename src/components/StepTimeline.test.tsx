@@ -46,3 +46,26 @@ test('shows live generation', () => {
   expect(screen.getByText('Model is generating…')).toBeInTheDocument()
   expect(screen.getByText('<tool_call>{')).toBeInTheDocument()
 })
+
+test('errors are highlighted with an explanation', () => {
+  render(
+    <StepTimeline
+      steps={[
+        { type: 'parse-error', error: 'Tool call is not valid JSON.', raw: '<tool_call>{bad}</tool_call>' },
+        { type: 'tool-result', name: 'run_javascript', result: { ok: false, error: 'Timed out after 3000ms (worker killed).', logs: [], ms: 3001 } },
+        { type: 'error', error: 'Stopped after 5 model calls without a final answer.' },
+      ]}
+    />,
+  )
+  const items = screen.getAllByRole('listitem')
+  expect(items.every((li) => li.classList.contains('is-error'))).toBe(true)
+  expect(screen.getByText('Could not read tool call')).toBeInTheDocument()
+  expect(screen.getByText('run_javascript failed')).toBeInTheDocument()
+  expect(screen.getByText(/Small models often break the format/)).toBeInTheDocument()
+  expect(screen.getByText(/sent back to the model/)).toBeInTheDocument()
+})
+
+test('successful steps are not marked as errors', () => {
+  render(<StepTimeline steps={TOOL_ROUND_TRIP} />)
+  expect(document.querySelectorAll('.is-error')).toHaveLength(0)
+})

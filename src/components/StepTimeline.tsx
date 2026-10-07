@@ -10,7 +10,7 @@ type Props = {
 
 const json = (v: unknown) => JSON.stringify(v, null, 2)
 
-function describe(s: Step): { icon: IconName; title: string; meta?: string; body?: string; tone?: 'ok' | 'error' } {
+function describe(s: Step): { icon: IconName; title: string; meta?: string; body?: string; tone?: 'ok' | 'error'; hint?: string } {
   switch (s.type) {
     case 'user':
       return { icon: 'user', title: 'You asked', body: s.text }
@@ -26,13 +26,13 @@ function describe(s: Step): { icon: IconName; title: string; meta?: string; body
     case 'tool-result':
       return s.result.ok
         ? { icon: 'terminal', title: `${s.name} returned`, meta: `${s.result.ms} ms in sandbox`, body: json(s.result.result) + (s.result.logs.length ? `\n\nlogs:\n${s.result.logs.join('\n')}` : ''), tone: 'ok' }
-        : { icon: 'terminal', title: `${s.name} failed`, meta: `${s.result.ms} ms in sandbox`, body: s.result.error, tone: 'error' }
+        : { icon: 'terminal', title: `${s.name} failed`, meta: `${s.result.ms} ms in sandbox`, body: s.result.error, tone: 'error', hint: 'The error was sent back to the model so it can try again or explain.' }
     case 'parse-error':
-      return { icon: 'alert', title: 'Could not read tool call', meta: s.error, body: s.raw, tone: 'error' }
+      return { icon: 'alert', title: 'Could not read tool call', meta: s.error, body: s.raw, tone: 'error', hint: 'Small models often break the format. We told the model what went wrong and let it retry.' }
     case 'answer':
       return { icon: 'check', title: 'Final answer', body: s.text, tone: 'ok' }
     case 'error':
-      return { icon: 'alert', title: 'Stopped', body: s.error, tone: 'error' }
+      return { icon: 'alert', title: 'Stopped', body: s.error, tone: 'error', hint: 'The loop has a limit so a confused model cannot call tools forever.' }
   }
 }
 
@@ -53,6 +53,7 @@ export default function StepTimeline({ steps, streaming }: Props) {
                 {d.meta && <span className="step__meta">{d.meta}</span>}
               </div>
               {d.body && <pre className="step__body">{d.body}</pre>}
+              {d.hint && <p className="step__hint">{d.hint}</p>}
               <details className="step__raw">
                 <summary>raw event</summary>
                 <pre>{json(s)}</pre>

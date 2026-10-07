@@ -27,3 +27,17 @@ export const DirectAnswer: Story = {
     ],
   },
 }
+
+export const Errors: Story = {
+  args: {
+    steps: [
+      { type: 'user', text: 'Run an infinite loop' },
+      { type: 'model', iteration: 1, text: '<tool_call>{name: run_javascript}</tool_call>', usage: { promptTokens: 420, completionTokens: 12 }, ms: 500 },
+      { type: 'parse-error', error: 'Tool call is not valid JSON.', raw: '<tool_call>{name: run_javascript}</tool_call>' },
+      { type: 'model', iteration: 2, text: '<tool_call>{"name":"run_javascript","arguments":{"code":"while(true){}"}}</tool_call>', usage: { promptTokens: 470, completionTokens: 20 }, ms: 640 },
+      { type: 'tool-call', name: 'run_javascript', arguments: { code: 'while(true){}' } },
+      { type: 'tool-result', name: 'run_javascript', result: { ok: false, error: 'Timed out after 3000ms (worker killed).', logs: [], ms: 3001 } },
+      { type: 'error', error: 'Stopped after 5 model calls without a final answer.' },
+    ],
+  },
+}

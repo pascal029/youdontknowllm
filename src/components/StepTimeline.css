@@ -28,3 +28,8 @@
 .step--tool-call .step__icon { color: var(--color-info); border-color: var(--color-info); }
 .step--live .step__icon { color: var(--color-accent); border-color: var(--color-accent); }
 .step.is-ok .step__icon { color: var(--color-accent); border-color: var(--color-accent); }
+
+.step.is-error .step__icon { color: var(--color-destructive); border-color: var(--color-destructive); }
+.step.is-error .step__card { border-color: var(--color-destructive); background: color-mix(in srgb, var(--color-destructive) 8%, var(--color-bg)); }
+.step.is-error .step__title { color: var(--color-destructive); }
+.step__hint { margin: var(--space-sm) 0 0; font-size: 0.75rem; color: var(--color-fg-muted); }
