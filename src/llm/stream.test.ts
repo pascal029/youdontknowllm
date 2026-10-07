@@ -37,3 +37,24 @@ test('reasoning fields are inlined as <think>…</think> before the content', as
   const text = out.filter((c) => c.type === 'delta').map((c) => (c as { text: string }).text).join('')
   expect(text).toBe('<think>Let me think</think>\nHi<think>more?</think>')
 })
+
+test('native tool_calls (streamed in pieces) become our <tool_call> text, after any thinking', async () => {
+  const out = await collect([
+    { choices: [{ delta: { reasoning: 'Use calculator.' } }] },
+    { choices: [{ delta: { content: '', tool_calls: [{ index: 0, function: { name: 'calculator', arguments: '{"expression":' } }] } }] },
+    { choices: [{ delta: { tool_calls: [{ index: 0, function: { arguments: '"1234*5678"}' } }] } }] },
+    { choices: [], usage: { prompt_tokens: 234, completion_tokens: 35 } },
+  ])
+  const text = out.filter((c) => c.type === 'delta').map((c) => (c as { text: string }).text).join('')
+  expect(text).toBe('<think>Use calculator.</think><tool_call>{"name":"calculator","arguments":"{\\"expression\\":\\"1234*5678\\"}"}</tool_call>')
+  const { parseToolCall } = await import('../agent/parseToolCall')
+  expect(parseToolCall(text)).toMatchObject({ kind: 'call', name: 'calculator', arguments: { expression: '1234*5678' } })
+  expect(out.at(-1)).toMatchObject({ type: 'done', usage: { promptTokens: 234, completionTokens: 35 } })
+})
+
+test('native tool call with no arguments still parses', async () => {
+  const out = await collect([{ choices: [{ delta: { tool_calls: [{ index: 0, function: { name: 'get_current_time' } }] } }] }])
+  const text = out.filter((c) => c.type === 'delta').map((c) => (c as { text: string }).text).join('')
+  const { parseToolCall } = await import('../agent/parseToolCall')
+  expect(parseToolCall(text)).toMatchObject({ kind: 'call', name: 'get_current_time', arguments: {} })
+})
