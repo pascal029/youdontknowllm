@@ -54,3 +54,33 @@ describe('errors', () => {
     expect(parseToolCall('<tool_call>{"name":"a","arguments":[1]}</tool_call>')).toMatchObject({ kind: 'error', error: expect.stringMatching(/object/) })
   })
 })
+
+describe('gpt-oss wrapper confusion', () => {
+  test('{"name":"tool_call","arguments":{"name":X,...}} is unwrapped to X', () => {
+    expect(parseToolCall('<tool_call>{"name": "tool_call", "arguments": {"name":"calculator","arguments":{"expression":"1234 * 5678"}}}</tool_call>')).toMatchObject({
+      kind: 'call',
+      name: 'calculator',
+      arguments: { expression: '1234 * 5678' },
+    })
+  })
+  test('works with double-encoded inner arguments and missing inner arguments', () => {
+    expect(parseToolCall('<tool_call>{"name":"tool_call","arguments":"{\\"name\\":\\"calculator\\",\\"arguments\\":\\"{\\\\\\"expression\\\\\\":\\\\\\"2+2\\\\\\"}\\"}"}</tool_call>')).toMatchObject({ kind: 'call', name: 'calculator', arguments: { expression: '2+2' } })
+    expect(parseToolCall('<tool_call>{"name":"tool_call","arguments":{"name":"get_current_time"}}</tool_call>')).toMatchObject({ kind: 'call', name: 'get_current_time', arguments: {} })
+  })
+  test('a real tool literally named tool_call without an inner name is left alone', () => {
+    expect(parseToolCall('<tool_call>{"name":"tool_call","arguments":{"x":1}}</tool_call>')).toMatchObject({ kind: 'call', name: 'tool_call', arguments: { x: 1 } })
+  })
+})
+
+describe('tool call hidden in thinking (Groq + gpt-oss)', () => {
+  test('used when the reply has no visible text', () => {
+    expect(parseToolCall('<think>We need to use calculator tool.<tool_call>{"name": "calculator", "arguments": {"expression": "1234 * 5678"}}</think>')).toMatchObject({
+      kind: 'call',
+      name: 'calculator',
+      arguments: { expression: '1234 * 5678' },
+    })
+  })
+  test('ignored when there is a visible answer', () => {
+    expect(parseToolCall('<think>maybe <tool_call>{"name":"calculator","arguments":{}}</tool_call>? no.</think>It is 4.')).toEqual({ kind: 'answer', text: 'It is 4.' })
+  })
+})

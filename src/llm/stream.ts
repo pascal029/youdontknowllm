@@ -15,6 +15,23 @@ export type OpenAIChunk = {
     completion_tokens: number
     extra?: { prefill_tokens_per_s?: number; decode_tokens_per_s?: number }
   } | null
+  /** some servers report failures inside the stream instead of with an HTTP status */
+  error?: { message?: string; code?: string; failed_generation?: string }
+}
+
+/**
+ * Groq (and other gpt-oss hosts) abort with `tool_use_failed` when the model makes a native tool call
+ * but the request had no `tools` list, which is how this app works (tools live in the prompt). The
+ * error carries the call the model made, so we recover it as a normal tool call.
+ */
+function recoveredToolCall(err: NonNullable<OpenAIChunk['error']>): string | null {
+  if (err.code !== 'tool_use_failed' || !err.failed_generation) return null
+  try {
+    const call = JSON.parse(err.failed_generation) as { name?: unknown }
+    return typeof call?.name === 'string' ? `<tool_call>${err.failed_generation}</tool_call>` : null
+  } catch {
+    return null
+  }
 }
 
 /**
@@ -30,6 +47,14 @@ export async function* fromOpenAIChunks(chunks: AsyncIterable<OpenAIChunk>): Asy
   let thinking = false
   const calls: { name: string; args: string }[] = []
   for await (const c of chunks) {
+    if (c.error) {
+      const call = recoveredToolCall(c.error)
+      if (!call) throw new Error(`API error: ${c.error.message ?? JSON.stringify(c.error)}`)
+      if (thinking) yield { type: 'delta', text: '</think>' }
+      thinking = false
+      yield { type: 'delta', text: call }
+      break // the server ends the stream after this error
+    }
     const delta = c.choices?.[0]?.delta
     for (const tc of delta?.tool_calls ?? []) {
       const call = (calls[tc.index ?? calls.length] ??= { name: '', args: '' })

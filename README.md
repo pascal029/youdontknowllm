@@ -49,6 +49,8 @@ Base URL `https://ollama.com/v1`, your ollama.com API key, and a model such as `
 
 ollama.com doesn't allow requests from web pages (no CORS headers), so the app sends those requests to this site's `/relay/ollama/*` path instead. Netlify forwards them server-side (`netlify.toml`), and Vite does the same in `npm run dev` / `npm run preview`. Your key passes through that relay on the way to ollama.com and isn't stored. Only hosts listed in `RELAYED_ORIGINS` (`src/llm/relay.ts`) are relayed; everything else is called directly.
 
+Tested with Groq (`https://api.groq.com/openai/v1`, `openai/gpt-oss-120b`), which allows browser requests, so no relay is needed.
+
 Models like gpt-oss return native `tool_calls` instead of text. The app converts them into its `<tool_call>` format, so tools work the same way with every model.
 
 ## How tool calling works (the part you don't know)

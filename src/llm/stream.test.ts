@@ -58,3 +58,27 @@ test('native tool call with no arguments still parses', async () => {
   const { parseToolCall } = await import('../agent/parseToolCall')
   expect(parseToolCall(text)).toMatchObject({ kind: 'call', name: 'get_current_time', arguments: {} })
 })
+
+test('errors sent inside the stream are surfaced (not silently ignored)', async () => {
+  await expect(collect([{ choices: [{ delta: { content: 'Hel' } }] }, { error: { message: 'rate limit exceeded', code: 'rate_limit' } }])).rejects.toThrow(
+    'API error: rate limit exceeded',
+  )
+})
+
+test("Groq's tool_use_failed is recovered as a tool call (gpt-oss called a tool without a native tools list)", async () => {
+  const out = await collect([
+    { choices: [{ delta: { reasoning: 'Need calculator.' } }] },
+    { error: { message: 'Tool choice is none, but model called a tool', code: 'tool_use_failed', failed_generation: '{"name": "calculator", "arguments": {"expression":"1234 * 5678"}}' } },
+  ])
+  const text = out.filter((c) => c.type === 'delta').map((c) => (c as { text: string }).text).join('')
+  expect(text).toBe('<think>Need calculator.</think><tool_call>{"name": "calculator", "arguments": {"expression":"1234 * 5678"}}</tool_call>')
+  const { parseToolCall } = await import('../agent/parseToolCall')
+  expect(parseToolCall(text)).toMatchObject({ kind: 'call', name: 'calculator', arguments: { expression: '1234 * 5678' } })
+  expect(out.at(-1)?.type).toBe('done')
+})
+
+test('tool_use_failed without a usable generation is still an error', async () => {
+  await expect(collect([{ error: { message: 'Tool choice is none, but model called a tool', code: 'tool_use_failed', failed_generation: 'garbage' } }])).rejects.toThrow(
+    'Tool choice is none',
+  )
+})

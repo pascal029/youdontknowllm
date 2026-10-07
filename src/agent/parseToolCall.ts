@@ -25,6 +25,11 @@ function toCall(json: string, raw: string): ParsedReply {
     }
   }
   if (typeof args !== 'object' || args === null || Array.isArray(args)) return { kind: 'error', error: '"arguments" must be an object.', raw }
+  const inner = args as { name?: unknown; arguments?: unknown }
+  if (o.name === 'tool_call' && typeof inner.name === 'string') {
+    // gpt-oss sometimes treats our <tool_call> wrapper as a function: {"name":"tool_call","arguments":{"name":"calculator",...}}
+    return toCall(JSON.stringify({ name: inner.name, arguments: inner.arguments ?? {} }), raw)
+  }
   return { kind: 'call', name: o.name, arguments: args as Record<string, unknown>, raw }
 }
 
@@ -37,6 +42,12 @@ export function parseToolCall(reply: string): ParsedReply {
   // Small models often drop the tags and emit bare JSON — accept it only when that's the whole reply.
   const bare = stripFence(text)
   if (bare.startsWith('{') && bare.endsWith('}') && /"name"\s*:/.test(bare)) return toCall(bare, text)
+
+  // Nothing visible at all: some hosts (Groq + gpt-oss) stream the call inside the thinking channel.
+  if (!text) {
+    const hidden = reply.match(/<tool_call>([\s\S]*?)(?:<\/tool_call>|<\/think>|$)/)
+    if (hidden) return toCall(hidden[1], hidden[0])
+  }
 
   return { kind: 'answer', text }
 }
