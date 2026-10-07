@@ -16,7 +16,7 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 1.3 WebLLM provider: load model with download progress bar, WebGPU support check
 - [x] 1.4 OpenAI-compatible provider: baseURL + apiKey + model name, SSE streaming
 - [x] 1.5 Provider settings UI: switch Local / OpenAI-compatible, persist in localStorage (key never logged)
-- [ ] 1.6 Basic streaming chat working end-to-end
+- [x] 1.6 Basic streaming chat working end-to-end
 
 ## Phase 2 — System prompt
 - [ ] 2.1 System prompt editor with default prompt + reset button

@@ -25,7 +25,7 @@ test('disables local loading without WebGPU', () => {
 
 test('remote mode shows a masked key field and needs a model name to connect', async () => {
   render(<Harness />)
-  await userEvent.click(screen.getByRole('radio', { name: 'OpenAI-compatible' }))
+  await userEvent.click(screen.getByRole('radio', { name: 'API' }))
   expect(screen.getByLabelText('API key')).toHaveAttribute('type', 'password')
   await userEvent.clear(screen.getByLabelText('Model name'))
   expect(screen.getByRole('button', { name: 'Connect' })).toBeDisabled()

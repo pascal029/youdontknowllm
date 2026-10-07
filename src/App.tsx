@@ -1,15 +1,90 @@
+import { useRef, useState } from 'react'
 import AppShell from './components/AppShell'
+import Chat from './components/Chat'
+import LoadProgress from './components/LoadProgress'
 import ProviderSettings, { DEFAULT_PROVIDER_SETTINGS } from './components/ProviderSettings'
 import { useLocalStorage } from './hooks/useLocalStorage'
-import { hasWebGPU } from './llm/webllm'
+import { LOCAL_MODELS } from './llm/models'
+import { createOpenAIProvider } from './llm/openai'
+import type { Message, Provider } from './llm/types'
+import { hasWebGPU } from './llm/webgpu'
 
 export default function App() {
   const [settings, setSettings] = useLocalStorage('ydkl.provider', DEFAULT_PROVIDER_SETTINGS)
+  const [provider, setProvider] = useState<Provider | null>(null)
+  const [loading, setLoading] = useState<{ progress: number; text: string } | null>(null)
+  const [error, setError] = useState('')
+  const [messages, setMessages] = useState<Message[]>([])
+  const [streaming, setStreaming] = useState<string>()
+  const abortRef = useRef<AbortController>(null)
+
+  async function activate() {
+    setError('')
+    try {
+      if (settings.mode === 'remote') {
+        setProvider(createOpenAIProvider(settings.remote))
+        return
+      }
+      const model = LOCAL_MODELS.find((m) => m.id === settings.localModelId) ?? LOCAL_MODELS[0]
+      setLoading({ progress: 0, text: 'Starting…' })
+      const { loadWebLLM } = await import('./llm/webllm')
+      setProvider(await loadWebLLM(model, (r) => setLoading({ progress: r.progress, text: r.text })))
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+    } finally {
+      setLoading(null)
+    }
+  }
+
+  async function send(text: string) {
+    if (!provider) return
+    const history: Message[] = [...messages, { role: 'user', content: text }]
+    setMessages(history)
+    setStreaming('')
+    setError('')
+    const ac = new AbortController()
+    abortRef.current = ac
+    let out = ''
+    try {
+      for await (const c of provider.chat(history, ac.signal)) {
+        if (c.type === 'delta') setStreaming((out += c.text))
+      }
+    } catch (e) {
+      if (!ac.signal.aborted) {
+        const msg = e instanceof Error ? e.message : String(e)
+        if (settings.mode === 'local') {
+          // A WebGPU failure (e.g. device lost) leaves the engine unusable; make the user reload it.
+          setProvider(null)
+          setError(`Local model stopped: ${msg} Reload the model, try a smaller one, or use an API.`)
+        } else setError(msg)
+      }
+    } finally {
+      if (out) setMessages([...history, { role: 'assistant', content: out }])
+      setStreaming(undefined)
+    }
+  }
 
   return (
     <AppShell
-      sidebar={<ProviderSettings value={settings} onChange={setSettings} onActivate={() => {}} webgpu={hasWebGPU()} />}
-      main={<p>Chat</p>}
+      sidebar={
+        <>
+          <ProviderSettings value={settings} onChange={setSettings} onActivate={activate} busy={!!loading} webgpu={hasWebGPU()} />
+          {loading && <LoadProgress {...loading} />}
+          {provider && !loading && <p className="status-ok">Ready: {provider.name}</p>}
+          {error && <p className="error-text" role="alert">{error}</p>}
+        </>
+      }
+      main={
+        <Chat
+          messages={messages}
+          streaming={streaming}
+          busy={streaming !== undefined}
+          disabled={!provider}
+          disabledReason="Load a model or connect an API to start."
+          onSend={send}
+          onStop={() => abortRef.current?.abort()}
+        />
+      }
       inspector={<p>Steps &amp; stats</p>}
     />
   )

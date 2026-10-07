@@ -2,8 +2,7 @@ import { CreateWebWorkerMLCEngine, type InitProgressReport } from '@mlc-ai/web-l
 import type { LocalModel } from './models'
 import { fromOpenAIChunks } from './stream'
 import type { Provider } from './types'
-
-export const hasWebGPU = () => typeof navigator !== 'undefined' && 'gpu' in navigator
+import { hasWebGPU } from './webgpu'
 
 /** Download (or load from browser cache) a local model and wrap it as a Provider. */
 export async function loadWebLLM(model: LocalModel, onProgress: (r: InitProgressReport) => void): Promise<Provider> {

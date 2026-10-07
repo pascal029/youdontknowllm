@@ -31,12 +31,13 @@ export default function ProviderSettings({ value, onChange, onActivate, busy, we
   return (
     <section className="provider" aria-labelledby="provider-title">
       <h2 id="provider-title" className="panel-title">Model</h2>
+      <p className="provider__hint">Run a small model in your browser, or use any OpenAI-compatible API.</p>
 
       <div className="segmented" role="radiogroup" aria-label="Where the model runs">
         {(['local', 'remote'] as const).map((mode) => (
           <label key={mode} className="segmented__opt">
             <input type="radio" name="provider-mode" value={mode} checked={value.mode === mode} onChange={() => set({ mode })} />
-            <span>{mode === 'local' ? 'In browser' : 'OpenAI-compatible'}</span>
+            <span>{mode === 'local' ? 'In browser' : 'API'}</span>
           </label>
         ))}
       </div>

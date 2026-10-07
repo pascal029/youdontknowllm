@@ -23,7 +23,7 @@
   overflow-y: auto;
 }
 
-.shell__sidebar { grid-area: sidebar; }
+.shell__sidebar { grid-area: sidebar; display: flex; flex-direction: column; gap: var(--space-xl); }
 .shell__inspector { grid-area: inspector; }
 .shell__main { grid-area: main; display: flex; flex-direction: column; min-width: 0; padding: var(--space-lg); }
 
