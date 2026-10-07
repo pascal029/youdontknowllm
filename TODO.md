@@ -43,5 +43,5 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 
 ## Phase 6 — Polish
 - [x] 6.1 Clear chat / new session
-- [ ] 6.2 README: what it is, how to run, browser requirements (WebGPU)
+- [x] 6.2 README: what it is, how to run, browser requirements (WebGPU)
 - [ ] 6.3 Build passes, deploy-ready static output

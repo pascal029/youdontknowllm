@@ -5,21 +5,22 @@ Browser playground for learning how LLMs work: chat with a small model running l
 ## Commands
 - `npm run dev` — dev server
 - `npm run build` — typecheck + production build (must pass before every commit)
-- `npm test` — vitest unit tests
+- `npm test` — vitest + React Testing Library
 - `npm run lint` — oxlint
-- `npm run storybook` — component stories (Storybook)
+- `npm run storybook` / `npm run build-storybook` — component stories
 
 ## Stack
 Vite + React + TypeScript, static SPA, no backend. Plain CSS, no UI library.
 `@mlc-ai/web-llm` for local models (≤2B params only).
 
 ## Layout
-- `src/llm/` — providers. One interface: OpenAI-style `chat.completions.create`. `webllm.ts` (local), `openai.ts` (remote via fetch + SSE), `models.ts` (the 5 bundled models), `types.ts`.
-- `src/agent/` — `loop.ts` async generator yielding `Step` events; `parseToolCall.ts`.
-- `src/tools/` — `builtin.ts`, `sandbox.ts` (Web Worker runner), `userTools.ts`.
-- `src/components/` — UI. Components render state; logic lives in llm/agent/tools.
-- `tests/` — vitest unit tests for pure logic (parser, sandbox, loop, providers).
-- `src/components/X.tsx` sits next to `X.test.tsx` (React Testing Library) and `X.stories.tsx` (Storybook).
+- `src/llm/` — providers behind one interface: `Provider.chat(messages, signal)` → async stream of `delta` / `done(usage)` (`types.ts`). `webllm.ts` (local, engine in `webllm.worker.ts`, lazy-loaded), `openai.ts` (fetch + SSE, measures speed when the server doesn't), `stream.ts` (OpenAI chunks → our stream, inlines reasoning as `<think>`), `models.ts` (the 5 bundled models), `webgpu.ts`.
+- `src/agent/` — `loop.ts` (`runAgent` async generator yielding `Step` events + deltas), `parseToolCall.ts`, `prompt.ts` (system prompt + tool instructions, tool response format).
+- `src/tools/` — `builtin.ts` (5 tools as JS strings), `sandbox.ts` (Web Worker runner), `types.ts` (`Tool` + `validateTool`).
+- `src/components/` — UI. Components render state; logic lives in llm/agent/tools. `App.tsx` wires it together.
+- `src/hooks/useLocalStorage.ts` — persistence (merges object defaults, so store arrays as `{ items }`).
+- Tests sit next to the code: `X.test.ts(x)`. `src/test-fake-worker.ts` runs the real sandbox source in jsdom.
+- Every component has `X.stories.tsx` (Storybook).
 - `design-system/youdontknowllm/MASTER.md` — UI source of truth (ui-ux-pro-max).
 
 ## Design (ui-ux-pro-max)
@@ -39,3 +40,7 @@ Follow `design-system/youdontknowllm/MASTER.md`. Short version:
 Work through `TODO.md` top to bottom. For each item: implement → add/update unit tests (+ a story for every UI component) → `npm test` and `npm run build` green → tick `[x]` → commit (conventional message) → push → next item.
 
 Definition of done for an item: build green, tests green, new logic has a unit test, new component has a `.test.tsx` and a `.stories.tsx`.
+
+## Testing against a real model
+- Remote: an Ollama server works as OpenAI-compatible at `http://<host>:11434/v1` (CORS allows localhost).
+- Local WebLLM needs a working WebGPU device; on Linux + Intel iGPU it can hit "device lost" (environment limit, not an app bug).
