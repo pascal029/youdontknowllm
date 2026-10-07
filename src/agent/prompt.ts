@@ -24,3 +24,7 @@ Call at most one tool at a time. If no tool is needed, answer normally.
 Available tools:
 ${list}`.trim()
 }
+
+/** How a tool result is fed back to the model (as a user turn — works with every chat template). */
+export const formatToolResponse = (name: string, result: unknown) =>
+  `<tool_response>${JSON.stringify({ name, result })}</tool_response>`

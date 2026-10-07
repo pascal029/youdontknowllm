@@ -24,7 +24,7 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 
 ## Phase 3 — Function calling
 - [x] 3.1 Tool definition type (name, description, JSON schema params, code)
-- [ ] 3.2 Tool-call prompt template + parser for <tool_call>{...}</tool_call> (+ unit tests)
+- [x] 3.2 Tool-call prompt template + parser for <tool_call>{...}</tool_call> (+ unit tests)
 - [ ] 3.3 Worker sandbox runner with timeout + terminate (+ unit test)
 - [ ] 3.4 Built-in tools: calculator, get_current_time, random_number, run_javascript, wikipedia_search
 - [ ] 3.5 Tool toggle list (enable/disable per tool)
