@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- @include head -->
+    <title>Run an LLM in Your Browser with WebGPU | youdontknowllm</title>
+    <meta name="description" content="How small language models run entirely in a web page with WebGPU: what you need, which models fit, what they&#x27;re good at and how to fix common errors." />
+    <link rel="canonical" href="%SITE_URL%/learn/run-llm-in-browser/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%SITE_NAME%" />
+    <meta property="og:title" content="Run an LLM in Your Browser with WebGPU" />
+    <meta property="og:description" content="No server, no account: how small LLMs run inside a web page, what you need, and what to expect from a 1B model." />
+    <meta property="og:url" content="%SITE_URL%/learn/run-llm-in-browser/" />
+    <meta property="og:image" content="%SITE_URL%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">
+      [
+        {
+          "@context": "https://schema.org",
+          "@type": "TechArticle",
+          "headline": "Run an LLM in your browser",
+          "description": "How small language models run entirely in a web page with WebGPU: what you need, which models fit, what they're good at and how to fix common errors.",
+          "url": "%SITE_URL%/learn/run-llm-in-browser/",
+          "image": "%SITE_URL%/og.png",
+          "datePublished": "2026-10-07",
+          "dateModified": "2026-10-07",
+          "author": {
+            "@type": "Organization",
+            "name": "youdontknowllm",
+            "url": "%SITE_URL%/"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "youdontknowllm",
+            "url": "%SITE_URL%/"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "%SITE_URL%/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Learn",
+              "item": "%SITE_URL%/learn/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Run an LLM in your browser",
+              "item": "%SITE_URL%/learn/run-llm-in-browser/"
+            }
+          ]
+        }
+      ]
+    </script>
+    <link rel="stylesheet" href="/src/site/site.css" />
+  </head>
+  <body>
+    <!-- @include header -->
+    <main class="page">
+      <article class="article">
+        <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/learn/">Learn</a> / <span aria-current="page">Run an LLM in your browser</span></nav>
+        <h1>Run an LLM in your browser</h1>
+        <p class="lead">You don't need a server or an API key to run a language model. A modern browser can download a small model and run it on your own GPU, entirely inside a web page. Here's how that works, what you need, and what a 1-billion-parameter model can and can't do.</p>
+
+        <h2 id="how">How it works</h2>
+        <ol>
+          <li><strong>WebGPU</strong> is a browser API that lets web pages run programs on your graphics card, much like games and AI apps do natively.</li>
+          <li><strong><a href="https://github.com/mlc-ai/web-llm" rel="noopener">WebLLM</a></strong> (from the MLC project) compiles open models into WebGPU programs, and gives them an OpenAI-style chat API inside the page.</li>
+          <li>The model's <strong>weights</strong> (its learned numbers, compressed to about 4 bits each) download once and are stored in the browser's cache. Later visits load from disk.</li>
+          <li>The model runs in a <strong>Web Worker</strong>, a background thread, so the page stays responsive while it thinks.</li>
+        </ol>
+        <p>After the download, nothing leaves your computer. Your prompts and the model's answers stay local.</p>
+
+        <h2 id="requirements">What you need</h2>
+        <ul>
+          <li><strong>A browser with WebGPU.</strong> Recent Chrome and Edge on Windows, macOS and ChromeOS are the most reliable. Other browsers and Linux have been adding support, but may be incomplete or behind a setting.</li>
+          <li><strong>GPU memory</strong> roughly equal to the model's download size: about 1–2 GB for the models below. Laptops with integrated graphics share system RAM, so close heavy tabs and apps.</li>
+          <li><strong>One download</strong> of 0.9–2 GB per model. Use Wi-Fi.</li>
+        </ul>
+
+        <h2 id="models">Models that fit</h2>
+        <p>The playground ships five models, all 2 billion parameters or less:</p>
+<pre><code>Model                    Params   Download   Good for
+Llama 3.2 1B Instruct    1B       ~0.9 GB    lightest download
+Qwen3 0.6B               0.6B     ~1.4 GB    fastest first try
+Qwen2.5 1.5B Instruct    1.5B     ~1.6 GB    following tool formats
+SmolLM2 1.7B Instruct    1.7B     ~1.7 GB    compact English chat
+Qwen3 1.7B               1.7B     ~2.0 GB    best quality of the five</code></pre>
+        <p>All run with a 4,096-token <a href="/learn/context-window/">context window</a>.</p>
+
+        <h2 id="expect">What to expect from a small model</h2>
+        <p><strong>Good at:</strong> casual chat, rewriting and summarising short text, simple questions, following a persona from the <a href="/learn/system-prompt/">system prompt</a>, and simple <a href="/learn/function-calling/">tool calls</a>.</p>
+        <p><strong>Weak at:</strong> facts (they confidently make things up), arithmetic, long multi-step reasoning, strict output formats and long conversations.</p>
+        <p>That's why tools matter so much for small models. A calculator fixes the arithmetic, a search tool fixes the facts. The model only has to decide <em>when</em> to use them.</p>
+        <p><strong>Speed</strong> depends heavily on your GPU. Expect anything from a few to several dozen tokens per second for decoding. See <a href="/learn/prefill-vs-decode/">prefill vs decode</a> for why.</p>
+
+        <h2 id="troubleshooting">Common problems</h2>
+        <ul>
+          <li><strong>"WebGPU is not available"</strong>: use an up-to-date Chrome or Edge. Some managed or older machines block it.</li>
+          <li><strong>"Device lost" or a crash while generating</strong>: the GPU ran out of memory or its driver gave up. Try a smaller model, close other GPU-heavy tabs, and update your graphics driver. On some Linux and integrated-GPU setups, WebGPU is still experimental and can fail even with small models.</li>
+          <li><strong>First load is slow</strong>: that's the one-time download. The next load comes from the cache in seconds.</li>
+          <li><strong>The model disappeared</strong>: clearing site data or browser storage removes the cached weights.</li>
+        </ul>
+        <p>If your machine can't run models locally, the playground also connects to any OpenAI-compatible API, including a local <a href="https://ollama.com/" rel="noopener">Ollama</a> server, which can run bigger models outside the browser.</p>
+
+        <aside class="try">
+          <h2 id="try">Try it</h2>
+          <ol>
+            <li>Open the <a href="/app/">playground</a> in Chrome or Edge, choose <strong>In browser</strong> and pick <em>Llama 3.2 1B</em> (the smallest download).</li>
+            <li>Press <strong>Load model</strong> and watch the download progress. Next time it loads from cache.</li>
+            <li>Ask it a fact question, then a math question with and without the calculator tool. Notice where it needs help.</li>
+            <li>Check the <strong>Decode</strong> speed to see what your own GPU can do.</li>
+          </ol>
+          <a class="btn btn--primary" href="/app/">Open the playground</a>
+        </aside>
+
+        <nav class="related" aria-label="Related guides">
+          <h2>Keep learning</h2>
+          <ul>
+            <li><a href="/learn/prefill-vs-decode/">Prefill vs decode</a>: what limits speed on your GPU</li>
+            <li><a href="/learn/function-calling/">How function calling works</a>: how tools make small models useful</li>
+            <li><a href="/learn/what-is-a-token/">What is a token?</a>: the basics</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+    <!-- @include footer -->
+  </body>
+</html>
