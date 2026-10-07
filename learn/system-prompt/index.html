@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- @include head -->
+    <title>What Is a System Prompt in an LLM? | youdontknowllm</title>
+    <meta name="description" content="Every chatbot runs on hidden instructions called the system prompt. See how it&#x27;s sent, what it can and can&#x27;t control, and how to write a good one." />
+    <link rel="canonical" href="%SITE_URL%/learn/system-prompt/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%SITE_NAME%" />
+    <meta property="og:title" content="The System Prompt: The Instructions You Don&#x27;t See" />
+    <meta property="og:description" content="How the hidden system prompt shapes every chatbot answer, what it can&#x27;t do, and how to write a good one." />
+    <meta property="og:url" content="%SITE_URL%/learn/system-prompt/" />
+    <meta property="og:image" content="%SITE_URL%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">
+      [
+        {
+          "@context": "https://schema.org",
+          "@type": "TechArticle",
+          "headline": "The system prompt: the instructions you don't see",
+          "description": "Every chatbot runs on hidden instructions called the system prompt. See how it's sent, what it can and can't control, and how to write a good one.",
+          "url": "%SITE_URL%/learn/system-prompt/",
+          "image": "%SITE_URL%/og.png",
+          "datePublished": "2026-10-07",
+          "dateModified": "2026-10-07",
+          "author": {
+            "@type": "Organization",
+            "name": "youdontknowllm",
+            "url": "%SITE_URL%/"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "youdontknowllm",
+            "url": "%SITE_URL%/"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "%SITE_URL%/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Learn",
+              "item": "%SITE_URL%/learn/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "System prompt",
+              "item": "%SITE_URL%/learn/system-prompt/"
+            }
+          ]
+        }
+      ]
+    </script>
+    <link rel="stylesheet" href="/src/site/site.css" />
+  </head>
+  <body>
+    <!-- @include header -->
+    <main class="page">
+      <article class="article">
+        <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/learn/">Learn</a> / <span aria-current="page">System prompt</span></nav>
+        <h1>The system prompt: the instructions you don&#x27;t see</h1>
+        <p class="lead">Before your first message even reaches the model, the app has already sent something: a block of instructions called the <strong>system prompt</strong>. It sets the model's persona, tone, rules and tools. It's why the same model can be a polite support agent in one app and a terse coding assistant in another.</p>
+
+        <h2 id="what">What it looks like</h2>
+        <p>Chat APIs take a list of messages, each with a <em>role</em>. The system prompt is the message with role <code>system</code>, placed first:</p>
+<pre><code>[
+  {"role": "system",    "content": "You are a helpful assistant. Answer briefly."},
+  {"role": "user",      "content": "What is the capital of Indonesia?"},
+  {"role": "assistant", "content": "Jakarta."},
+  {"role": "user",      "content": "And its population?"}
+]</code></pre>
+        <p>It is sent with <strong>every</strong> request, because the model has no memory between messages (see <a href="/learn/context-window/">the context window</a>).</p>
+
+        <h2 id="how">It's still just text</h2>
+        <p>The model doesn't have a separate input for instructions. A <em>chat template</em> flattens the message list into one stream of <a href="/learn/what-is-a-token/">tokens</a>, with special markers showing where each role starts. For a Qwen model it looks roughly like this:</p>
+<pre><code>&lt;|im_start|&gt;system
+You are a helpful assistant. Answer briefly.&lt;|im_end|&gt;
+&lt;|im_start|&gt;user
+What is the capital of Indonesia?&lt;|im_end|&gt;
+&lt;|im_start|&gt;assistant
+</code></pre>
+        <p>The system prompt has power only because models are <em>trained</em> to give text in that position more weight than user messages. It's a strong habit, not a hard rule.</p>
+
+        <h2 id="uses">What a system prompt is good for</h2>
+        <ul>
+          <li><strong>Persona and tone</strong>: "You are a friendly tutor for beginners."</li>
+          <li><strong>Format</strong>: "Answer in at most three sentences." "Reply in JSON."</li>
+          <li><strong>Rules and scope</strong>: "Only answer questions about cooking."</li>
+          <li><strong>Background facts</strong>: today's date, the user's name, product details.</li>
+          <li><strong>Tool instructions</strong>: the list of available tools and the exact format for <a href="/learn/function-calling/">calling them</a>. In the playground, these are appended to your system prompt automatically.</li>
+        </ul>
+
+        <h2 id="limits">What it can't do</h2>
+        <ul>
+          <li><strong>It isn't secret.</strong> Users can often get a model to repeat its instructions ("prompt leaking"). Don't put passwords or anything private in it.</li>
+          <li><strong>It isn't a security boundary.</strong> A cleverly written user message, or text inside a web page or tool result, can override it. This is called <em>prompt injection</em>. Real safety checks belong in code.</li>
+          <li><strong>Small models follow it loosely.</strong> A 1B-parameter model may drop a persona after a few messages or ignore a format rule. Larger models are far more consistent.</li>
+          <li><strong>It costs tokens every turn.</strong> A 2,000-token system prompt is paid for, and waited for, on every single message.</li>
+        </ul>
+
+        <h2 id="writing">Writing a good system prompt</h2>
+        <ul>
+          <li><strong>Be specific.</strong> "Answer in 2–3 sentences for a 12-year-old" beats "be simple".</li>
+          <li><strong>Say what to do</strong>, not only what not to do.</li>
+          <li><strong>Show an example</strong> of the output you want. Models copy examples very well.</li>
+          <li><strong>Keep it short</strong>, especially for small models with small context windows.</li>
+          <li><strong>Test it.</strong> Ask the same question with different system prompts and compare.</li>
+        </ul>
+
+        <aside class="try">
+          <h2 id="try">Try it</h2>
+          <ol>
+            <li>Open the <a href="/app/">playground</a> and ask: <em>What is the speed of light?</em></li>
+            <li>Change the system prompt to <em>You are a pirate. Answer every question like a pirate.</em> and ask again.</li>
+            <li>Try a format rule: <em>Reply only with valid JSON like {"answer": "..."}</em>. How reliable is a small model compared to a large API model?</li>
+            <li>Open <strong>Full prompt sent to the model</strong> to see your text plus the tool instructions the app adds.</li>
+            <li>Press <strong>Reset</strong> to go back to the default.</li>
+          </ol>
+          <a class="btn btn--primary" href="/app/">Open the playground</a>
+        </aside>
+
+        <nav class="related" aria-label="Related guides">
+          <h2>Keep learning</h2>
+          <ul>
+            <li><a href="/learn/function-calling/">How function calling works</a>: tool instructions live in the system prompt</li>
+            <li><a href="/learn/context-window/">The context window</a>: why long system prompts cost you</li>
+            <li><a href="/learn/what-is-a-token/">What is a token?</a>: the special tokens around each message</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+    <!-- @include footer -->
+  </body>
+</html>
