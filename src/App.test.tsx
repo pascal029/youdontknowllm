@@ -127,3 +127,19 @@ test('New chat clears messages, steps and context, and the model starts fresh', 
   const sent = JSON.parse(fetchMock.mock.calls[1][1].body).messages
   expect(sent.map((m: { content: string }) => m.content)).not.toContain('first')
 })
+
+test('view a built-in tool read-only, then duplicate it into an editable custom tool', async () => {
+  render(<App />)
+  await userEvent.click(screen.getByRole('button', { name: 'View calculator code' }))
+  const view = screen.getByRole('dialog', { name: 'calculator (built-in)' })
+  expect(within(view).getByLabelText('Code')).toHaveAttribute('readonly')
+
+  await userEvent.click(within(view).getByRole('button', { name: 'Duplicate & edit' }))
+  const add = screen.getByRole('dialog', { name: 'Add tool' })
+  expect(within(add).getByLabelText('Name')).toHaveValue('calculator_copy')
+  expect(within(add).getByLabelText('Code')).not.toHaveAttribute('readonly')
+  await userEvent.click(within(add).getByRole('button', { name: 'Save tool' }))
+
+  expect(screen.getByRole('checkbox', { name: /calculator_copy/ })).toBeChecked()
+  expect(screen.getByRole('checkbox', { name: /^calculator$/ })).toBeInTheDocument() // built-in untouched
+})

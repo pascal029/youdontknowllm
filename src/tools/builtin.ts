@@ -5,6 +5,7 @@ import type { Tool } from './types'
 
 const calculator: Tool = {
   name: 'calculator',
+  example: { expression: '23 * 19' },
   description: 'Evaluate a math expression. Supports + - * / % ^ ( ) and Math functions like sqrt, sin, log, PI.',
   parameters: {
     type: 'object',
@@ -26,6 +27,7 @@ return value`,
 
 const getCurrentTime: Tool = {
   name: 'get_current_time',
+  example: { timezone: 'Asia/Jakarta' },
   description: 'Get the current date and time, optionally in a given IANA timezone like "Asia/Jakarta".',
   parameters: { type: 'object', properties: { timezone: { type: 'string', description: 'IANA timezone, optional' } } },
   code: `const timeZone = args.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -41,6 +43,7 @@ return {
 
 const randomNumber: Tool = {
   name: 'random_number',
+  example: { min: 1, max: 6 },
   description: 'Generate a random integer between min and max (inclusive).',
   parameters: {
     type: 'object',
@@ -56,6 +59,7 @@ return min + Math.floor(Math.random() * (max - min + 1))`,
 
 const runJavascript: Tool = {
   name: 'run_javascript',
+  example: { code: 'return [1, 2, 3].map((x) => x * 2)' },
   description: 'Run a JavaScript snippet and return its result. Use `return` to give back a value; console.log output is captured.',
   parameters: {
     type: 'object',
@@ -70,6 +74,7 @@ return await new AsyncFunction('console', String(args.code ?? ''))(console)`,
 
 const wikipediaSearch: Tool = {
   name: 'wikipedia_search',
+  example: { query: 'WebGPU' },
   description: 'Search English Wikipedia and return the top 3 article titles with short snippets.',
   parameters: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] },
   code: `const url = 'https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=3&srsearch=' + encodeURIComponent(args.query ?? '')

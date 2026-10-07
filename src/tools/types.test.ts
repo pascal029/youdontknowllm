@@ -23,3 +23,14 @@ test.each([
 test('rejects duplicate names', () => {
   expect(validateTool(ok, ['add_numbers'])[0]).toMatch(/already exists/)
 })
+
+test('exampleArgs: explicit example wins, else guessed from the schema', async () => {
+  const { exampleArgs } = await import('./types')
+  expect(exampleArgs({ parameters: { type: 'object' }, example: { q: 'x' } })).toEqual({ q: 'x' })
+  expect(
+    exampleArgs({
+      parameters: { type: 'object', properties: { s: { type: 'string' }, n: { type: 'integer' }, b: { type: 'boolean' }, a: { type: 'array' }, o: { type: 'object' }, u: {} } },
+    }),
+  ).toEqual({ s: 'hello', n: 1, b: true, a: [], o: {}, u: 'hello' })
+  expect(exampleArgs({ parameters: { type: 'object' } })).toEqual({})
+})

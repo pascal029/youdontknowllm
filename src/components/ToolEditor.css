@@ -6,3 +6,5 @@
 .tool-editor__out.is-error { color: var(--color-destructive); }
 .tool-editor__errors { margin: 0; padding-left: var(--space-xl); color: var(--color-destructive); font-size: 0.8125rem; }
 .tool-editor__actions { display: flex; justify-content: flex-end; gap: var(--space-md); }
+.tool-editor__note { margin: 0; padding: var(--space-md) var(--space-lg); border-radius: var(--radius); background: var(--color-muted); color: var(--color-fg-muted); font-size: 0.8125rem; }
+.tool-editor textarea[readonly], .tool-editor input[readonly] { background: var(--color-muted); }

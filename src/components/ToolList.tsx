@@ -4,8 +4,9 @@ import './ToolList.css'
 type Props = {
   tools: Tool[]
   onToggle: (name: string, enabled: boolean) => void
-  /** custom tools only */
+  /** open the code: "View code" for built-ins, "Edit" for custom tools */
   onEdit?: (tool: Tool) => void
+  /** custom tools only */
   onDelete?: (tool: Tool) => void
 }
 
@@ -21,10 +22,17 @@ export default function ToolList({ tools, onToggle, onEdit, onDelete }: Props) {
             {!t.builtin && <span className="badge">custom</span>}
           </label>
           <p id={`tool-desc-${t.name}`} className="tool__desc">{t.description}</p>
-          {!t.builtin && (onEdit || onDelete) && (
+          {(onEdit || (onDelete && !t.builtin)) && (
             <div className="tool__actions">
-              {onEdit && <button type="button" className="btn btn--ghost btn--sm" onClick={() => onEdit(t)} aria-label={`Edit ${t.name}`}>Edit</button>}
-              {onDelete && <button type="button" className="btn btn--ghost btn--sm btn--danger" onClick={() => onDelete(t)} aria-label={`Delete ${t.name}`}>Delete</button>}
+              {onEdit &&
+                (t.builtin ? (
+                  <button type="button" className="btn btn--ghost btn--sm" onClick={() => onEdit(t)} aria-label={`View ${t.name} code`}>View code</button>
+                ) : (
+                  <button type="button" className="btn btn--ghost btn--sm" onClick={() => onEdit(t)} aria-label={`Edit ${t.name}`}>Edit</button>
+                ))}
+              {onDelete && !t.builtin && (
+                <button type="button" className="btn btn--ghost btn--sm btn--danger" onClick={() => onDelete(t)} aria-label={`Delete ${t.name}`}>Delete</button>
+              )}
             </div>
           )}
         </li>

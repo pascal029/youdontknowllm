@@ -16,11 +16,15 @@ test('lists tools with enabled state and toggles them', async () => {
   expect(onToggle).toHaveBeenCalledWith('calculator', false)
 })
 
-test('only custom tools get edit/delete', async () => {
+test('built-ins get "View code"; only custom tools get Edit/Delete', async () => {
   const onEdit = vi.fn()
   const onDelete = vi.fn()
   render(<ToolList tools={[...BUILTIN_TOOLS, custom]} onToggle={() => {}} onEdit={onEdit} onDelete={onDelete} />)
   expect(screen.getAllByRole('button', { name: /^Edit/ })).toHaveLength(1)
+  expect(screen.getAllByRole('button', { name: /^Delete/ })).toHaveLength(1)
+  expect(screen.getAllByRole('button', { name: /^View .* code$/ })).toHaveLength(BUILTIN_TOOLS.length)
+  await userEvent.click(screen.getByRole('button', { name: 'View calculator code' }))
+  expect(onEdit).toHaveBeenCalledWith(BUILTIN_TOOLS[0])
   await userEvent.click(screen.getByRole('button', { name: 'Edit shout' }))
   await userEvent.click(screen.getByRole('button', { name: 'Delete shout' }))
   expect(onEdit).toHaveBeenCalledWith(custom)

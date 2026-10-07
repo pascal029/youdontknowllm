@@ -76,5 +76,5 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 9.2 Model cache helpers (isModelCached / deleteCachedModel via lazy WebLLM) + Provider.unload + tests
 - [x] 9.3 Model picker: "Downloaded" status + Delete button with confirm modal (unloads the model if active)
 - [x] 9.4 Tool editor in a modal: "Add tool" and "Edit" for custom tools (replaces inline editor)
-- [ ] 9.5 Built-in tools: "View code" read-only modal with Test run + example arguments
+- [x] 9.5 Built-in tools: "View code" read-only modal with Test run + example arguments
 - [ ] 9.6 Browser QA: delete flow, modals, keyboard + a11y

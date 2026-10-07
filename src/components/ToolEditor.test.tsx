@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { expect, test, vi } from 'vitest'
+import { BUILTIN_TOOLS } from '../tools/builtin'
 import ToolEditor, { NEW_TOOL_TEMPLATE } from './ToolEditor'
 
 const setup = (over: Partial<Parameters<typeof ToolEditor>[0]> = {}) => {
@@ -55,4 +56,29 @@ test('cancel', async () => {
   const { onCancel } = setup()
   await userEvent.click(screen.getByRole('button', { name: 'Cancel' }))
   expect(onCancel).toHaveBeenCalled()
+})
+
+test('read-only (built-in): fields locked, no Save, Test run uses the example, Duplicate offered', async () => {
+  const run = vi.fn().mockResolvedValue({ ok: true, result: 437, logs: [], ms: 2 })
+  const onDuplicate = vi.fn()
+  const calc = BUILTIN_TOOLS[0]
+  setup({ initial: calc, readOnly: true, onDuplicate, run })
+
+  expect(screen.getByText(/Built-in tool: read-only/)).toBeInTheDocument()
+  expect(screen.getByLabelText('Code')).toHaveAttribute('readonly')
+  expect(screen.getByLabelText('Name')).toHaveAttribute('readonly')
+  expect(screen.queryByRole('button', { name: 'Save tool' })).not.toBeInTheDocument()
+  expect(screen.getByLabelText('Test arguments')).toHaveValue(JSON.stringify(calc.example))
+
+  await userEvent.click(screen.getByRole('button', { name: 'Test run' }))
+  expect(run).toHaveBeenCalledWith(calc.code, calc.example)
+  expect(screen.getByRole('status')).toHaveTextContent('→ 437')
+
+  await userEvent.click(screen.getByRole('button', { name: 'Duplicate & edit' }))
+  expect(onDuplicate).toHaveBeenCalled()
+})
+
+test('new tools pre-fill test arguments from their schema', () => {
+  setup()
+  expect(screen.getByLabelText('Test arguments')).toHaveValue('{"text":"hello"}')
 })

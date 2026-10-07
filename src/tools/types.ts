@@ -9,6 +9,16 @@ export type Tool = ToolSpec & {
   code: string
   enabled: boolean
   builtin?: boolean
+  /** sample arguments for "Test run" */
+  example?: Record<string, unknown>
+}
+
+/** Arguments to pre-fill "Test run": the tool's example, else a guess from its JSON Schema. */
+export function exampleArgs(t: Pick<Tool, 'parameters' | 'example'>): Record<string, unknown> {
+  if (t.example) return t.example
+  const props = (t.parameters as { properties?: Record<string, { type?: string }> }).properties ?? {}
+  const sample = (type?: string) => (type === 'number' || type === 'integer' ? 1 : type === 'boolean' ? true : type === 'array' ? [] : type === 'object' ? {} : 'hello')
+  return Object.fromEntries(Object.entries(props).map(([k, v]) => [k, sample(v?.type)]))
 }
 
 const NAME = /^[a-z_][a-z0-9_]{0,63}$/

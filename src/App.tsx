@@ -42,7 +42,8 @@ export default function App() {
   const abortRef = useRef<AbortController>(null)
   // stored as { items } because useLocalStorage merges objects
   const [custom, setCustom] = useLocalStorage('ydkl.customTools', { items: [] as Tool[] })
-  const [editing, setEditing] = useState<Tool | null>(null)
+  /** tool open in the editor modal; isNew = Add or Duplicate (save appends instead of replacing) */
+  const [editing, setEditing] = useState<{ tool: Tool; isNew: boolean } | null>(null)
   const [deletingTool, setDeletingTool] = useState<Tool | null>(null)
   const tools = [...BUILTIN_TOOLS, ...custom.items].map((t) => ({ ...t, enabled: !prefs.disabledTools.includes(t.name) }))
   const systemText = composeSystemPrompt(prefs.systemPrompt.trim(), tools.filter((t) => t.enabled))
@@ -181,23 +182,28 @@ export default function App() {
             <ToolList
               tools={tools}
               onToggle={toggleTool}
-              onEdit={setEditing}
+              onEdit={(tool) => setEditing({ tool, isNew: false })}
               onDelete={setDeletingTool}
             />
-            <button type="button" className="btn btn--sm add-tool" onClick={() => setEditing(NEW_TOOL_TEMPLATE)}>+ Add tool</button>
+            <button type="button" className="btn btn--sm add-tool" onClick={() => setEditing({ tool: NEW_TOOL_TEMPLATE, isNew: true })}>+ Add tool</button>
             <Modal
               open={!!editing}
               size="lg"
-              title={editing === NEW_TOOL_TEMPLATE ? 'Add tool' : `Edit ${editing?.name ?? ''}`}
+              title={!editing ? '' : editing.isNew ? 'Add tool' : editing.tool.builtin ? `${editing.tool.name} (built-in)` : `Edit ${editing.tool.name}`}
               onClose={() => setEditing(null)}
             >
               {editing && (
                 <ToolEditor
-                  initial={editing}
-                  takenNames={tools.map((t) => t.name).filter((n) => n !== editing.name || editing === NEW_TOOL_TEMPLATE)}
+                  key={`${editing.tool.name}-${editing.isNew}`}
+                  initial={editing.tool}
+                  readOnly={editing.tool.builtin && !editing.isNew}
+                  onDuplicate={() =>
+                    setEditing({ tool: { ...editing.tool, name: `${editing.tool.name}_copy`, builtin: false, enabled: true }, isNew: true })
+                  }
+                  takenNames={tools.map((t) => t.name).filter((n) => editing.isNew || n !== editing.tool.name)}
                   onCancel={() => setEditing(null)}
                   onSave={(t) => {
-                    const rest = editing === NEW_TOOL_TEMPLATE ? custom.items : custom.items.filter((x) => x.name !== editing.name)
+                    const rest = editing.isNew ? custom.items : custom.items.filter((x) => x.name !== editing.tool.name)
                     setCustom({ items: [...rest, t] })
                     setEditing(null)
                   }}

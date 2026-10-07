@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { BUILTIN_TOOLS } from '../tools/builtin'
 import Modal from './Modal'
 import ToolEditor, { NEW_TOOL_TEMPLATE } from './ToolEditor'
 
@@ -21,3 +22,5 @@ export const InModal: Story = {
     </Modal>
   ),
 }
+/** Built-in tool: read-only view with Test run and Duplicate. */
+export const BuiltInReadOnly: Story = { args: { initial: BUILTIN_TOOLS[0], readOnly: true, onDuplicate: () => {} } }

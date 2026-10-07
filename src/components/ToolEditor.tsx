@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { runInSandbox, type SandboxResult } from '../tools/sandbox'
-import { validateTool, type Tool } from '../tools/types'
+import { exampleArgs, validateTool, type Tool } from '../tools/types'
 import './ToolEditor.css'
 
 export const NEW_TOOL_TEMPLATE: Tool = {
@@ -18,18 +18,22 @@ type Props = {
   takenNames: string[]
   onSave: (tool: Tool) => void
   onCancel: () => void
+  /** built-in tools: view + test only */
+  readOnly?: boolean
+  /** read-only mode: copy this tool into a new editable one */
+  onDuplicate?: () => void
   /** injectable for tests/stories */
   run?: (code: string, args: unknown) => Promise<SandboxResult>
 }
 
 const pretty = (v: unknown) => JSON.stringify(v, null, 2)
 
-export default function ToolEditor({ initial, takenNames, onSave, onCancel, run = runInSandbox }: Props) {
+export default function ToolEditor({ initial, takenNames, onSave, onCancel, readOnly, onDuplicate, run = runInSandbox }: Props) {
   const [name, setName] = useState(initial.name)
   const [description, setDescription] = useState(initial.description)
   const [params, setParams] = useState(pretty(initial.parameters))
   const [code, setCode] = useState(initial.code)
-  const [testArgs, setTestArgs] = useState('{"text": "hello"}')
+  const [testArgs, setTestArgs] = useState(() => JSON.stringify(exampleArgs(initial)))
   const [errors, setErrors] = useState<string[]>([])
   const [testResult, setTestResult] = useState<SandboxResult | null>(null)
 
@@ -57,26 +61,31 @@ export default function ToolEditor({ initial, takenNames, onSave, onCancel, run 
   }
 
   return (
-    <form className="tool-editor" onSubmit={(e) => { e.preventDefault(); save() }} aria-label="Tool editor">
+    <form className="tool-editor" onSubmit={(e) => { e.preventDefault(); if (!readOnly) save() }} aria-label="Tool editor">
+      {readOnly && (
+        <p className="tool-editor__note">
+          Built-in tool: read-only. Run it below, or duplicate it to change the code.
+        </p>
+      )}
       <label className="field">
         <span>Name</span>
-        <input className="mono" value={name} onChange={(e) => setName(e.target.value)} />
+        <input className="mono" value={name} readOnly={readOnly} onChange={(e) => setName(e.target.value)} />
       </label>
       <label className="field">
         <span>Description</span>
-        <input value={description} onChange={(e) => setDescription(e.target.value)} />
+        <input value={description} readOnly={readOnly} onChange={(e) => setDescription(e.target.value)} />
       </label>
       <div className="field">
         <label>
           <span>Parameters (JSON Schema)</span>
-          <textarea className="mono" rows={6} value={params} onChange={(e) => setParams(e.target.value)} spellCheck={false} />
+          <textarea className="mono" rows={6} value={params} readOnly={readOnly} onChange={(e) => setParams(e.target.value)} spellCheck={false} />
         </label>
         <small>The model reads this to know which arguments to send.</small>
       </div>
       <div className="field">
         <label>
           <span>Code</span>
-          <textarea className="mono" rows={10} value={code} onChange={(e) => setCode(e.target.value)} spellCheck={false} />
+          <textarea className="mono" rows={10} value={code} readOnly={readOnly} onChange={(e) => setCode(e.target.value)} spellCheck={false} />
         </label>
         <small>Async function body. Use <code>args</code>, <code>return</code> a value. Runs in a sandboxed worker (3s limit).</small>
       </div>
@@ -102,8 +111,17 @@ export default function ToolEditor({ initial, takenNames, onSave, onCancel, run 
       )}
 
       <div className="tool-editor__actions">
-        <button type="button" className="btn btn--ghost" onClick={onCancel}>Cancel</button>
-        <button type="submit" className="btn btn--primary">Save tool</button>
+        {readOnly ? (
+          <>
+            <button type="button" className="btn btn--ghost" onClick={onCancel}>Close</button>
+            {onDuplicate && <button type="button" className="btn btn--primary" onClick={onDuplicate}>Duplicate &amp; edit</button>}
+          </>
+        ) : (
+          <>
+            <button type="button" className="btn btn--ghost" onClick={onCancel}>Cancel</button>
+            <button type="submit" className="btn btn--primary">Save tool</button>
+          </>
+        )}
       </div>
     </form>
   )
