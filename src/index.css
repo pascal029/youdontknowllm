@@ -57,3 +57,42 @@ button { cursor: pointer; }
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Shared form + button primitives */
+.field, .field > label { display: grid; gap: var(--space-sm); font-size: 0.875rem; }
+.field > span, .field > label > span { color: var(--color-fg-muted); font-weight: 500; }
+.field input, .field select, .field textarea {
+  width: 100%;
+  min-height: 36px;
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  transition: border-color var(--duration);
+}
+.field input:hover, .field select:hover, .field textarea:hover { border-color: var(--color-fg-muted); }
+.field small { color: var(--color-fg-muted); font-size: 0.75rem; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  min-height: 36px;
+  padding: var(--space-md) var(--space-xl);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-secondary);
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: background var(--duration), border-color var(--duration), opacity var(--duration);
+}
+.btn:hover { border-color: var(--color-fg-muted); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn--primary { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-on-accent); }
+.btn--primary:hover { filter: brightness(0.9); }
+.btn--ghost { background: transparent; }
+.btn--danger { color: var(--color-destructive); }
+
+.panel-title { margin: 0 0 var(--space-md); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-fg-muted); }
+.error-text { margin: 0; color: var(--color-destructive); font-size: 0.875rem; }
