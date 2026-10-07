@@ -2,14 +2,146 @@
 <html lang="en">
   <head>
     <!-- @include head -->
-    <title>youdontknowllm</title>
+    <title>Learn How LLMs Work in Your Browser | youdontknowllm</title>
+    <meta name="description" content="Chat with a small LLM running on your own GPU, edit the system prompt, add tools, and watch every step: tokens, context window and function calls." />
+    <link rel="canonical" href="%SITE_URL%/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="%SITE_NAME%" />
+    <meta property="og:title" content="Learn How LLMs Work in Your Browser" />
+    <meta property="og:description" content="Run a small LLM on your own GPU and watch every step: system prompt, tokens, context window, function calls and speed." />
+    <meta property="og:url" content="%SITE_URL%/" />
+    <meta property="og:image" content="%SITE_URL%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "youdontknowllm",
+        "url": "%SITE_URL%/",
+        "description": "Learn how large language models work by running one in your browser and watching every step."
+      }
+    </script>
     <link rel="stylesheet" href="/src/site/site.css" />
   </head>
   <body>
     <!-- @include header -->
     <main class="page">
-      <h1>youdontknowllm</h1>
-      <p><a href="/app/">Open the playground</a></p>
+      <section class="hero">
+        <div class="hero__text">
+          <p class="eyebrow">Free · open source · no sign-up</p>
+          <h1>Learn how LLMs work by running one in your browser</h1>
+          <p class="lead">
+            Chat with a small language model on your own GPU, or plug in any OpenAI-compatible API. Then look inside:
+            the system prompt, the tokens, the context window, every tool call and how fast it thinks.
+          </p>
+          <div class="hero__cta">
+            <a class="btn btn--primary btn--lg" href="/app/">Open the playground</a>
+            <a class="btn btn--lg" href="/learn/">Start learning</a>
+          </div>
+          <p class="hero__note">Runs locally with WebGPU (Chrome/Edge). Your prompts never leave your machine.</p>
+        </div>
+
+        <figure class="demo" aria-label="Example of the step-by-step view">
+          <ol class="demo__steps">
+            <li><span class="demo__tag">you</span> What is 23 × 19?</li>
+            <li><span class="demo__tag">model</span> <code>&lt;tool_call&gt;{"name":"calculator","arguments":{"expression":"23*19"}}&lt;/tool_call&gt;</code></li>
+            <li><span class="demo__tag demo__tag--tool">tool</span> calculator → <code>437</code> <span class="demo__meta">4 ms in sandbox</span></li>
+            <li><span class="demo__tag demo__tag--ok">answer</span> 23 × 19 = 437</li>
+          </ol>
+          <div class="demo__stats">
+            <span>Context <b>3,610</b> tokens left</span>
+            <span>Decode <b>38</b> tok/s</span>
+          </div>
+          <figcaption>What the playground shows for one question: the model decides to call a tool, the tool runs, the model answers.</figcaption>
+        </figure>
+      </section>
+
+      <section aria-labelledby="see-title">
+        <h2 id="see-title">What you'll see that chat apps hide</h2>
+        <ul class="cards">
+          <li class="card">
+            <h3>The system prompt</h3>
+            <p>Edit the hidden instructions and see the full prompt the model actually receives, tool definitions included.</p>
+          </li>
+          <li class="card">
+            <h3>Tokens and the context window</h3>
+            <p>A live meter shows how many tokens your conversation uses and how much room the model has left.</p>
+          </li>
+          <li class="card">
+            <h3>Function calling</h3>
+            <p>Give the model a calculator, a clock, Wikipedia or your own JavaScript tool, and watch it decide when to use them.</p>
+          </li>
+          <li class="card">
+            <h3>The agent loop, step by step</h3>
+            <p>Prompt → model → tool call → tool result → answer. Every step, with the raw text and JSON behind it.</p>
+          </li>
+          <li class="card">
+            <h3>Speed: prefill vs decode</h3>
+            <p>See how fast the model reads your prompt and how fast it writes, in tokens per second, live.</p>
+          </li>
+          <li class="card">
+            <h3>Private by default</h3>
+            <p>Local models run entirely on your GPU. Tool code runs in a locked-down sandbox. No account, no server.</p>
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="how-title">
+        <h2 id="how-title">How it works</h2>
+        <ol class="how">
+          <li>
+            <h3>Pick a model</h3>
+            <p>One of 5 small models (0.6B–1.7B parameters) downloaded once into your browser, or any OpenAI-compatible API such as OpenAI or Ollama.</p>
+          </li>
+          <li>
+            <h3>Ask something</h3>
+            <p>Change the system prompt, switch tools on or off, or write your own tool with a JSON Schema and a few lines of JavaScript.</p>
+          </li>
+          <li>
+            <h3>Watch what happens</h3>
+            <p>Follow every step of the loop, and see the context window and tokens per second update as the model generates.</p>
+          </li>
+        </ol>
+      </section>
+
+      <section aria-labelledby="learn-title">
+        <h2 id="learn-title">Learn the concepts</h2>
+        <ul class="cards cards--links">
+          <li><a class="card" href="/learn/what-is-a-token/"><h3>What is a token?</h3><p>Why models read pieces of words, not words.</p></a></li>
+          <li><a class="card" href="/learn/context-window/"><h3>The context window</h3><p>The model's working memory, and what happens when it fills up.</p></a></li>
+          <li><a class="card" href="/learn/system-prompt/"><h3>The system prompt</h3><p>The hidden instructions behind every chat.</p></a></li>
+          <li><a class="card" href="/learn/function-calling/"><h3>Function calling</h3><p>How a text model "uses tools" when it can only write text.</p></a></li>
+          <li><a class="card" href="/learn/prefill-vs-decode/"><h3>Prefill vs decode</h3><p>The two speeds of an LLM, and why they differ.</p></a></li>
+          <li><a class="card" href="/learn/run-llm-in-browser/"><h3>Run an LLM in your browser</h3><p>WebGPU, small models and what to expect.</p></a></li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="faq-title" class="faq">
+        <h2 id="faq-title">Questions</h2>
+        <details>
+          <summary>Is it free?</summary>
+          <p>Yes. It is open source and runs in your browser. Local models cost nothing to run. If you connect a paid API, you pay that provider directly.</p>
+        </details>
+        <details>
+          <summary>What do I need to run a model locally?</summary>
+          <p>A browser with WebGPU (recent Chrome or Edge) and roughly 1–2 GB of free GPU memory. The model downloads once and is cached.</p>
+        </details>
+        <details>
+          <summary>Is my data sent anywhere?</summary>
+          <p>With a local model, nothing leaves your computer. With an API, your messages go only to the API address you enter, and your key is stored only in your browser.</p>
+        </details>
+        <details>
+          <summary>Which models can I use?</summary>
+          <p>Locally: Qwen3 0.6B, Llama 3.2 1B, Qwen2.5 1.5B, SmolLM2 1.7B and Qwen3 1.7B. Remotely: any model behind an OpenAI-compatible <code>/chat/completions</code> endpoint.</p>
+        </details>
+      </section>
+
+      <section class="final-cta">
+        <h2>See what an LLM is actually doing</h2>
+        <a class="btn btn--primary btn--lg" href="/app/">Open the playground</a>
+      </section>
     </main>
     <!-- @include footer -->
   </body>
