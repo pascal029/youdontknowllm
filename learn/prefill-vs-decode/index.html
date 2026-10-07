@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- @include head -->
+    <title>Prefill vs Decode: LLM Tokens per Second | youdontknowllm</title>
+    <meta name="description" content="Why an LLM reads your prompt fast but writes slowly. Prefill, decode, time to first token and tokens per second, explained with real numbers." />
+    <link rel="canonical" href="%SITE_URL%/learn/prefill-vs-decode/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%SITE_NAME%" />
+    <meta property="og:title" content="Prefill vs Decode: The Two Speeds of an LLM" />
+    <meta property="og:description" content="Why a model reads your prompt in a flash but types its answer slowly, and what tokens per second really measures." />
+    <meta property="og:url" content="%SITE_URL%/learn/prefill-vs-decode/" />
+    <meta property="og:image" content="%SITE_URL%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">
+      [
+        {
+          "@context": "https://schema.org",
+          "@type": "TechArticle",
+          "headline": "Prefill vs decode: the two speeds of an LLM",
+          "description": "Why an LLM reads your prompt fast but writes slowly. Prefill, decode, time to first token and tokens per second, explained with real numbers.",
+          "url": "%SITE_URL%/learn/prefill-vs-decode/",
+          "image": "%SITE_URL%/og.png",
+          "datePublished": "2026-10-07",
+          "dateModified": "2026-10-07",
+          "author": {
+            "@type": "Organization",
+            "name": "youdontknowllm",
+            "url": "%SITE_URL%/"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "youdontknowllm",
+            "url": "%SITE_URL%/"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "%SITE_URL%/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Learn",
+              "item": "%SITE_URL%/learn/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Prefill vs decode",
+              "item": "%SITE_URL%/learn/prefill-vs-decode/"
+            }
+          ]
+        }
+      ]
+    </script>
+    <link rel="stylesheet" href="/src/site/site.css" />
+  </head>
+  <body>
+    <!-- @include header -->
+    <main class="page">
+      <article class="article">
+        <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/learn/">Learn</a> / <span aria-current="page">Prefill vs decode</span></nav>
+        <h1>Prefill vs decode: the two speeds of an LLM</h1>
+        <p class="lead">Every LLM request has two phases. First the model <strong>reads</strong> your whole prompt: that's <em>prefill</em>. Then it <strong>writes</strong> the answer one <a href="/learn/what-is-a-token/">token</a> at a time: that's <em>decode</em>. They run at very different speeds, and knowing why explains most of what "fast" and "slow" mean for language models.</p>
+
+        <h2 id="prefill">Prefill: reading the prompt</h2>
+        <p>All the prompt's tokens (system prompt, tools, conversation history) are known up front, so the model can process them <strong>in parallel</strong>. GPUs are excellent at this. Prefill speeds are often hundreds to thousands of tokens per second.</p>
+        <p>Prefill also builds the <strong>KV cache</strong>, the model's internal notes about every token so far, so it doesn't have to re-read the prompt for each new word it writes.</p>
+        <p>The time until the first word appears is called <strong>time to first token</strong> (TTFT). It grows with prompt length, which is why a long <a href="/learn/context-window/">context</a> makes every reply start later.</p>
+
+        <h2 id="decode">Decode: writing the answer</h2>
+        <p>Writing can't be parallel. Token 2 depends on token 1, token 3 on token 2, and so on. For <em>every</em> new token, the hardware has to stream essentially all of the model's weights through the processor.</p>
+        <p>So decode speed is usually limited by <strong>memory bandwidth</strong>, not raw computing power. A handy estimate:</p>
+<pre><code>decode tokens/sec  ≈  memory bandwidth  ÷  model size in memory
+
+e.g. 1B-parameter model, 4-bit  ≈ 0.6–0.9 GB
+     laptop GPU at ~60 GB/s     →  very roughly 60–100 tok/s at best</code></pre>
+        <p>Real numbers are lower because of overheads, but the shape holds. Smaller and more compressed (quantized) models decode faster, and faster memory means faster decode.</p>
+
+        <h2 id="total">Putting it together</h2>
+<pre><code>total time  ≈  time to first token  +  output tokens ÷ decode speed
+
+prompt 1,000 tokens at 500 tok/s  →  2.0 s before the first word
+answer   200 tokens at  25 tok/s  →  8.0 s of typing
+                                     ≈ 10 s total</code></pre>
+        <p>Notice that the answer dominates. Long outputs are expensive in time. That's also why <strong>reasoning models</strong> feel slow: their hidden "thinking" is decode, token by token, before the visible answer begins.</p>
+
+        <h2 id="cache">Why the second step of an agent is often faster</h2>
+        <p>In a <a href="/learn/function-calling/">tool-calling</a> loop, the model is called again with the same conversation plus a short tool result. Many runtimes (including WebLLM and Ollama) can <strong>reuse the KV cache</strong> for the part of the prompt they've already seen, so the second prefill only processes the new tokens.</p>
+
+        <h2 id="factors">What makes a model faster or slower</h2>
+        <ul>
+          <li><strong>Model size</strong>: fewer parameters means less to read per token.</li>
+          <li><strong>Quantization</strong>: storing weights in 4 bits instead of 16 cuts memory traffic roughly 4×, at a small cost in quality.</li>
+          <li><strong>Hardware</strong>: GPU memory bandwidth matters most for decode, compute for prefill.</li>
+          <li><strong>Prompt length</strong>: longer prompts mean longer prefill and a bigger KV cache.</li>
+          <li><strong>Network and queueing</strong>: for hosted APIs, part of the "prefill" you measure is just waiting.</li>
+        </ul>
+
+        <aside class="try">
+          <h2 id="try">Try it</h2>
+          <ol>
+            <li>Open the <a href="/app/">playground</a> and ask for a 150-word explanation of anything.</li>
+            <li>Watch <strong>Decode</strong> update live, with a "live" badge, as the answer streams.</li>
+            <li>When it's done, compare <strong>Prefill</strong> and <strong>Decode</strong>. Prefill is usually much higher.</li>
+            <li>Enable more tools (a longer prompt) and compare the time to first word. Then try a smaller model and compare decode speed.</li>
+            <li>Ask something that needs a tool and compare the two <strong>Model call</strong> times in the timeline.</li>
+          </ol>
+          <a class="btn btn--primary" href="/app/">Open the playground</a>
+        </aside>
+
+        <nav class="related" aria-label="Related guides">
+          <h2>Keep learning</h2>
+          <ul>
+            <li><a href="/learn/run-llm-in-browser/">Run an LLM in your browser</a>: what speeds to expect on your own GPU</li>
+            <li><a href="/learn/context-window/">The context window</a>: why long prompts slow down prefill</li>
+            <li><a href="/learn/what-is-a-token/">What is a token?</a>: the unit of speed</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+    <!-- @include footer -->
+  </body>
+</html>

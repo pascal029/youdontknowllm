@@ -54,7 +54,7 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 7.5 Article: What is a token?
 - [x] 7.6 Article: Context window
 - [x] 7.7 Article: System prompt
-- [ ] 7.8 Article: Prefill vs decode (tokens/sec)
+- [x] 7.8 Article: Prefill vs decode (tokens/sec)
 - [ ] 7.9 Article: Run an LLM in your browser (WebGPU, ≤2B)
 - [ ] 7.10 Playground /app/ metadata (title, description, OG, SoftwareApplication JSON-LD)
 - [ ] 7.11 robots.txt, generated sitemap.xml, 1200×630 og:image, favicon, 404.html
