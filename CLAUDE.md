@@ -17,10 +17,10 @@ Vite + React + TypeScript, no backend. Multi-page static site: `/` and `/learn/*
 - `src/llm/` — providers behind one interface: `Provider.chat(messages, signal)` → async stream of `delta` / `done(usage)` (`types.ts`). `webllm.ts` (local, engine in `webllm.worker.ts`, lazy-loaded), `openai.ts` (fetch + SSE, measures speed when the server doesn't), `stream.ts` (OpenAI chunks → our stream, inlines reasoning as `<think>`), `models.ts` (the 5 bundled models), `webgpu.ts`.
 - `src/agent/` — `loop.ts` (`runAgent` async generator yielding `Step` events + deltas), `parseToolCall.ts`, `prompt.ts` (system prompt + tool instructions, tool response format).
 - `src/tools/` — `builtin.ts` (5 tools as JS strings), `sandbox.ts` (Web Worker runner), `types.ts` (`Tool` + `validateTool`).
-- `src/components/` — UI. Components render state; logic lives in llm/agent/tools. `App.tsx` wires it together.
+- `src/components/` — UI, one folder per component: `Name/index.tsx`, `index.css`, `index.test.tsx`, `index.stories.tsx`. Components render state; logic lives in llm/agent/tools. `App.tsx` wires it together.
 - `src/hooks/useLocalStorage.ts` — persistence (merges object defaults, so store arrays as `{ items }`).
-- Tests sit next to the code: `X.test.ts(x)`. `src/test-fake-worker.ts` runs the real sandbox source in jsdom.
-- Every component has `X.stories.tsx` (Storybook).
+- Tests sit next to the code: `X.test.ts` (components: `Name/index.test.tsx`). `src/test-fake-worker.ts` runs the real sandbox source in jsdom.
+- Every component has `Name/index.stories.tsx` (Storybook).
 - `design-system/youdontknowllm/MASTER.md` — UI source of truth (ui-ux-pro-max).
 
 ## Design (ui-ux-pro-max)
