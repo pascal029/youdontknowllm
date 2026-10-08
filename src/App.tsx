@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { runAgent, type Step } from './agent/loop'
 import { composeSystemPrompt } from './agent/prompt'
+import { splitThink } from './agent/parseToolCall'
 import AppShell from './components/AppShell'
-import Chat from './components/Chat'
+import Chat, { type ChatMessage } from './components/Chat'
 import ComposedPrompt from './components/ComposedPrompt'
 import ContextMeter from './components/ContextMeter'
 import LoadProgress from './components/LoadProgress'
@@ -31,7 +32,7 @@ export default function App() {
   /** what the model sees next turn (includes tool calls/responses) */
   const [history, setHistory] = useState<Message[]>([])
   /** what the chat shows: user messages + final answers */
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [steps, setSteps] = useState<Step[]>([])
   /** last model call: drives context + speed stats, carries over between turns */
   const [lastModel, setLastModel] = useState<Extract<Step, { type: 'model' }> | null>(null)
@@ -106,6 +107,8 @@ export default function App() {
     setError('')
     const ac = new AbortController()
     abortRef.current = ac
+    // reasoning from every model call this turn, shown collapsed above the answer
+    const thoughts: string[] = []
     try {
       const gen = runAgent({ provider, systemPrompt: prefs.systemPrompt, tools: tools.filter((t) => t.enabled), history, userText: text, signal: ac.signal })
       for (;;) {
@@ -127,12 +130,14 @@ export default function App() {
         }
         setSteps((s) => [...s, e])
         if (e.type === 'model') {
+          const { thinking } = splitThink(e.text)
+          if (thinking) thoughts.push(thinking)
           setStreaming('')
           setLastModel(e)
           liveRef.current = { first: 0, tokens: 0 }
           setLive(undefined)
         }
-        if (e.type === 'answer') setMessages((m) => [...m, { role: 'assistant', content: e.text }])
+        if (e.type === 'answer') setMessages((m) => [...m, { role: 'assistant', content: e.text, thinking: thoughts.join('\n\n') || undefined }])
         if (e.type === 'error') setError(e.error)
       }
     } catch (e) {

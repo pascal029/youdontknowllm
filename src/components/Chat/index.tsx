@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { splitThink } from '../../agent/parseToolCall'
 import type { Message } from '../../llm/types'
 import './index.css'
 
+/** a chat bubble: assistant answers may carry the model's reasoning */
+export type ChatMessage = Message & { thinking?: string }
+
 type Props = {
-  messages: Message[]
+  messages: ChatMessage[]
   /** text being streamed right now, shown as an in-progress assistant bubble */
   streaming?: string
   busy: boolean
@@ -19,6 +23,9 @@ export default function Chat({ messages, streaming, busy, disabled, disabledReas
   const [draft, setDraft] = useState('')
   const endRef = useRef<HTMLDivElement>(null)
   const visible = messages.filter((m) => m.role !== 'system')
+  const live = streaming === undefined ? undefined : splitThink(streaming)
+  // still inside an unclosed <think> → the model is thinking, keep it open and put the caret there
+  const thinkingNow = !!streaming && /<think>(?![\s\S]*<\/think>)/.test(streaming)
 
   useEffect(() => {
     endRef.current?.scrollIntoView?.({ block: 'end' })
@@ -50,13 +57,15 @@ export default function Chat({ messages, streaming, busy, disabled, disabledReas
         {visible.map((m, i) => (
           <div key={i} className={`bubble bubble--${m.role}`}>
             <span className="bubble__role">{m.role}</span>
+            {m.thinking && <Thinking text={m.thinking} />}
             <p className="bubble__text">{m.content}</p>
           </div>
         ))}
-        {streaming !== undefined && (
+        {live && (
           <div className="bubble bubble--assistant" aria-busy="true">
             <span className="bubble__role">assistant</span>
-            <p className="bubble__text">{streaming}<span className="caret" aria-hidden="true" /></p>
+            {live.thinking && <Thinking text={live.thinking} open={thinkingNow} live={thinkingNow} />}
+            {!thinkingNow && <p className="bubble__text">{live.text}<span className="caret" aria-hidden="true" /></p>}
           </div>
         )}
         <div ref={endRef} />
@@ -80,5 +89,14 @@ export default function Chat({ messages, streaming, busy, disabled, disabledReas
         )}
       </form>
     </div>
+  )
+}
+
+function Thinking({ text, open, live }: { text: string; open?: boolean; live?: boolean }) {
+  return (
+    <details className="thinking" open={open}>
+      <summary>{live ? 'Thinking…' : 'Thought process'}</summary>
+      <p className="thinking__text">{text}{live && <span className="caret" aria-hidden="true" />}</p>
+    </details>
   )
 }

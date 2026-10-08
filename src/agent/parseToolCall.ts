@@ -3,7 +3,14 @@ export type ParsedReply =
   | { kind: 'call'; name: string; arguments: Record<string, unknown>; raw: string }
   | { kind: 'error'; error: string; raw: string }
 
-const stripThink = (s: string) => s.replace(/<think>[\s\S]*?(<\/think>|$)/g, '').trim()
+const THINK = /<think>([\s\S]*?)(?:<\/think>|$)/g
+const stripThink = (s: string) => s.replace(THINK, '').trim()
+
+/** Split a raw reply into its `<think>` reasoning (joined, unclosed tail included) and the visible text. */
+export function splitThink(reply: string): { thinking: string; text: string } {
+  const thinking = [...reply.matchAll(THINK)].map((m) => m[1].trim()).filter(Boolean).join('\n\n')
+  return { thinking, text: stripThink(reply) }
+}
 const stripFence = (s: string) => s.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
 
 function toCall(json: string, raw: string): ParsedReply {
@@ -36,7 +43,8 @@ function toCall(json: string, raw: string): ParsedReply {
 /** Decide whether a model reply is a final answer or a tool call. */
 export function parseToolCall(reply: string): ParsedReply {
   const text = stripThink(reply)
-  const tagged = text.match(/<tool_call>([\s\S]*?)(?:<\/tool_call>|$)/)
+  // The call ends at </tool_call>, or at the next special token: Gemma-style models close with <tool_call|> or start <|tool_response>.
+  const tagged = text.match(/<tool_call>([\s\S]*?)(?:<\/tool_call>|<tool_call\|>|<\||$)/)
   if (tagged) return toCall(tagged[1], tagged[0])
 
   // Small models often drop the tags and emit bare JSON — accept it only when that's the whole reply.
@@ -45,7 +53,7 @@ export function parseToolCall(reply: string): ParsedReply {
 
   // Nothing visible at all: some hosts (Groq + gpt-oss) stream the call inside the thinking channel.
   if (!text) {
-    const hidden = reply.match(/<tool_call>([\s\S]*?)(?:<\/tool_call>|<\/think>|$)/)
+    const hidden = reply.match(/<tool_call>([\s\S]*?)(?:<\/tool_call>|<tool_call\|>|<\||<\/think>|$)/)
     if (hidden) return toCall(hidden[1], hidden[0])
   }
 

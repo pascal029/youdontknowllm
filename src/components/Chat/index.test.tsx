@@ -46,3 +46,20 @@ test('New chat appears only when there are messages', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'New chat' }))
   expect(onClear).toHaveBeenCalled()
 })
+
+test('an answer keeps its thinking in a collapsed, expandable section', async () => {
+  render(<Chat {...base} messages={[{ role: 'assistant', content: '437', thinking: '23*19 = 437' }]} />)
+  const details = screen.getByText('Thought process').closest('details')!
+  expect(details).not.toHaveAttribute('open')
+  await userEvent.click(screen.getByText('Thought process'))
+  expect(details).toHaveAttribute('open')
+  expect(screen.getByText('23*19 = 437')).toBeInTheDocument()
+})
+
+test('while the model is thinking the section is open; once it answers it collapses', () => {
+  const { rerender } = render(<Chat {...base} busy streaming="<think>let me see" />)
+  expect(screen.getByText('Thinking…').closest('details')).toHaveAttribute('open')
+  rerender(<Chat {...base} busy streaming="<think>let me see</think>It is" />)
+  expect(screen.getByText('Thought process').closest('details')).not.toHaveAttribute('open')
+  expect(screen.getByText('It is')).toBeInTheDocument()
+})

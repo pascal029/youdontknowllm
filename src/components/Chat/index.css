@@ -30,3 +30,8 @@
 }
 .chat__composer .btn { min-height: 44px; }
 .chat__bar { display: flex; justify-content: flex-end; }
+
+.thinking { margin-top: var(--space-xs); border-left: 2px solid var(--color-border); padding-left: var(--space-md); }
+.thinking summary { cursor: pointer; width: max-content; font-size: 0.8125rem; color: var(--color-fg-muted); transition: color 150ms; }
+.thinking summary:hover { color: var(--color-fg); }
+.thinking__text { margin: var(--space-xs) 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--font-mono); font-size: 0.8125rem; color: var(--color-fg-muted); }

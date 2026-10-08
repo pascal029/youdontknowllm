@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { parseToolCall } from './parseToolCall'
+import { parseToolCall, splitThink } from './parseToolCall'
 
 describe('answers', () => {
   test('plain text is an answer', () => {
@@ -17,6 +17,11 @@ describe('answers', () => {
 })
 
 describe('calls', () => {
+  test('Gemma-style closing token <tool_call|> and a trailing <|tool_response>', () => {
+    expect(parseToolCall('<tool_call>{"name": "calculator", "arguments": {"expression": "123 * 456"}}<tool_call|><|tool_response>')).toMatchObject({
+      kind: 'call', name: 'calculator', arguments: { expression: '123 * 456' },
+    })
+  })
   test('tagged call', () => {
     expect(parseToolCall('<tool_call>{"name": "calculator", "arguments": {"expression": "23*19"}}</tool_call>')).toMatchObject({
       kind: 'call', name: 'calculator', arguments: { expression: '23*19' },
@@ -82,5 +87,17 @@ describe('tool call hidden in thinking (Groq + gpt-oss)', () => {
   })
   test('ignored when there is a visible answer', () => {
     expect(parseToolCall('<think>maybe <tool_call>{"name":"calculator","arguments":{}}</tool_call>? no.</think>It is 4.')).toEqual({ kind: 'answer', text: 'It is 4.' })
+  })
+})
+
+describe('splitThink', () => {
+  test('separates reasoning from the visible text, joining several blocks', () => {
+    expect(splitThink('<think> a </think>Hi<think>b</think>')).toEqual({ thinking: 'a\n\nb', text: 'Hi' })
+  })
+  test('an unclosed block (still streaming) counts as thinking', () => {
+    expect(splitThink('<think>working on it')).toEqual({ thinking: 'working on it', text: '' })
+  })
+  test('no thinking', () => {
+    expect(splitThink('Hello')).toEqual({ thinking: '', text: 'Hello' })
   })
 })

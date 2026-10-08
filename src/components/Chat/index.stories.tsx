@@ -18,3 +18,9 @@ export const Empty: Story = {}
 export const NoModel: Story = { args: { disabled: true, disabledReason: 'Load a model or connect an API to start.' } }
 export const Conversation: Story = { args: { messages: convo } }
 export const Streaming: Story = { args: { messages: convo.slice(0, 1), busy: true, streaming: '23 × 19 is' } }
+export const WithThinking: Story = {
+  args: { messages: [convo[0], { ...convo[1], thinking: '23 * 19 = 23 * 20 - 23 = 460 - 23 = 437.' }] },
+}
+export const StreamingThinking: Story = {
+  args: { messages: convo.slice(0, 1), busy: true, streaming: '<think>23 * 20 is 460, minus 23' },
+}
