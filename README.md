@@ -23,6 +23,7 @@ Chat with a small language model running entirely on your own GPU (no server, no
 - **Step-by-step timeline**: your prompt → model output → tool chosen + arguments → tool result → final answer, with raw events and highlighted errors.
 - **Sampling settings**: temperature, top-p, top-k, max tokens and seed. Anything left empty uses the model's default.
 - **Context window meter**: tokens used / left, with warnings as it fills.
+- **Compact the context**: drop old messages, remove tool traffic, summarize, or summary + recent messages, with a before/after view. **Fill context** adds a sample chat so you can try it straight away.
 - **Inference speed**: prefill and decode tokens/sec, live while generating.
 - **Reasoning models**: hidden "thinking" (e.g. Ollama `reasoning`) is shown as `<think>` in the timeline.
 
