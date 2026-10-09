@@ -63,3 +63,9 @@ test('while the model is thinking the section is open; once it answers it collap
   expect(screen.getByText('Thought process').closest('details')).not.toHaveAttribute('open')
   expect(screen.getByText('It is')).toBeInTheDocument()
 })
+
+test('a notice renders as a divider line between bubbles, not as a message', () => {
+  render(<Chat {...base} messages={[{ role: 'user', content: 'hi' }, { role: 'notice', content: 'Context compacted: 900 → 200 tokens' }, { role: 'user', content: 'again' }]} />)
+  expect(screen.getByRole('note')).toHaveTextContent('Context compacted: 900 → 200 tokens')
+  expect(screen.queryByText('notice')).not.toBeInTheDocument()
+})

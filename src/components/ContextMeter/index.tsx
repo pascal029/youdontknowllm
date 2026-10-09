@@ -25,7 +25,7 @@ export default function ContextMeter({ used, total }: Props) {
       <div className="ctx__bar" aria-hidden="true"><span style={{ width: `${pct}%` }} /></div>
       <p className="ctx__detail">
         {used.toLocaleString()} / {total.toLocaleString()} tokens ({Math.round(pct)}%)
-        {level === 'danger' && ' · almost full: the model will start forgetting or fail. Clear the chat.'}
+        {level === 'danger' && ' · almost full: the model will start forgetting or fail. Compact the context or start a new chat.'}
       </p>
     </div>
   )

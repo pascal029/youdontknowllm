@@ -24,3 +24,13 @@ export const WithThinking: Story = {
 export const StreamingThinking: Story = {
   args: { messages: convo.slice(0, 1), busy: true, streaming: '<think>23 * 20 is 460, minus 23' },
 }
+export const AfterCompaction: Story = {
+  args: {
+    messages: [
+      ...convo,
+      { role: 'notice', content: 'Context compacted (summary): ≈420 → ≈90 tokens. The model no longer sees the messages above as written.' },
+      { role: 'user', content: 'What did I ask first?' },
+      { role: 'assistant', content: 'You asked me to multiply 23 by 19.' },
+    ],
+  },
+}
