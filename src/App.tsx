@@ -55,7 +55,11 @@ export default function App() {
   const [editing, setEditing] = useState<{ tool: Tool; isNew: boolean } | null>(null)
   const [deletingTool, setDeletingTool] = useState<Tool | null>(null)
   const tools = [...BUILTIN_TOOLS, ...custom.items].map((t) => ({ ...t, enabled: !prefs.disabledTools.includes(t.name) }))
-  const systemText = composeSystemPrompt(prefs.systemPrompt.trim(), tools.filter((t) => t.enabled))
+  const selectedLocal = LOCAL_MODELS.find((m) => m.id === settings.localModelId) ?? LOCAL_MODELS[0]
+  /** the loaded model (or the picked local one, before loading) can't do tool calls: send none */
+  const noTools = provider ? provider.tools === false : settings.mode === 'local' && !selectedLocal.tools
+  const activeTools = noTools ? [] : tools.filter((t) => t.enabled)
+  const systemText = composeSystemPrompt(prefs.systemPrompt.trim(), activeTools)
   const toggleTool = (name: string, enabled: boolean) =>
     setPrefs({ ...prefs, disabledTools: enabled ? prefs.disabledTools.filter((n) => n !== name) : [...prefs.disabledTools, name] })
 
@@ -88,7 +92,7 @@ export default function App() {
         setProvider(createOpenAIProvider(settings.remote))
         return
       }
-      const model = LOCAL_MODELS.find((m) => m.id === settings.localModelId) ?? LOCAL_MODELS[0]
+      const model = selectedLocal
       setLoading({ progress: 0, text: 'Starting…' })
       const { loadWebLLM } = await import('./llm/webllm')
       setProvider(await loadWebLLM(model, (r) => setLoading({ progress: r.progress, text: r.text })))
@@ -118,7 +122,7 @@ export default function App() {
     // reasoning from every model call this turn, shown collapsed above the answer
     const thoughts: string[] = []
     try {
-      const gen = runAgent({ provider, systemPrompt: prefs.systemPrompt, tools: tools.filter((t) => t.enabled), history, userText: text, signal: ac.signal, sampling })
+      const gen = runAgent({ provider, systemPrompt: prefs.systemPrompt, tools: activeTools, history, userText: text, signal: ac.signal, sampling })
       for (;;) {
         const r = await gen.next()
         if (r.done) {
@@ -222,63 +226,73 @@ export default function App() {
           {error && <p className="error-text" role="alert">{error}</p>}
           <SamplingSettings value={sampling} onChange={setSampling} />
           <SystemPromptEditor value={prefs.systemPrompt} onChange={(systemPrompt) => setPrefs({ ...prefs, systemPrompt })} />
-          <section aria-labelledby="tools-title">
-            <h2 id="tools-title" className="panel-title">Tools</h2>
-            <ToolList
-              tools={tools}
-              onToggle={toggleTool}
-              onEdit={(tool) => setEditing({ tool, isNew: false })}
-              onDelete={setDeletingTool}
-            />
-            <button type="button" className="btn btn--sm add-tool" onClick={() => setEditing({ tool: NEW_TOOL_TEMPLATE, isNew: true })}>+ Add tool</button>
-            <Modal
-              open={!!editing}
-              size="lg"
-              title={!editing ? '' : editing.isNew ? 'Add tool' : editing.tool.builtin ? `${editing.tool.name} (built-in)` : `Edit ${editing.tool.name}`}
-              onClose={() => setEditing(null)}
-            >
-              {editing && (
-                <ToolEditor
-                  key={`${editing.tool.name}-${editing.isNew}`}
-                  initial={editing.tool}
-                  readOnly={editing.tool.builtin && !editing.isNew}
-                  onDuplicate={() =>
-                    setEditing({ tool: { ...editing.tool, name: `${editing.tool.name}_copy`, builtin: false, enabled: true }, isNew: true })
-                  }
-                  takenNames={tools.map((t) => t.name).filter((n) => editing.isNew || n !== editing.tool.name)}
-                  onCancel={() => setEditing(null)}
-                  onSave={(t) => {
-                    const rest = editing.isNew ? custom.items : custom.items.filter((x) => x.name !== editing.tool.name)
-                    setCustom({ items: [...rest, t] })
-                    setEditing(null)
-                  }}
-                />
+          <details className="panel">
+            <summary>
+              <h2 className="panel-title">Tools</h2>
+              <span className="panel__meta">{noTools ? 'off for this model' : `${activeTools.length} of ${tools.length} on`}</span>
+            </summary>
+            <div className="panel__body">
+              {noTools && (
+                <p className="notice-text" role="status">
+                  {provider?.name ?? selectedLocal.label} can't call tools reliably, so no tools are sent to it. Pick a Qwen model or an API to use tools.
+                </p>
               )}
-            </Modal>
-            <Modal
-              open={!!deletingTool}
-              size="sm"
-              title={`Delete ${deletingTool?.name ?? ''}?`}
-              onClose={() => setDeletingTool(null)}
-              footer={
-                <>
-                  <button type="button" className="btn btn--ghost" onClick={() => setDeletingTool(null)}>Cancel</button>
-                  <button
-                    type="button"
-                    className="btn btn--danger-solid"
-                    onClick={() => {
-                      setCustom({ items: custom.items.filter((x) => x.name !== deletingTool?.name) })
-                      setDeletingTool(null)
+              <ToolList
+                tools={tools}
+                onToggle={toggleTool}
+                onEdit={(tool) => setEditing({ tool, isNew: false })}
+                onDelete={setDeletingTool}
+              />
+              <button type="button" className="btn btn--sm add-tool" onClick={() => setEditing({ tool: NEW_TOOL_TEMPLATE, isNew: true })}>+ Add tool</button>
+              <Modal
+                open={!!editing}
+                size="lg"
+                title={!editing ? '' : editing.isNew ? 'Add tool' : editing.tool.builtin ? `${editing.tool.name} (built-in)` : `Edit ${editing.tool.name}`}
+                onClose={() => setEditing(null)}
+              >
+                {editing && (
+                  <ToolEditor
+                    key={`${editing.tool.name}-${editing.isNew}`}
+                    initial={editing.tool}
+                    readOnly={editing.tool.builtin && !editing.isNew}
+                    onDuplicate={() =>
+                      setEditing({ tool: { ...editing.tool, name: `${editing.tool.name}_copy`, builtin: false, enabled: true }, isNew: true })
+                    }
+                    takenNames={tools.map((t) => t.name).filter((n) => editing.isNew || n !== editing.tool.name)}
+                    onCancel={() => setEditing(null)}
+                    onSave={(t) => {
+                      const rest = editing.isNew ? custom.items : custom.items.filter((x) => x.name !== editing.tool.name)
+                      setCustom({ items: [...rest, t] })
+                      setEditing(null)
                     }}
-                  >
-                    Delete tool
-                  </button>
-                </>
-              }
-            >
-              <p className="modal-text">This removes the tool and its code from this browser. It can't be undone.</p>
-            </Modal>
-          </section>
+                  />
+                )}
+              </Modal>
+              <Modal
+                open={!!deletingTool}
+                size="sm"
+                title={`Delete ${deletingTool?.name ?? ''}?`}
+                onClose={() => setDeletingTool(null)}
+                footer={
+                  <>
+                    <button type="button" className="btn btn--ghost" onClick={() => setDeletingTool(null)}>Cancel</button>
+                    <button
+                      type="button"
+                      className="btn btn--danger-solid"
+                      onClick={() => {
+                        setCustom({ items: custom.items.filter((x) => x.name !== deletingTool?.name) })
+                        setDeletingTool(null)
+                      }}
+                    >
+                      Delete tool
+                    </button>
+                  </>
+                }
+              >
+                <p className="modal-text">This removes the tool and its code from this browser. It can't be undone.</p>
+              </Modal>
+            </div>
+          </details>
           <ComposedPrompt text={systemText} />
         </>
       }

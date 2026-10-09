@@ -40,7 +40,7 @@ export default function ProviderSettings({ value, onChange, onActivate, busy, we
   const set = (patch: Partial<ProviderSettingsValue>) => onChange({ ...value, ...patch })
   const setRemote = (patch: Partial<RemoteConfig>) => set({ remote: { ...value.remote, ...patch } })
   const model = LOCAL_MODELS.find((m) => m.id === value.localModelId) ?? LOCAL_MODELS[0]
-  const remoteReady = value.remote.baseURL.trim() && value.remote.model.trim()
+  const remoteReady = value.remote.baseURL.trim() && value.remote.model.trim() && value.remote.contextWindow > 0
   const isCached = cached?.has(model.id)
 
   const confirmDelete = async () => {
@@ -84,7 +84,7 @@ export default function ProviderSettings({ value, onChange, onActivate, busy, we
                 ))}
               </select>
             </label>
-            <small>{model.note} Context {model.contextWindow.toLocaleString()} tokens.</small>
+            <small>{model.note} Context {model.contextWindow.toLocaleString()} tokens.{!model.tools && ' No tool calling.'}</small>
           </div>
           {webgpu && cached && (
             <div className="model-status">
@@ -152,7 +152,7 @@ export default function ProviderSettings({ value, onChange, onActivate, busy, we
           </label>
           <label className="field">
             <span>Context window (tokens)</span>
-            <input type="number" min={512} step={512} value={value.remote.contextWindow} onChange={(e) => setRemote({ contextWindow: Number(e.target.value) || 0 })} />
+            <input type="number" inputMode="numeric" min={512} step={512} placeholder="8192" value={value.remote.contextWindow || ''} onChange={(e) => setRemote({ contextWindow: Number(e.target.value) || 0 })} />
           </label>
           <button className="btn btn--primary" onClick={onActivate} disabled={busy || !remoteReady}>
             Connect

@@ -26,12 +26,12 @@ export default function SamplingSettings({ value, onChange }: Props) {
   const count = Object.keys(value).length
 
   return (
-    <details className="sampling">
+    <details className="panel">
       <summary>
         <span className="panel-title">Sampling</span>
-        <span className="sampling__meta">{count ? `${count} set` : 'model defaults'}</span>
+        <span className="panel__meta">{count ? `${count} set` : 'model defaults'}</span>
       </summary>
-      <div className="sampling__body">
+      <div className="panel__body sampling__body">
         {PARAMS.map((p) => {
           const v = value[p.key]
           const id = `sampling-${p.key}`

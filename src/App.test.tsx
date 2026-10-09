@@ -118,6 +118,14 @@ test('disabling a tool removes it from the composed prompt', async () => {
   expect(screen.queryByText(/"name":"calculator"/)).not.toBeInTheDocument()
 })
 
+test('a local model without tool support gets no tools, and the UI says so', async () => {
+  localStorage.setItem('ydkl.provider', JSON.stringify({ mode: 'local', localModelId: 'SmolLM2-1.7B-Instruct-q4f16_1-MLC' }))
+  render(<App />)
+  expect(screen.getByText(/can't call tools reliably/)).toBeInTheDocument()
+  expect(screen.getByText('off for this model')).toBeInTheDocument()
+  expect(screen.queryByText(/"name":"calculator"/)).not.toBeInTheDocument()
+})
+
 test('add, persist, edit and delete a custom tool (editor and confirm in modals)', async () => {
   const { unmount } = render(<App />)
   await userEvent.click(screen.getByRole('button', { name: '+ Add tool' }))
