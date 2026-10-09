@@ -11,6 +11,7 @@ import Modal from './components/Modal'
 import ProviderSettings, { DEFAULT_PROVIDER_SETTINGS } from './components/ProviderSettings'
 import StepTimeline from './components/StepTimeline'
 import SpeedStats, { liveRate, type LiveSpeed } from './components/SpeedStats'
+import SamplingSettings from './components/SamplingSettings'
 import SystemPromptEditor, { DEFAULT_SYSTEM_PROMPT } from './components/SystemPromptEditor'
 import ToolEditor, { NEW_TOOL_TEMPLATE } from './components/ToolEditor'
 import ToolList from './components/ToolList'
@@ -26,7 +27,7 @@ import type { Tool } from './tools/types'
 export default function App() {
   const [settings, setSettings] = useLocalStorage('ydkl.provider', DEFAULT_PROVIDER_SETTINGS)
   const [prefs, setPrefs] = useLocalStorage('ydkl.prefs', { systemPrompt: DEFAULT_SYSTEM_PROMPT, disabledTools: [] as string[] })
-  const [sampling] = useLocalStorage<Sampling>('ydkl.sampling', {})
+  const [sampling, setSampling] = useLocalStorage<Sampling>('ydkl.sampling', {})
   const [provider, setProvider] = useState<Provider | null>(null)
   const [loading, setLoading] = useState<{ progress: number; text: string } | null>(null)
   const [error, setError] = useState('')
@@ -183,6 +184,7 @@ export default function App() {
           {loading && <LoadProgress {...loading} />}
           {provider && !loading && <p className="status-ok">Ready: {provider.name}</p>}
           {error && <p className="error-text" role="alert">{error}</p>}
+          <SamplingSettings value={sampling} onChange={setSampling} />
           <SystemPromptEditor value={prefs.systemPrompt} onChange={(systemPrompt) => setPrefs({ ...prefs, systemPrompt })} />
           <section aria-labelledby="tools-title">
             <h2 id="tools-title" className="panel-title">Tools</h2>
