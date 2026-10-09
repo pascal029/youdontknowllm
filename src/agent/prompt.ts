@@ -28,3 +28,7 @@ ${list}`.trim()
 /** How a tool result is fed back to the model (as a user turn — works with every chat template). */
 export const formatToolResponse = (name: string, result: unknown) =>
   `<tool_response>${JSON.stringify({ name, result })}</tool_response>`
+
+/** Sent back when the model's <tool_call> can't be parsed, so it can retry. */
+export const PARSE_ERROR_PREFIX = 'Your tool call could not be parsed:'
+export const formatParseError = (error: string) => `${PARSE_ERROR_PREFIX} ${error} Reply with a valid <tool_call> or answer directly.`

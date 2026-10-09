@@ -2,7 +2,7 @@ import type { Message, Provider, Sampling, Usage } from '../llm/types'
 import { runInSandbox, type SandboxResult } from '../tools/sandbox'
 import type { Tool } from '../tools/types'
 import { parseToolCall } from './parseToolCall'
-import { composeSystemPrompt, formatToolResponse } from './prompt'
+import { composeSystemPrompt, formatParseError, formatToolResponse } from './prompt'
 
 /** One visible step of the agent loop. The UI renders a list of these. */
 export type Step =
@@ -62,7 +62,7 @@ export async function* runAgent(o: RunOptions): AsyncGenerator<LoopEvent, Messag
     }
     if (parsed.kind === 'error') {
       yield { type: 'parse-error', error: parsed.error, raw: parsed.raw }
-      history.push({ role: 'user', content: `Your tool call could not be parsed: ${parsed.error} Reply with a valid <tool_call> or answer directly.` })
+      history.push({ role: 'user', content: formatParseError(parsed.error) })
       continue
     }
 

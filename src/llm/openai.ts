@@ -29,7 +29,7 @@ export async function* parseSSE(body: ReadableStream<Uint8Array>): AsyncGenerato
   }
 }
 
-const estimateTokens = (s: string) => Math.ceil(s.length / 4) // ponytail: rough chars/4, servers usually send real usage
+export const estimateTokens = (s: string) => Math.ceil(s.length / 4) // ponytail: rough chars/4, servers usually send real usage
 
 /**
  * Fill in usage + speed the server didn't send, measured on our side:

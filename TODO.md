@@ -85,3 +85,10 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 10.3 SamplingSettings component: collapsible, range + number per param, unset toggle, one-line hints, "may be rejected" note on top_k, reset, link to lesson (+ test + story)
 - [x] 10.4 Lesson /learn/sampling/ "Temperature, top-p and top-k", placed right after "What is a token?" in LESSONS: distribution → temperature → top-k → top-p → seed → max_tokens, static SVG chart, try-it CTA
 - [x] 10.5 QA: tests + build green, Lighthouse on the new page, real-model check (temp 0 + seed = same answer)
+
+## Phase 11 — Compact the context window + lesson
+- [x] 11.1 `src/agent/compact.ts`: shared `estimateTokens`, `dropOldest(history, n)` (cuts on a user-turn boundary), `stripToolTraffic`, `summarize(provider, history, { keepLast, sampling })` (+ tests, fake provider)
+- [ ] 11.2 App: `compact()` replaces model `history` only; chat keeps every message and shows a "Context compacted: a → b tokens" divider; meter shows the estimate until the next real usage
+- [ ] 11.3 ContextCompactor modal (button by the meter): 4 strategies (drop oldest N, remove tool traffic, summarize all, summary + keep last N), Before | After columns with per-message ≈tokens, removed struck through, summary highlighted, Generate preview → Apply; hint on summarize strategies when the provider is an in-browser model (small models write lossy/wrong summaries, try an API model or the non-model strategies); meter "almost full" text points to it (+ test + story)
+- [ ] 11.4 Lesson /learn/managing-context/ "Managing the context window", right after "The context window": why, the 4 strategies + tradeoffs, static before/after diagram, auto-compact in real apps, pinning + RAG mention, try-it
+- [ ] 11.5 QA: tests + build green, Groq summarize → follow-up still correct, Lighthouse + 375px on the new page
