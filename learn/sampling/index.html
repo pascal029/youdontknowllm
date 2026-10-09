@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- @include head -->
+    <title>Temperature, Top-p and Top-k Explained | youdontknowllm</title>
+    <meta name="description" content="Temperature, top-p and top-k decide how an LLM picks its next token. See what each one does to the probabilities, and when to change them." />
+    <link rel="canonical" href="%SITE_URL%/learn/sampling/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%SITE_NAME%" />
+    <meta property="og:title" content="Temperature, Top-p and Top-k: How an LLM Picks the Next Token" />
+    <meta property="og:description" content="What temperature, top-p, top-k, seed and max tokens actually do, with a worked example." />
+    <meta property="og:url" content="%SITE_URL%/learn/sampling/" />
+    <meta property="og:image" content="%SITE_URL%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">
+      [
+        {
+          "@context": "https://schema.org",
+          "@type": "TechArticle",
+          "headline": "Temperature, top-p and top-k: how an LLM picks the next token",
+          "description": "Temperature, top-p and top-k decide how an LLM picks its next token. See what each one does to the probabilities, and when to change them.",
+          "url": "%SITE_URL%/learn/sampling/",
+          "image": "%SITE_URL%/og.png",
+          "datePublished": "2026-10-09",
+          "dateModified": "2026-10-09",
+          "author": {
+            "@type": "Organization",
+            "name": "youdontknowllm",
+            "url": "%SITE_URL%/"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "youdontknowllm",
+            "url": "%SITE_URL%/"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "%SITE_URL%/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Learn",
+              "item": "%SITE_URL%/learn/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Sampling",
+              "item": "%SITE_URL%/learn/sampling/"
+            }
+          ]
+        }
+      ]
+    </script>
+    <link rel="stylesheet" href="/src/site/site.css" />
+  </head>
+  <body>
+    <!-- @include header -->
+    <main class="page">
+      <article class="article">
+        <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/learn/">Learn</a> / <span aria-current="page">Sampling</span></nav>
+        <!-- @lesson:meta -->
+        <h1>Temperature, top-p and top-k: how an LLM picks the next token</h1>
+        <p class="lead">A model doesn't output a word. For every possible next <a href="/learn/what-is-a-token/">token</a> it outputs a <strong>probability</strong>, and then something has to pick one. That picking step is called <em>sampling</em>, and temperature, top-p and top-k are the knobs that control it.</p>
+
+        <h2 id="distribution">The model gives you odds, not an answer</h2>
+        <p>Say the text so far is <em>My favourite fruit is</em>. The model scores every token in its vocabulary (often 100,000+) and turns the scores into probabilities that add up to 100%. The top few might look like this:</p>
+<pre><code> mango   40%
+ apple   25%
+ banana  15%
+ cherry  10%
+ durian   6%
+ kiwi     4%
+ ...      (everything else, tiny)</code></pre>
+        <p>The app then rolls a weighted die: <code>mango</code> comes up 40% of the time, <code>kiwi</code> 4%. The chosen token is appended to the text, and the whole thing repeats for the next token. That's why the same question can get a different answer each time.</p>
+
+        <h2 id="temperature">Temperature: sharpen or flatten the odds</h2>
+        <p><strong>Temperature</strong> reshapes the probabilities before the roll. Below 1 it makes likely tokens even likelier. Above 1 it spreads the chances toward the unlikely ones.</p>
+        <figure class="dist">
+          <table>
+            <caption>Next-token probabilities for <em>My favourite fruit is</em> at three temperatures</caption>
+            <thead><tr><th scope="col">Token</th><th scope="col">T = 0.5</th><th scope="col">T = 1</th><th scope="col">T = 1.5</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>mango</code></th><td><span class="dist__bar" style="--w: 61%"></span><span class="dist__num">61%</span></td><td><span class="dist__bar" style="--w: 40%"></span><span class="dist__num">40%</span></td><td><span class="dist__bar" style="--w: 32%"></span><span class="dist__num">32%</span></td></tr>
+              <tr><th scope="row"><code>apple</code></th><td><span class="dist__bar" style="--w: 24%"></span><span class="dist__num">24%</span></td><td><span class="dist__bar" style="--w: 25%"></span><span class="dist__num">25%</span></td><td><span class="dist__bar" style="--w: 23%"></span><span class="dist__num">23%</span></td></tr>
+              <tr><th scope="row"><code>banana</code></th><td><span class="dist__bar" style="--w: 9%"></span><span class="dist__num">9%</span></td><td><span class="dist__bar" style="--w: 15%"></span><span class="dist__num">15%</span></td><td><span class="dist__bar" style="--w: 17%"></span><span class="dist__num">17%</span></td></tr>
+              <tr><th scope="row"><code>cherry</code></th><td><span class="dist__bar" style="--w: 4%"></span><span class="dist__num">4%</span></td><td><span class="dist__bar" style="--w: 10%"></span><span class="dist__num">10%</span></td><td><span class="dist__bar" style="--w: 13%"></span><span class="dist__num">13%</span></td></tr>
+              <tr><th scope="row"><code>durian</code></th><td><span class="dist__bar" style="--w: 1%"></span><span class="dist__num">1%</span></td><td><span class="dist__bar" style="--w: 6%"></span><span class="dist__num">6%</span></td><td><span class="dist__bar" style="--w: 9%"></span><span class="dist__num">9%</span></td></tr>
+              <tr><th scope="row"><code>kiwi</code></th><td><span class="dist__bar" style="--w: 1%"></span><span class="dist__num">1%</span></td><td><span class="dist__bar" style="--w: 4%"></span><span class="dist__num">4%</span></td><td><span class="dist__bar" style="--w: 7%"></span><span class="dist__num">7%</span></td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <ul>
+          <li><strong>0</strong>: always take the top token (<em>greedy</em>). Most repeatable, can get stuck repeating itself.</li>
+          <li><strong>0.2–0.7</strong>: focused. Good for facts, code, and tool calls, where a "creative" bracket breaks the JSON.</li>
+          <li><strong>~1</strong>: the model's raw odds.</li>
+          <li><strong>1.2+</strong>: more surprising word choices, and more nonsense as you go higher.</li>
+        </ul>
+        <p>Under the hood each raw score is divided by the temperature before being turned into probabilities, which is why small temperatures exaggerate the gaps between tokens.</p>
+
+        <h2 id="top-k">Top-k: only the k best tokens</h2>
+        <p><strong>Top-k</strong> throws away everything except the <em>k</em> likeliest tokens, then rolls among those. With <code>top_k = 2</code> only <code>mango</code> and <code>apple</code> survive, rescaled to 62% and 38%. Even at high temperature, <code>durian</code> can no longer appear.</p>
+        <p>The weakness: k is fixed. When the model is sure (one token at 95%) k = 40 still lets 39 bad options in. When it's unsure (many good options) a small k cuts good ones out.</p>
+
+        <h2 id="top-p">Top-p: the smallest set that covers p</h2>
+        <p><strong>Top-p</strong> (also called <em>nucleus sampling</em>) adapts to that. It keeps adding tokens from most to least likely until their probabilities add up to <em>p</em>, then drops the rest. With <code>top_p = 0.8</code>: mango (40) + apple (25) + banana (15) = 80%, so those three stay. If the model were 95% sure of one token, top-p 0.8 would keep only that one.</p>
+        <p>Typical order: temperature reshapes the odds, then top-k and top-p cut the tail, then the die is rolled. Most APIs suggest changing temperature <em>or</em> top-p, not both, because they push in similar directions.</p>
+
+        <h2 id="others">Seed and max tokens</h2>
+        <ul>
+          <li><strong>Seed</strong> fixes the random number generator, so the same prompt, settings and seed usually give the same answer. "Usually" because GPU math and server batching can still change the odds slightly.</li>
+          <li><strong>Max tokens</strong> stops generation after that many tokens. The answer is simply cut off mid-sentence. Thinking models spend these tokens on their hidden reasoning too, so a small limit can return an empty answer.</li>
+        </ul>
+
+        <h2 id="support">Not every server accepts every knob</h2>
+        <p>Temperature, top-p, seed and max tokens are part of the OpenAI chat API, so almost every server understands them. <strong>Top-k is not.</strong> Ollama, vLLM and llama.cpp support it in their own APIs, but OpenAI and Groq reject a request that contains it, and in-browser WebLLM ignores it. If a request fails right after you set top-k, that's why.</p>
+
+        <aside class="try">
+          <h2 id="try">Try it</h2>
+          <ol>
+            <li>Open the <a href="/app/">playground</a>, connect a model, and open the <strong>Sampling</strong> panel.</li>
+            <li>Set temperature to <strong>0</strong> and seed to <strong>42</strong>. Ask <em>Name one random fruit.</em> three times. Same answer?</li>
+            <li>Set temperature to <strong>1.5</strong> and ask again. How varied are the answers now? Push it to <strong>2</strong> and watch the text fall apart.</li>
+            <li>Set max tokens to <strong>10</strong> and ask for a story. See where it gets cut.</li>
+            <li>Press <strong>Reset to defaults</strong> to go back to the model's own settings.</li>
+          </ol>
+          <a class="btn btn--primary" href="/app/">Open the playground</a>
+        </aside>
+        <!-- @lesson:nav -->
+      </article>
+    </main>
+    <!-- @include footer -->
+  </body>
+</html>

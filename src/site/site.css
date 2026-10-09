@@ -215,6 +215,16 @@ main.page { max-width: var(--page-max); margin: 0 auto; padding: 0 var(--space-x
 .article pre { margin: 0 0 var(--space-xl); padding: var(--space-lg) var(--space-xl); overflow-x: auto; border: 1px solid var(--hairline-strong); border-radius: var(--radius-md); background: var(--color-surface); line-height: 1.6; }
 .article pre code { padding: 0; border: 0; background: none; font-size: 0.8125rem; }
 
+/* Sampling lesson: probability table with inline bars (width from --w) */
+.dist { margin: 0 0 var(--space-xl); overflow-x: auto; border: 1px solid var(--hairline-strong); border-radius: var(--radius-md); background: var(--color-surface); }
+.dist table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.dist caption { padding: var(--space-md) var(--space-lg); text-align: left; font-size: 0.8125rem; color: var(--color-fg-muted); }
+.dist th, .dist td { padding: var(--space-sm) var(--space-lg); text-align: left; border-top: 1px solid var(--hairline); }
+.dist thead th { font-weight: 600; font-size: 0.75rem; color: var(--color-fg-muted); }
+.dist td { min-width: 96px; }
+.dist__bar { display: block; width: var(--w); min-width: 2px; height: 6px; border-radius: 3px; background: var(--color-accent); }
+.dist__num { font-family: var(--font-mono); font-size: 0.75rem; }
+
 .breadcrumb { display: flex; flex-wrap: wrap; gap: var(--space-sm); font-size: 0.8125rem; color: var(--color-fg-muted); }
 .breadcrumb a { color: var(--color-fg-muted) !important; text-decoration: none; }
 .breadcrumb a:hover { color: var(--color-fg) !important; }
