@@ -1,13 +1,14 @@
 
 /* Tokens from design-system/youdontknowllm/MASTER.md — components use these, never raw hex. */
-/* Fallback with Inter's metrics so text doesn't jump when the web font loads (less layout shift). */
+/* Fallback with Lora's metrics so text doesn't jump when the web font loads (less layout shift).
+   Measured from Lora[wght].ttf vs Liberation Serif (metric-compatible with Times New Roman) over an English sample. */
 @font-face {
-  font-family: 'Inter Fallback';
-  src: local('Arial'), local('Liberation Sans'), local('Arimo'); /* metric-compatible: Windows/macOS, Linux, ChromeOS */
-  ascent-override: 90.49%;
-  descent-override: 22.56%;
+  font-family: 'Lora Fallback';
+  src: local('Times New Roman'), local('Liberation Serif'), local('Tinos'); /* metric-compatible: Windows/macOS, Linux, ChromeOS */
+  ascent-override: 88.02%;
+  descent-override: 23.97%;
   line-gap-override: 0%;
-  size-adjust: 107.06%;
+  size-adjust: 114.29%;
 }
 
 :root {
@@ -27,7 +28,7 @@
   --color-info: #1d5e8c;
   --color-ring: var(--color-accent);
 
-  --font-sans: 'Inter', 'Inter Fallback', system-ui, sans-serif;
+  --font-text: 'Lora', 'Lora Fallback', Georgia, serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   --space-xs: 2px;
@@ -42,7 +43,7 @@
   --duration: 200ms;
 
   color-scheme: light;
-  font-family: var(--font-sans);
+  font-family: var(--font-text);
   font-size: 16px;
   line-height: 1.5;
   color: var(--color-fg);

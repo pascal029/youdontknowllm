@@ -26,7 +26,7 @@ Vite + React + TypeScript, no backend. Multi-page static site: `/` and `/learn/*
 ## Design (ui-ux-pro-max)
 Follow `design-system/youdontknowllm/MASTER.md`. Short version:
 - Light cream/green palette (user-chosen): `#FBF5DD` cream bg, `#E7E1B1` khaki secondary, `#306D29` green accent, `#0D530E` dark green text/hover. Tokens live on `:root` in `src/index.css` (derived: surface `#FDFAEE`, muted `#F0EAC5`, border `#B9C48F`, fg-muted `#41773C`); site-only tokens (hairlines, glass, glows) at the top of `src/site/site.css`. Focus ring = accent.
-- Inter for UI, JetBrains Mono for code, prompts, JSON and steps. Dense spacing scale (2/4/8/12/16/24/32px).
+- Lora for all text (site + app, user-chosen; `--font-text` with a metric-matched 'Lora Fallback'), JetBrains Mono for code, prompts, JSON and steps. Dense spacing scale (2/4/8/12/16/24/32px).
 - Components use CSS variables only, never raw hex.
 - SVG icons, never emoji. Visible focus rings, 150–300ms transitions, respect `prefers-reduced-motion`, contrast ≥ 4.5:1, works at 375px.
 

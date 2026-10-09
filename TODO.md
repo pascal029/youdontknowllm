@@ -96,4 +96,4 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 
 ## Phase 12 — Follow-ups
 - [x] 12.1 Strip old `<think>` reasoning from the history kept between turns (kept within a turn; hidden tool calls preserved) + lesson note
-- [ ] 12.2 Lora font
+- [x] 12.2 Lora for all text (site + app + Storybook) with a metric-matched fallback face; docs updated

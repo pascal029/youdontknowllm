@@ -23,7 +23,7 @@ Primary CTA "Open the playground" in hero + final section; secondary "Start lear
 - Content is in the DOM and visible to crawlers; `prefers-reduced-motion: reduce` → everything shown immediately.
 
 ## Typography
-- Display: Inter 700, letter-spacing -0.03em, `clamp(2.25rem, 6vw, 4rem)`.
+- Display: Lora 700, letter-spacing -0.03em, `clamp(2.25rem, 6vw, 4rem)`.
 - Labels/eyebrows/numbers: JetBrains Mono 500, uppercase, +0.08em tracking.
 - Body 16–18px, line-height 1.6.
 

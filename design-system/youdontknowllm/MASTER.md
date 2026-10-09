@@ -38,14 +38,14 @@
 
 ### Typography
 
-- **Heading Font:** Inter
-- **Body Font:** Inter
+- **Heading Font:** Lora (user-chosen, replaces Inter)
+- **Body Font:** Lora
 - **Mood:** dark, cinematic, technical, precision, clean, premium, developer, professional, high-end utility
-- **Google Fonts:** [Inter + Inter](https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap)
+- **Google Fonts:** [Lora + JetBrains Mono](https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap)
 
 **CSS Import:**
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* loaded via <link> in partials/head.html, not @import (non-blocking) */
 ```
 
 ### Spacing Variables
