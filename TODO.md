@@ -93,3 +93,7 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 11.4 Lesson /learn/managing-context/ "Managing the context window", right after "The context window": why, the 4 strategies + tradeoffs, static before/after diagram, auto-compact in real apps, pinning + RAG mention, try-it
 - [x] 11.6 Fill context: button next to Compact that appends a sample chat (facts early, tool calls, a big tool result, filler turns) up to ~80% of the window, shown in the chat + a notice; lesson try-it uses it (+ tests + story)
 - [x] 11.5 QA: tests + build green, Groq summarize → follow-up still correct, Lighthouse + 375px on the new page
+
+## Phase 12 — Follow-ups
+- [x] 12.1 Strip old `<think>` reasoning from the history kept between turns (kept within a turn; hidden tool calls preserved) + lesson note
+- [ ] 12.2 Lora font

@@ -1,7 +1,7 @@
 import type { Message, Provider, Sampling, Usage } from '../llm/types'
 import { runInSandbox, type SandboxResult } from '../tools/sandbox'
 import type { Tool } from '../tools/types'
-import { parseToolCall } from './parseToolCall'
+import { parseToolCall, splitThink } from './parseToolCall'
 import { composeSystemPrompt, formatParseError, formatToolResponse } from './prompt'
 
 /** One visible step of the agent loop. The UI renders a list of these. */
@@ -58,7 +58,7 @@ export async function* runAgent(o: RunOptions): AsyncGenerator<LoopEvent, Messag
     const parsed = parseToolCall(raw)
     if (parsed.kind === 'answer') {
       yield { type: 'answer', text: parsed.text }
-      return history
+      return history.map(withoutThinking)
     }
     if (parsed.kind === 'error') {
       yield { type: 'parse-error', error: parsed.error, raw: parsed.raw }
@@ -76,5 +76,17 @@ export async function* runAgent(o: RunOptions): AsyncGenerator<LoopEvent, Messag
   }
 
   yield { type: 'error', error: `Stopped after ${maxIterations} model calls without a final answer.` }
-  return history
+  return history.map(withoutThinking)
+}
+
+/**
+ * Old reasoning is dropped once a turn is over: it costs context on every later call, and it can carry facts
+ * that compaction removed. Within a turn the model still sees its own thinking between tool calls.
+ * A call hidden inside the thinking (Groq + gpt-oss) is kept as a plain <tool_call>.
+ */
+export function withoutThinking(m: Message): Message {
+  if (m.role !== 'assistant' || !m.content.includes('<think>')) return m
+  const parsed = parseToolCall(m.content)
+  if (parsed.kind === 'call') return { ...m, content: `<tool_call>${JSON.stringify({ name: parsed.name, arguments: parsed.arguments })}</tool_call>` }
+  return { ...m, content: splitThink(m.content).text }
 }

@@ -115,6 +115,7 @@
         <ul>
           <li><strong>Pin what matters.</strong> Put facts that must survive (who the user is, the task, hard rules) in the <a href="/learn/system-prompt/">system prompt</a>, which is never compacted.</li>
           <li><strong>Retrieve instead of carrying.</strong> Store documents or old messages outside the chat and fetch only the relevant pieces when needed. That's the idea behind RAG and "memory" features.</li>
+          <li><strong>Drop old reasoning.</strong> Thinking models write long hidden reasoning. Apps keep it while the model is still working on your question, then remove it from the history. It costs tokens on every later call, and it can quietly carry facts you meant to compact away. This playground does the same.</li>
           <li><strong>Start a new chat</strong> when the topic changes. It's the cheapest compaction there is.</li>
         </ul>
 

@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 import type { Message, Provider, Sampling } from '../llm/types'
 import type { Tool } from '../tools/types'
-import { runAgent, type LoopEvent } from './loop'
+import { runAgent, withoutThinking, type LoopEvent } from './loop'
 
 /** Fake provider that replies with scripted outputs in order and records what it was sent. */
 function fakeProvider(replies: string[]) {
@@ -119,4 +119,25 @@ test('passes sampling settings to every model call', async () => {
   const run = vi.fn().mockResolvedValue({ ok: true, result: 2, logs: [], ms: 1 })
   await drain(runAgent({ ...base, provider, tools: [calculator], run, sampling: { temperature: 0.2 } }))
   expect(samplings).toEqual([{ temperature: 0.2 }, { temperature: 0.2 }])
+})
+
+test('thinking is visible within a turn, but dropped from the history kept for later turns', async () => {
+  const { provider, calls } = fakeProvider([
+    '<think>I should use the calculator.</think><tool_call>{"name":"calculator","arguments":{"expression":"1+1"}}</tool_call>',
+    '<think>The tool said 2. User is Ana.</think>It is 2.',
+  ])
+  const run = vi.fn().mockResolvedValue({ ok: true, result: 2, logs: [], ms: 1 })
+  const { history } = await drain(runAgent({ ...base, provider, tools: [calculator], run }))
+  // second call in the same turn still sees the first call's thinking
+  expect(calls[1].some((m) => m.content.includes('I should use the calculator'))).toBe(true)
+  expect(history.some((m) => m.content.includes('<think>'))).toBe(false)
+  expect(history.at(-1)).toEqual({ role: 'assistant', content: 'It is 2.' })
+  expect(history[1].content).toBe('<tool_call>{"name":"calculator","arguments":{"expression":"1+1"}}</tool_call>')
+})
+
+test('withoutThinking keeps a tool call that was hidden inside the thinking, and leaves other messages alone', () => {
+  const hidden = { role: 'assistant' as const, content: '<think>call it <tool_call>{"name":"calculator","arguments":{"expression":"2"}}</tool_call></think>' }
+  expect(withoutThinking(hidden).content).toBe('<tool_call>{"name":"calculator","arguments":{"expression":"2"}}</tool_call>')
+  const user = { role: 'user' as const, content: '<think>not mine</think>' }
+  expect(withoutThinking(user)).toBe(user)
 })
