@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- @include head -->
+    <title>Managing the LLM Context Window | youdontknowllm</title>
+    <meta name="description" content="Long chats fill the context window. Compare the four ways apps make room (drop, trim tool output, summarize, hybrid) and what each one forgets." />
+    <link rel="canonical" href="%SITE_URL%/learn/managing-context/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%SITE_NAME%" />
+    <meta property="og:title" content="Managing the Context Window: How Chat Apps Make Room" />
+    <meta property="og:description" content="Dropping, trimming, summarizing: the four ways to compact an LLM conversation, and what each one forgets." />
+    <meta property="og:url" content="%SITE_URL%/learn/managing-context/" />
+    <meta property="og:image" content="%SITE_URL%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">
+      [
+        {
+          "@context": "https://schema.org",
+          "@type": "TechArticle",
+          "headline": "Managing the context window: how chat apps make room",
+          "description": "Long chats fill the context window. Compare the four ways apps make room (drop, trim tool output, summarize, hybrid) and what each one forgets.",
+          "url": "%SITE_URL%/learn/managing-context/",
+          "image": "%SITE_URL%/og.png",
+          "datePublished": "2026-10-09",
+          "dateModified": "2026-10-09",
+          "author": {
+            "@type": "Organization",
+            "name": "youdontknowllm",
+            "url": "%SITE_URL%/"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "youdontknowllm",
+            "url": "%SITE_URL%/"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "%SITE_URL%/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Learn",
+              "item": "%SITE_URL%/learn/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Managing context",
+              "item": "%SITE_URL%/learn/managing-context/"
+            }
+          ]
+        }
+      ]
+    </script>
+    <link rel="stylesheet" href="/src/site/site.css" />
+  </head>
+  <body>
+    <!-- @include header -->
+    <main class="page">
+      <article class="article">
+        <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/learn/">Learn</a> / <span aria-current="page">Managing context</span></nav>
+        <!-- @lesson:meta -->
+        <h1>Managing the context window: how chat apps make room</h1>
+        <p class="lead">The model re-reads the whole conversation on every turn, and the <a href="/learn/context-window/">context window</a> has a hard limit. Long before you hit it, every extra token makes each answer slower and more expensive. So real apps <strong>compact</strong> the conversation: they decide what the model keeps seeing and what it forgets.</p>
+
+        <h2 id="two-lists">What you see vs what the model sees</h2>
+        <p>A chat app keeps two lists. One is the conversation on your screen. The other is the list of messages it actually sends to the model. They start out identical, but compacting changes only the second one. You can still scroll up and read your first message after the model has stopped seeing it, and that gap is why chatbots "forget" things that are right there on the page.</p>
+
+        <h2 id="example">One conversation, four strategies</h2>
+        <p>Take a chat of four turns: a question answered with a Wikipedia lookup (the tool result alone is ~1,900 tokens), a turn where you give your name, a long explanation, and a short follow-up. With a ~450-token system prompt, it fills about 3,000 tokens. Here is what each strategy leaves:</p>
+        <figure class="dist">
+          <table>
+            <caption>Approximate tokens the model re-reads per turn after each strategy</caption>
+            <thead><tr><th scope="col">Strategy</th><th scope="col">Tokens</th><th scope="col">Keeps</th><th scope="col">Loses</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Before compacting</th><td><span class="dist__bar" style="--w: 100%"></span><span class="dist__num">≈3,000</span></td><td>everything</td><td>–</td></tr>
+              <tr><th scope="row">Drop oldest 4 messages</th><td><span class="dist__bar" style="--w: 33%"></span><span class="dist__num">≈990</span></td><td>the last three turns</td><td>the whole Wikipedia question and its answer</td></tr>
+              <tr><th scope="row">Remove tool traffic</th><td><span class="dist__bar" style="--w: 36%"></span><span class="dist__num">≈1,070</span></td><td>every question and answer</td><td>the raw tool output</td></tr>
+              <tr><th scope="row">Summarize everything<br /><small>1 model call</small></th><td><span class="dist__bar" style="--w: 19%"></span><span class="dist__num">≈582</span></td><td>a ~120-token summary</td><td>exact wording, small details</td></tr>
+              <tr><th scope="row">Summary + keep last 2<br /><small>1 model call</small></th><td><span class="dist__bar" style="--w: 22%"></span><span class="dist__num">≈667</span></td><td>summary + the last turn word for word</td><td>older details</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p>The system prompt and tool list are sent every time and are never compacted, which is why no strategy goes below ~450 here.</p>
+
+        <h2 id="drop">1. Drop the oldest messages</h2>
+        <p>Also called a <em>sliding window</em>: keep the last N messages, forget the rest. It's free, instant and predictable, and it's what many apps do silently when the window fills. The cost is that facts from the start (your name, the task, an early instruction) disappear completely.</p>
+        <p>One detail matters: cut on a <strong>turn boundary</strong>. If the kept part starts with an assistant reply or a tool result, the model sees an answer to a question it never got.</p>
+
+        <h2 id="tools">2. Remove tool traffic</h2>
+        <p>With <a href="/learn/function-calling/">function calling</a>, a single question can produce a tool call, a large tool result, and only then an answer. Once the answer is written, the raw result is usually dead weight. Dropping the calls and results, while keeping questions and answers, often saves the most for the least loss. Coding agents do the same with old file reads and command output.</p>
+
+        <h2 id="summary">3. Summarize everything</h2>
+        <p>Ask the model to rewrite the conversation as a short summary, then replace the history with that one note. This shrinks the most and keeps facts from the whole chat, but it has costs:</p>
+        <ul>
+          <li><strong>One extra model call</strong>, which reads the entire conversation once more.</li>
+          <li><strong>Details get lost.</strong> Exact numbers, code and wording become "the user asked about X".</li>
+          <li><strong>Small models summarize badly.</strong> A 1–2B model may drop important facts or invent ones that were never said. Always check the summary before relying on it.</li>
+        </ul>
+
+        <h2 id="hybrid">4. Summary + keep the recent messages</h2>
+        <p>The usual compromise: summarize the older part and keep the last few messages word for word. The model keeps the overall story <em>and</em> the exact wording of what you're working on right now. This is roughly what ChatGPT-style apps and coding agents do when they "auto-compact" near the limit.</p>
+
+        <h2 id="more">Other ways to save context</h2>
+        <ul>
+          <li><strong>Pin what matters.</strong> Put facts that must survive (who the user is, the task, hard rules) in the <a href="/learn/system-prompt/">system prompt</a>, which is never compacted.</li>
+          <li><strong>Retrieve instead of carrying.</strong> Store documents or old messages outside the chat and fetch only the relevant pieces when needed. That's the idea behind RAG and "memory" features.</li>
+          <li><strong>Start a new chat</strong> when the topic changes. It's the cheapest compaction there is.</li>
+        </ul>
+
+        <aside class="try">
+          <h2 id="try">Try it</h2>
+          <ol>
+            <li>Open the <a href="/app/">playground</a>. Tell the model your name, then ask it to search Wikipedia for something, then chat a little more.</li>
+            <li>Press <strong>Compact context…</strong> under the context meter. Compare <strong>Before</strong> and <strong>After</strong> for each strategy: what's struck through, and how many tokens are left?</li>
+            <li>Apply <strong>Drop oldest messages</strong>, then ask <em>What is my name?</em> The chat still shows it; the model no longer knows it.</li>
+            <li>Start over and apply <strong>Summary + keep last N</strong> instead. Ask the same question. Did the summary keep your name?</li>
+            <li>Try a summary with an in-browser model and with an API model, and compare their quality.</li>
+          </ol>
+          <a class="btn btn--primary" href="/app/">Open the playground</a>
+        </aside>
+        <!-- @lesson:nav -->
+      </article>
+    </main>
+    <!-- @include footer -->
+  </body>
+</html>

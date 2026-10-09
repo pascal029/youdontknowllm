@@ -26,7 +26,7 @@ test('lesson list: numbered rows in LESSONS order, chosen heading level', () => 
   const doc = dom(lessonList('h3', fixed))
   const items = [...doc.querySelectorAll('.path__item')]
   expect(items.map((a) => a.getAttribute('href'))).toEqual(LESSONS.map((l) => `/learn/${l.slug}/`))
-  expect(items.map((a) => a.querySelector('.path__num')?.textContent)).toEqual(['01', '02', '03', '04', '05', '06', '07'])
+  expect(items.map((a) => a.querySelector('.path__num')?.textContent)).toEqual(['01', '02', '03', '04', '05', '06', '07', '08'])
   expect(items.map((a) => a.querySelector('h3')?.textContent)).toEqual(LESSONS.map((l) => l.title))
   expect(items[0].querySelector('.path__meta')?.textContent).toBe('4 min')
 })

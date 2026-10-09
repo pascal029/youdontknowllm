@@ -34,7 +34,7 @@ const indexable = () => pages.filter((p) => p.url !== '/404')
 
 test('builds the expected pages', () => {
   expect(pages.map((p) => p.url).sort()).toEqual(
-    ['/', '/404', '/app/', '/learn/', ...['context-window', 'function-calling', 'prefill-vs-decode', 'run-llm-in-browser', 'sampling', 'system-prompt', 'what-is-a-token'].map((s) => `/learn/${s}/`)].sort(),
+    ['/', '/404', '/app/', '/learn/', ...['context-window', 'function-calling', 'managing-context', 'prefill-vs-decode', 'run-llm-in-browser', 'sampling', 'system-prompt', 'what-is-a-token'].map((s) => `/learn/${s}/`)].sort(),
   )
 })
 

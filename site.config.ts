@@ -9,6 +9,7 @@ export const LESSONS: Lesson[] = [
   { slug: 'what-is-a-token', title: 'What is a token?', blurb: 'Models read pieces of words mapped to numbers, not words.' },
   { slug: 'sampling', title: 'Temperature, top-p and top-k', blurb: 'How the model picks one next token out of thousands of options.' },
   { slug: 'context-window', title: 'The context window', blurb: "The model's working memory, and what happens when it fills up." },
+  { slug: 'managing-context', title: 'Managing the context window', blurb: 'Dropping, trimming and summarizing: how chat apps make room, and what each one forgets.' },
   { slug: 'system-prompt', title: 'The system prompt', blurb: 'The hidden instructions sent before every conversation.' },
   { slug: 'function-calling', title: 'How function calling works', blurb: 'A model can only write text. Here is how that text becomes a tool call.' },
   { slug: 'prefill-vs-decode', title: 'Prefill vs decode', blurb: 'The two speeds of every LLM: reading your prompt and writing the answer.' },

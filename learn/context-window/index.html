@@ -107,6 +107,7 @@
           <li>The app <strong>summarises</strong> older messages into a shorter note, losing detail.</li>
         </ul>
         <p>Even before it's full, very long contexts can hurt quality. Models tend to pay most attention to the beginning and the end, and can miss details buried in the middle.</p>
+        <p>The next lesson, <a href="/learn/managing-context/">managing the context window</a>, compares these strategies side by side.</p>
 
         <h2 id="cost">Longer context = slower and more expensive</h2>
         <p>Every token in the window has to be processed before the first word of the answer appears. That's the <a href="/learn/prefill-vs-decode/">prefill</a> phase. A longer conversation means a longer wait, more memory for the model's cache and, on paid APIs, a higher bill on every single message.</p>
