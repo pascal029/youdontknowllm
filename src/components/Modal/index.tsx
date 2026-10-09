@@ -17,6 +17,7 @@ type Props = {
  */
 export default function Modal({ open, title, onClose, children, footer, size = 'md' }: Props) {
   const ref = useRef<HTMLDialogElement>(null)
+  const downOnBackdrop = useRef(false)
   const titleId = useId()
 
   useEffect(() => {
@@ -35,8 +36,10 @@ export default function Modal({ open, title, onClose, children, footer, size = '
         e.preventDefault() // Esc: let React state decide
         onClose()
       }}
+      // close on a backdrop click, but not when a text selection started inside and was released outside
+      onMouseDown={(e) => (downOnBackdrop.current = e.target === e.currentTarget)}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose() // click on the backdrop
+        if (downOnBackdrop.current && e.target === e.currentTarget) onClose()
       }}
     >
       {open && (

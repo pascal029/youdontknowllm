@@ -16,11 +16,12 @@ type Props = { value: Sampling; onChange: (v: Sampling) => void }
 /** Sampling knobs. An empty field is not sent, so the model's own default applies. */
 export default function SamplingSettings({ value, onChange }: Props) {
   // a half-typed number like "0." reads as "" (badInput) in the number field; ignored there so it doesn't unset the key
-  const set = (key: keyof Sampling, raw: string) => {
+  // clamped (and whole numbers for step-1 params): out-of-range values make APIs reject every request
+  const set = (p: Param, raw: string) => {
     const next = { ...value }
     const n = Number(raw)
-    if (raw === '' || !Number.isFinite(n)) delete next[key]
-    else next[key] = n
+    if (raw === '' || !Number.isFinite(n)) delete next[p.key]
+    else next[p.key] = Math.min(p.max ?? Infinity, Math.max(p.min, p.step === 1 ? Math.round(n) : n))
     onChange(next)
   }
   const count = Object.keys(value).length
@@ -50,10 +51,10 @@ export default function SamplingSettings({ value, onChange }: Props) {
                     max={p.max}
                     step={p.step}
                     value={v ?? p.rest}
-                    onChange={(e) => set(p.key, e.target.value)}
+                    onChange={(e) => set(p, e.target.value)}
                   />
                 )}
-                <input id={id} type="number" inputMode="decimal" placeholder="default" min={p.min} max={p.max} step={p.step} value={v ?? ''} onChange={(e) => !e.target.validity.badInput && set(p.key, e.target.value)} />
+                <input id={id} type="number" inputMode="decimal" placeholder="default" min={p.min} max={p.max} step={p.step} value={v ?? ''} onChange={(e) => !e.target.validity.badInput && set(p, e.target.value)} />
               </div>
               <small>{p.hint}</small>
               {p.warn && v !== undefined && <small className="sampling__warn">{p.warn}</small>}

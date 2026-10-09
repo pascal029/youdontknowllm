@@ -40,7 +40,7 @@ export default function Chat({ messages, streaming, busy, disabled, disabledReas
   }
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) submit(e)
+    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) submit(e) // IME Enter confirms text, doesn't send
   }
 
   return (

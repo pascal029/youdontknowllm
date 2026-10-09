@@ -111,6 +111,20 @@ test('shows API errors', async () => {
   expect(await screen.findByRole('alert')).toHaveTextContent('API error 500')
 })
 
+test('a turn that fails (or is stopped) still leaves the question in what the model sees next', async () => {
+  const fetchMock = vi.fn().mockResolvedValueOnce(new Response('nope', { status: 500 })).mockImplementation(async () => new Response(sse({ choices: [{ delta: { content: 'ok' } }] })))
+  vi.stubGlobal('fetch', fetchMock)
+  render(<App />)
+  await userEvent.click(screen.getByRole('radio', { name: 'API' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Connect' }))
+  await userEvent.type(screen.getByLabelText('Message'), 'first{Enter}')
+  await screen.findByRole('alert')
+  await userEvent.type(screen.getByLabelText('Message'), 'second{Enter}')
+  await within(screen.getByRole('main')).findByText('ok')
+  const sent = JSON.parse(fetchMock.mock.calls[1][1].body).messages
+  expect(sent.slice(-2)).toEqual([{ role: 'user', content: 'first' }, { role: 'user', content: 'second' }])
+})
+
 test('disabling a tool removes it from the composed prompt', async () => {
   render(<App />)
   expect(screen.getByText(/"name":"calculator"/)).toBeInTheDocument()

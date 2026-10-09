@@ -52,6 +52,8 @@ export async function* runAgent(o: RunOptions): AsyncGenerator<LoopEvent, Messag
         yield { type: 'delta', text: c.text }
       } else usage = c.usage
     }
+    // WebLLM's interrupt ends the stream normally; don't treat a stopped reply as an answer or run its tool call
+    signal?.throwIfAborted()
     yield { type: 'model', iteration: i, text: raw, usage, ms: Math.round(performance.now() - start) }
     history.push({ role: 'assistant', content: raw })
 

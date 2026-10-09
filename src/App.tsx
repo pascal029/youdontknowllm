@@ -63,6 +63,10 @@ export default function App() {
   const toggleTool = (name: string, enabled: boolean) =>
     setPrefs({ ...prefs, disabledTools: enabled ? prefs.disabledTools.filter((n) => n !== name) : [...prefs.disabledTools, name] })
 
+  /** on/off is stored by name: follow a rename, forget a deleted tool */
+  const renameDisabled = (from: string, to?: string) =>
+    setPrefs({ ...prefs, disabledTools: prefs.disabledTools.flatMap((n) => (n !== from ? [n] : to ? [to] : [])) })
+
   const webgpu = hasWebGPU()
   /** local model ids already in the browser cache (undefined = not checked yet) */
   const [cached, setCached] = useState<Set<string>>()
@@ -114,6 +118,8 @@ export default function App() {
   async function send(text: string) {
     if (!provider) return
     setMessages((m) => [...m, { role: 'user', content: text }])
+    // the model keeps the question even if this turn is stopped (a finished turn replaces history below)
+    setHistory((h) => [...h, { role: 'user', content: text }])
     setSteps([])
     setStreaming('')
     setError('')
@@ -156,7 +162,7 @@ export default function App() {
     } catch (e) {
       if (!ac.signal.aborted) {
         const msg = e instanceof Error ? e.message : String(e)
-        if (settings.mode === 'local') {
+        if (activeModelId) {
           // A WebGPU failure (e.g. device lost) leaves the engine unusable; make the user reload it.
           void dropProvider()
           setError(`Local model stopped: ${msg} Reload the model, try a smaller one, or use an API.`)
@@ -263,6 +269,7 @@ export default function App() {
                     onSave={(t) => {
                       const rest = editing.isNew ? custom.items : custom.items.filter((x) => x.name !== editing.tool.name)
                       setCustom({ items: [...rest, t] })
+                      if (!editing.isNew) renameDisabled(editing.tool.name, t.name)
                       setEditing(null)
                     }}
                   />
@@ -281,6 +288,7 @@ export default function App() {
                       className="btn btn--danger-solid"
                       onClick={() => {
                         setCustom({ items: custom.items.filter((x) => x.name !== deletingTool?.name) })
+                        if (deletingTool) renameDisabled(deletingTool.name)
                         setDeletingTool(null)
                       }}
                     >
@@ -339,7 +347,7 @@ export default function App() {
                 history={history}
                 systemTokens={estimateTokens(systemText)}
                 contextWindow={provider.contextWindow}
-                local={settings.mode === 'local'}
+                local={!!activeModelId}
                 summarize={(h, keepLast, signal) => summarize(provider, h, { keepLast, sampling, signal })}
                 onApply={compact}
                 onCancel={() => setCompactOpen(false)}

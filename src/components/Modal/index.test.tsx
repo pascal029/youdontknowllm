@@ -40,7 +40,8 @@ test('closes via the close button, Esc (cancel) and backdrop click', async () =>
   expect(screen.queryByText('Body text')).not.toBeInTheDocument()
 
   await open()
-  fireEvent.click(screen.getByRole('dialog')) // target is the dialog itself = backdrop
+  fireEvent.mouseDown(screen.getByRole('dialog')) // target is the dialog itself = backdrop
+  fireEvent.click(screen.getByRole('dialog'))
   expect(onClose).toHaveBeenCalledTimes(3)
 })
 
@@ -49,5 +50,14 @@ test('clicks inside the panel do not close it', async () => {
   render(<Harness onClose={onClose} />)
   await userEvent.click(screen.getByRole('button', { name: 'Open' }))
   await userEvent.click(screen.getByText('Body text'))
+  expect(onClose).not.toHaveBeenCalled()
+})
+
+test('a text selection dragged from inside out to the backdrop does not close it', async () => {
+  const onClose = vi.fn()
+  render(<Harness onClose={onClose} />)
+  await userEvent.click(screen.getByRole('button', { name: 'Open' }))
+  fireEvent.mouseDown(screen.getByText('Body text'))
+  fireEvent.click(screen.getByRole('dialog')) // browsers fire click on the common ancestor
   expect(onClose).not.toHaveBeenCalled()
 })

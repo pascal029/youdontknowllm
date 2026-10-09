@@ -141,3 +141,13 @@ test('withoutThinking keeps a tool call that was hidden inside the thinking, and
   const user = { role: 'user' as const, content: '<think>not mine</think>' }
   expect(withoutThinking(user)).toBe(user)
 })
+
+test('a reply stopped mid-stream (stream ends normally, like WebLLM) is not run as a tool call', async () => {
+  const { provider, calls } = fakeProvider(['<tool_call>{"name":"calculator","arguments":{"expression":"1+1"}}</tool_call>', 'never'])
+  const ac = new AbortController()
+  ac.abort()
+  const run = vi.fn()
+  await expect(drain(runAgent({ ...base, provider, tools: [calculator], signal: ac.signal, run }))).rejects.toThrow()
+  expect(calls).toHaveLength(1)
+  expect(run).not.toHaveBeenCalled()
+})
