@@ -1,6 +1,6 @@
 import { resolveBaseURL } from './relay'
 import { fromOpenAIChunks, type OpenAIChunk } from './stream'
-import type { Message, Provider, StreamChunk } from './types'
+import type { Message, Provider, Sampling, StreamChunk } from './types'
 
 export type RemoteConfig = {
   baseURL: string
@@ -84,7 +84,7 @@ export function createOpenAIProvider(cfg: RemoteConfig): Provider {
   return {
     name: cfg.model,
     contextWindow: cfg.contextWindow,
-    async *chat(messages: Message[], signal?: AbortSignal) {
+    async *chat(messages: Message[], signal?: AbortSignal, sampling?: Sampling) {
       const start = performance.now()
       const res = await fetch(url, {
         method: 'POST',
@@ -96,6 +96,7 @@ export function createOpenAIProvider(cfg: RemoteConfig): Provider {
         body: JSON.stringify({
           model: cfg.model,
           messages,
+          ...sampling,
           stream: true,
           stream_options: { include_usage: true },
         }),

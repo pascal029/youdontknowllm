@@ -1,22 +1,24 @@
 import { describe, expect, test, vi } from 'vitest'
-import type { Message, Provider } from '../llm/types'
+import type { Message, Provider, Sampling } from '../llm/types'
 import type { Tool } from '../tools/types'
 import { runAgent, type LoopEvent } from './loop'
 
 /** Fake provider that replies with scripted outputs in order and records what it was sent. */
 function fakeProvider(replies: string[]) {
   const calls: Message[][] = []
+  const samplings: (Sampling | undefined)[] = []
   const provider: Provider = {
     name: 'fake',
     contextWindow: 4096,
-    async *chat(messages) {
+    async *chat(messages, _signal, sampling) {
       calls.push(messages)
+      samplings.push(sampling)
       const text = replies.shift() ?? 'out of replies'
       for (const part of text.match(/.{1,5}/gs) ?? []) yield { type: 'delta', text: part }
       yield { type: 'done', usage: { promptTokens: 100, completionTokens: 10, decodeTps: 20 } }
     },
   }
-  return { provider, calls }
+  return { provider, calls, samplings }
 }
 
 const calculator: Tool = { name: 'calculator', description: 'math', parameters: { type: 'object' }, code: 'CODE', enabled: true }
@@ -110,4 +112,11 @@ test('provider errors propagate (caller decides how to show them)', async () => 
   // oxlint-disable-next-line require-yield
   const provider: Provider = { name: 'x', contextWindow: 1, chat: async function* () { throw new Error('API error 500') } }
   await expect(drain(runAgent({ ...base, provider, tools: [] }))).rejects.toThrow('API error 500')
+})
+
+test('passes sampling settings to every model call', async () => {
+  const { provider, samplings } = fakeProvider(['<tool_call>{"name":"calculator","arguments":{"expression":"1+1"}}</tool_call>', '2'])
+  const run = vi.fn().mockResolvedValue({ ok: true, result: 2, logs: [], ms: 1 })
+  await drain(runAgent({ ...base, provider, tools: [calculator], run, sampling: { temperature: 0.2 } }))
+  expect(samplings).toEqual([{ temperature: 0.2 }, { temperature: 0.2 }])
 })

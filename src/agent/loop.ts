@@ -1,4 +1,4 @@
-import type { Message, Provider, Usage } from '../llm/types'
+import type { Message, Provider, Sampling, Usage } from '../llm/types'
 import { runInSandbox, type SandboxResult } from '../tools/sandbox'
 import type { Tool } from '../tools/types'
 import { parseToolCall } from './parseToolCall'
@@ -26,6 +26,7 @@ export type RunOptions = {
   history: Message[]
   userText: string
   signal?: AbortSignal
+  sampling?: Sampling
   maxIterations?: number
   run?: (code: string, args: unknown) => Promise<SandboxResult>
 }
@@ -45,7 +46,7 @@ export async function* runAgent(o: RunOptions): AsyncGenerator<LoopEvent, Messag
     let raw = ''
     let usage: Usage = { promptTokens: 0, completionTokens: 0 }
     const messages: Message[] = system ? [{ role: 'system', content: system }, ...history] : [...history]
-    for await (const c of provider.chat(messages, signal)) {
+    for await (const c of provider.chat(messages, signal, o.sampling)) {
       if (c.type === 'delta') {
         raw += c.text
         yield { type: 'delta', text: c.text }

@@ -74,6 +74,19 @@ test('ollama.com is called through the site relay; other hosts directly', async 
   expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe('Bearer k')
 })
 
+test('sends only the sampling keys that are set', async () => {
+  const fetchMock = vi.fn().mockImplementation(async () => new Response(sse('data: [DONE]\n\n')))
+  vi.stubGlobal('fetch', fetchMock)
+  const p = createOpenAIProvider({ baseURL: 'https://api.example.com/v1', apiKey: '', model: 'm', contextWindow: 8192 })
+  await collect(p.chat([], undefined, { temperature: 0, seed: 7, top_p: undefined }))
+  await collect(p.chat([]))
+
+  const withSampling = JSON.parse(fetchMock.mock.calls[0][1].body)
+  expect(withSampling).toMatchObject({ temperature: 0, seed: 7, stream: true })
+  expect('top_p' in withSampling).toBe(false)
+  expect(Object.keys(JSON.parse(fetchMock.mock.calls[1][1].body)).sort()).toEqual(['messages', 'model', 'stream', 'stream_options'])
+})
+
 test('network failures explain the likely cause instead of "Failed to fetch"', async () => {
   vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')))
   const p = createOpenAIProvider({ baseURL: 'https://api.example.com/v1', apiKey: '', model: 'm', contextWindow: 1 })

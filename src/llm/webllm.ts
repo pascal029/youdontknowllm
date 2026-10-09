@@ -1,7 +1,7 @@
 import { CreateWebWorkerMLCEngine, type InitProgressReport } from '@mlc-ai/web-llm'
 import type { LocalModel } from './models'
 import { fromOpenAIChunks } from './stream'
-import type { Provider } from './types'
+import type { Provider, Sampling } from './types'
 import { hasWebGPU } from './webgpu'
 
 /** Download (or load from browser cache) a local model and wrap it as a Provider. */
@@ -13,12 +13,13 @@ export async function loadWebLLM(model: LocalModel, onProgress: (r: InitProgress
   return {
     name: model.label,
     contextWindow: model.contextWindow,
-    async *chat(messages, signal) {
+    async *chat(messages, signal, sampling) {
       const onAbort = () => engine.interruptGenerate()
       signal?.addEventListener('abort', onAbort)
       try {
         const stream = await engine.chat.completions.create({
           messages,
+          ...withoutTopK(sampling),
           stream: true,
           stream_options: { include_usage: true },
         })
@@ -32,4 +33,11 @@ export async function loadWebLLM(model: LocalModel, onProgress: (r: InitProgress
       worker.terminate()
     },
   }
+}
+
+/** WebLLM's request type has no top_k. */
+function withoutTopK(s: Sampling = {}): Omit<Sampling, 'top_k'> {
+  const rest = { ...s }
+  delete rest.top_k
+  return rest
 }
