@@ -84,4 +84,4 @@ Each item = one commit + push. Every UI component ships with a `.test.tsx` and a
 - [x] 10.2 State: `ydkl.sampling` in localStorage, wired into runAgent in App
 - [x] 10.3 SamplingSettings component: collapsible, range + number per param, unset toggle, one-line hints, "may be rejected" note on top_k, reset, link to lesson (+ test + story)
 - [x] 10.4 Lesson /learn/sampling/ "Temperature, top-p and top-k", placed right after "What is a token?" in LESSONS: distribution → temperature → top-k → top-p → seed → max_tokens, static SVG chart, try-it CTA
-- [ ] 10.5 QA: tests + build green, Lighthouse on the new page, real-model check (temp 0 + seed = same answer)
+- [x] 10.5 QA: tests + build green, Lighthouse on the new page, real-model check (temp 0 + seed = same answer)
