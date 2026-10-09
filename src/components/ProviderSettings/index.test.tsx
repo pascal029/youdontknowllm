@@ -95,3 +95,15 @@ test('explains the relay when the base URL is ollama.com', async () => {
   await userEvent.type(url, 'https://ollama.com/v1')
   expect(screen.getByText(/through this site's relay/)).toBeInTheDocument()
 })
+
+test('context window can be cleared (no stuck 0); Connect waits for a value', async () => {
+  render(<Harness />)
+  await userEvent.click(screen.getByRole('radio', { name: 'API' }))
+  const field = screen.getByLabelText('Context window (tokens)')
+  await userEvent.clear(field)
+  expect(field).toHaveValue(null)
+  expect(screen.getByRole('button', { name: 'Connect' })).toBeDisabled()
+  await userEvent.type(field, '4096')
+  expect(field).toHaveValue(4096)
+  expect(screen.getByRole('button', { name: 'Connect' })).toBeEnabled()
+})

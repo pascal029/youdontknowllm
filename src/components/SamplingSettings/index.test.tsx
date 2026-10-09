@@ -48,3 +48,14 @@ test('links to the sampling lesson', () => {
   render(<Harness />)
   expect(screen.getByRole('link', { name: 'How sampling works' })).toHaveAttribute('href', '/learn/sampling/')
 })
+
+test('out-of-range or fractional values are clamped to what APIs accept', async () => {
+  const spy = vi.fn()
+  render(<Harness spy={spy} />)
+  fireEvent.change(screen.getByRole('spinbutton', { name: 'Top-p' }), { target: { value: '5' } })
+  expect(spy).toHaveBeenLastCalledWith({ top_p: 1 })
+  fireEvent.change(screen.getByRole('spinbutton', { name: 'Max tokens' }), { target: { value: '-3' } })
+  expect(spy).toHaveBeenLastCalledWith({ top_p: 1, max_tokens: 1 })
+  fireEvent.change(screen.getByRole('spinbutton', { name: 'Seed' }), { target: { value: '1.6' } })
+  expect(spy).toHaveBeenLastCalledWith({ top_p: 1, max_tokens: 1, seed: 2 })
+})

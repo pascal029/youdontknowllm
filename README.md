@@ -79,4 +79,4 @@ All of it is visible in the **What happened** panel.
 
 ## Privacy
 
-Settings, the system prompt and custom tools are saved in your browser's localStorage. The API key never leaves your browser except to the base URL you entered.
+Settings, the system prompt and custom tools are saved in your browser's localStorage. The API key is never saved: it's kept in memory until you reload, and sent only to the base URL you entered.

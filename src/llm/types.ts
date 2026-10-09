@@ -32,6 +32,8 @@ export interface Provider {
   name: string
   /** max tokens the model can see at once */
   contextWindow: number
+  /** false = the model can't do tool calls, so none are offered */
+  tools?: boolean
   chat(messages: Message[], signal?: AbortSignal, sampling?: Sampling): AsyncIterable<StreamChunk>
   /** free resources (local models: GPU memory + worker). Remote providers have nothing to free. */
   unload?(): Promise<void>

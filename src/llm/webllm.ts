@@ -13,6 +13,7 @@ export async function loadWebLLM(model: LocalModel, onProgress: (r: InitProgress
   return {
     name: model.label,
     contextWindow: model.contextWindow,
+    tools: model.tools,
     async *chat(messages, signal, sampling) {
       const onAbort = () => engine.interruptGenerate()
       signal?.addEventListener('abort', onAbort)
