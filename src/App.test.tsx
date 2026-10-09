@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import App from './App'
@@ -50,6 +50,34 @@ test('sends the saved sampling settings with each request', async () => {
   await userEvent.type(screen.getByLabelText('Message'), 'hi{Enter}')
   await within(screen.getByRole('main')).findByText('ok')
   expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({ temperature: 0.3, seed: 1 })
+})
+
+test('compacting drops turns from what the model sees, but the chat keeps them', async () => {
+  const fetchMock = vi.fn().mockImplementation(async () => new Response(sse({ choices: [{ delta: { content: 'ok' } }] })))
+  vi.stubGlobal('fetch', fetchMock)
+  render(<App />)
+  await userEvent.click(screen.getByRole('radio', { name: 'API' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Connect' }))
+  const main = within(screen.getByRole('main'))
+  for (const q of ['first', 'second', 'third']) {
+    await userEvent.type(screen.getByLabelText('Message'), `${q}{Enter}`)
+    await main.findByText(q)
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Compact context…' })).toBeEnabled())
+  }
+
+  await userEvent.click(screen.getByRole('button', { name: 'Compact context…' }))
+  const dialog = within(screen.getByRole('dialog'))
+  fireEvent.change(dialog.getByLabelText(/Messages to drop/), { target: { value: '2' } })
+  await userEvent.click(dialog.getByRole('button', { name: 'Apply' }))
+
+  expect(main.getByRole('note')).toHaveTextContent(/Context compacted \(dropped oldest 2\)/)
+  expect(main.getByText('first')).toBeInTheDocument()
+
+  await userEvent.type(screen.getByLabelText('Message'), 'fourth{Enter}')
+  await main.findByText('fourth')
+  const sent = JSON.parse(fetchMock.mock.calls.at(-1)![1].body).messages.map((m: { content: string }) => m.content)
+  expect(sent).not.toContain('first')
+  expect(sent).toContain('second')
 })
 
 test('shows API errors', async () => {

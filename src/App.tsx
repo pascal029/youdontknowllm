@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { estimateTokens, historyTokens, summarize } from './agent/compact'
 import { runAgent, type Step } from './agent/loop'
 import { composeSystemPrompt } from './agent/prompt'
 import { splitThink } from './agent/parseToolCall'
 import AppShell from './components/AppShell'
 import Chat, { type ChatMessage } from './components/Chat'
 import ComposedPrompt from './components/ComposedPrompt'
+import ContextCompactor from './components/ContextCompactor'
 import ContextMeter from './components/ContextMeter'
 import LoadProgress from './components/LoadProgress'
 import Modal from './components/Modal'
@@ -40,7 +42,10 @@ export default function App() {
   const [lastModel, setLastModel] = useState<Extract<Step, { type: 'model' }> | null>(null)
   const [live, setLive] = useState<LiveSpeed>()
   const liveRef = useRef({ first: 0, tokens: 0 })
-  const ctxUsed = (lastModel ? lastModel.usage.promptTokens + lastModel.usage.completionTokens : 0) + (live?.tokens ?? 0)
+  /** after compacting: estimated size until the next model call reports real usage */
+  const [ctxEstimate, setCtxEstimate] = useState<number | null>(null)
+  const [compactOpen, setCompactOpen] = useState(false)
+  const ctxUsed = (ctxEstimate ?? (lastModel ? lastModel.usage.promptTokens + lastModel.usage.completionTokens : 0)) + (live?.tokens ?? 0)
   const [streaming, setStreaming] = useState<string>()
   const abortRef = useRef<AbortController>(null)
   // stored as { items } because useLocalStorage merges objects
@@ -136,6 +141,7 @@ export default function App() {
           if (thinking) thoughts.push(thinking)
           setStreaming('')
           setLastModel(e)
+          setCtxEstimate(null)
           liveRef.current = { first: 0, tokens: 0 }
           setLive(undefined)
         }
@@ -164,7 +170,22 @@ export default function App() {
     setMessages([])
     setSteps([])
     setLastModel(null)
+    setCtxEstimate(null)
     setError('')
+  }
+
+  /** Replace what the model re-reads; the visible chat keeps every message plus a notice. */
+  function compact(next: Message[], label: string) {
+    const sys = estimateTokens(systemText)
+    const before = sys + historyTokens(history)
+    const after = sys + historyTokens(next)
+    setHistory(next)
+    setCtxEstimate(after)
+    setMessages((m) => [
+      ...m,
+      { role: 'notice', content: `Context compacted (${label}): ≈${before.toLocaleString()} → ≈${after.toLocaleString()} tokens. Messages above stay visible, but the model no longer sees all of them as written.` },
+    ])
+    setCompactOpen(false)
   }
 
   return (
@@ -263,9 +284,25 @@ export default function App() {
           {provider && (
             <section aria-label="Stats" className="stats">
               <ContextMeter used={ctxUsed} total={provider.contextWindow} />
+              <button type="button" className="btn btn--sm" onClick={() => setCompactOpen(true)} disabled={!history.length || streaming !== undefined}>
+                Compact context…
+              </button>
               {(lastModel || live) && <SpeedStats usage={lastModel?.usage ?? { promptTokens: 0, completionTokens: 0 }} ms={lastModel?.ms ?? 0} live={live} />}
             </section>
           )}
+          <Modal open={compactOpen} size="lg" title="Compact the context window" onClose={() => setCompactOpen(false)}>
+            {provider && (
+              <ContextCompactor
+                history={history}
+                systemTokens={estimateTokens(systemText)}
+                contextWindow={provider.contextWindow}
+                local={settings.mode === 'local'}
+                summarize={(h, keepLast, signal) => summarize(provider, h, { keepLast, sampling, signal })}
+                onApply={compact}
+                onCancel={() => setCompactOpen(false)}
+              />
+            )}
+          </Modal>
           <section aria-labelledby="steps-title">
             <h2 id="steps-title" className="panel-title">What happened</h2>
             <StepTimeline steps={steps} streaming={streaming} />
