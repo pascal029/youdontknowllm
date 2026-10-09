@@ -40,6 +40,18 @@ test('end to end: connect OpenAI-compatible API, send, see streamed reply', asyn
   expect(sent.at(-1)).toEqual({ role: 'user', content: 'hi' })
 })
 
+test('sends the saved sampling settings with each request', async () => {
+  localStorage.setItem('ydkl.sampling', JSON.stringify({ temperature: 0.3, seed: 1 }))
+  const fetchMock = vi.fn().mockImplementation(async () => new Response(sse({ choices: [{ delta: { content: 'ok' } }] })))
+  vi.stubGlobal('fetch', fetchMock)
+  render(<App />)
+  await userEvent.click(screen.getByRole('radio', { name: 'API' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Connect' }))
+  await userEvent.type(screen.getByLabelText('Message'), 'hi{Enter}')
+  await within(screen.getByRole('main')).findByText('ok')
+  expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({ temperature: 0.3, seed: 1 })
+})
+
 test('shows API errors', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('nope', { status: 500 })))
   render(<App />)

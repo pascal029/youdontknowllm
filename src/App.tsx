@@ -18,7 +18,7 @@ import { useLocalStorage } from './hooks/useLocalStorage'
 import { cachedModelIds, deleteCachedModel } from './llm/cache'
 import { LOCAL_MODELS } from './llm/models'
 import { createOpenAIProvider } from './llm/openai'
-import type { Message, Provider } from './llm/types'
+import type { Message, Provider, Sampling } from './llm/types'
 import { hasWebGPU } from './llm/webgpu'
 import { BUILTIN_TOOLS } from './tools/builtin'
 import type { Tool } from './tools/types'
@@ -26,6 +26,7 @@ import type { Tool } from './tools/types'
 export default function App() {
   const [settings, setSettings] = useLocalStorage('ydkl.provider', DEFAULT_PROVIDER_SETTINGS)
   const [prefs, setPrefs] = useLocalStorage('ydkl.prefs', { systemPrompt: DEFAULT_SYSTEM_PROMPT, disabledTools: [] as string[] })
+  const [sampling] = useLocalStorage<Sampling>('ydkl.sampling', {})
   const [provider, setProvider] = useState<Provider | null>(null)
   const [loading, setLoading] = useState<{ progress: number; text: string } | null>(null)
   const [error, setError] = useState('')
@@ -110,7 +111,7 @@ export default function App() {
     // reasoning from every model call this turn, shown collapsed above the answer
     const thoughts: string[] = []
     try {
-      const gen = runAgent({ provider, systemPrompt: prefs.systemPrompt, tools: tools.filter((t) => t.enabled), history, userText: text, signal: ac.signal })
+      const gen = runAgent({ provider, systemPrompt: prefs.systemPrompt, tools: tools.filter((t) => t.enabled), history, userText: text, signal: ac.signal, sampling })
       for (;;) {
         const r = await gen.next()
         if (r.done) {
