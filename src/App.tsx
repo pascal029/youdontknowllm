@@ -28,7 +28,18 @@ import { BUILTIN_TOOLS } from './tools/builtin'
 import type { Tool } from './tools/types'
 
 export default function App() {
-  const [settings, setSettings] = useLocalStorage('ydkl.provider', DEFAULT_PROVIDER_SETTINGS)
+  const [stored, setStored] = useLocalStorage('ydkl.provider', DEFAULT_PROVIDER_SETTINGS)
+  /** the API key lives only in memory: typed again after every reload, never written to localStorage */
+  const [apiKey, setApiKey] = useState('')
+  const settings = { ...stored, remote: { ...stored.remote, apiKey } }
+  const setSettings = (v: typeof settings) => {
+    setApiKey(v.remote.apiKey)
+    setStored({ ...v, remote: { ...v.remote, apiKey: '' } })
+  }
+  // wipe a key saved by older versions
+  useEffect(() => {
+    if (stored.remote.apiKey) setStored({ ...stored, remote: { ...stored.remote, apiKey: '' } })
+  }, [stored, setStored])
   const [prefs, setPrefs] = useLocalStorage('ydkl.prefs', { systemPrompt: DEFAULT_SYSTEM_PROMPT, disabledTools: [] as string[] })
   const [sampling, setSampling] = useLocalStorage<Sampling>('ydkl.sampling', {})
   const [provider, setProvider] = useState<Provider | null>(null)

@@ -33,7 +33,7 @@ Follow `design-system/youdontknowllm/MASTER.md`. Short version:
 ## Conventions
 - Tool calling is prompt-based for all providers: tools described in the system prompt, model replies with `<tool_call>{"name":..., "arguments":{...}}</tool_call>`.
 - Tool code always runs in a fresh Web Worker with a timeout, then `terminate()`. Never `eval` on the main thread.
-- API keys live only in localStorage and are sent only with requests to the user's baseURL. Exception: hosts in `RELAYED_ORIGINS` (`src/llm/relay.ts`, e.g. ollama.com, which has no CORS) go through this site's Netlify/Vite relay; the UI says so. Never log keys.
+- API keys live only in memory (React state, never localStorage: re-entered after each reload) and are sent only with requests to the user's baseURL. Exception: hosts in `RELAYED_ORIGINS` (`src/llm/relay.ts`, e.g. ollama.com, which has no CORS) go through this site's Netlify/Vite relay; the UI says so. Never log keys.
 - Native `tool_calls` from a server are converted to `<tool_call>` text in `stream.ts`, so the prompt-based tool pipeline handles every model. Errors sent inside a stream are raised; Groq's `tool_use_failed` (gpt-oss called a tool without a native `tools` list) is recovered from `failed_generation`. `parseToolCall` also unwraps `{"name":"tool_call",...}` and, when a reply has no visible text, finds a call hidden in the thinking.
 - No new dependency when a few lines will do.
 

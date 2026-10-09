@@ -40,6 +40,22 @@ test('end to end: connect OpenAI-compatible API, send, see streamed reply', asyn
   expect(sent.at(-1)).toEqual({ role: 'user', content: 'hi' })
 })
 
+test('the API key is sent with requests but never written to localStorage; an old saved key is wiped', async () => {
+  localStorage.setItem('ydkl.provider', JSON.stringify({ mode: 'remote', remote: { baseURL: 'https://api.openai.com/v1', apiKey: 'sk-old', model: 'gpt-4o-mini', contextWindow: 8192 } }))
+  const fetchMock = vi.fn().mockImplementation(async () => new Response(sse({ choices: [{ delta: { content: 'ok' } }] })))
+  vi.stubGlobal('fetch', fetchMock)
+  render(<App />)
+  await waitFor(() => expect(localStorage.getItem('ydkl.provider')).not.toContain('sk-old'))
+  expect(screen.getByLabelText('API key')).toHaveValue('')
+
+  await userEvent.type(screen.getByLabelText('API key'), 'sk-secret')
+  await userEvent.click(screen.getByRole('button', { name: 'Connect' }))
+  await userEvent.type(screen.getByLabelText('Message'), 'hi{Enter}')
+  await within(screen.getByRole('main')).findByText('ok')
+  expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe('Bearer sk-secret')
+  expect(JSON.stringify({ ...localStorage })).not.toContain('sk-secret')
+})
+
 test('sends the saved sampling settings with each request', async () => {
   localStorage.setItem('ydkl.sampling', JSON.stringify({ temperature: 0.3, seed: 1 }))
   const fetchMock = vi.fn().mockImplementation(async () => new Response(sse({ choices: [{ delta: { content: 'ok' } }] })))

@@ -144,7 +144,7 @@ export default function ProviderSettings({ value, onChange, onActivate, busy, we
               <span>API key</span>
               <input type="password" autoComplete="off" value={value.remote.apiKey} onChange={(e) => setRemote({ apiKey: e.target.value })} />
             </label>
-            <small>Stored only in this browser. Sent only with requests to the base URL above.</small>
+            <small>Not saved: kept only until you reload or close this page. Sent only with requests to the base URL above.</small>
           </div>
           <label className="field">
             <span>Model name</span>
