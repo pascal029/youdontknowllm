@@ -80,6 +80,28 @@ test('compacting drops turns from what the model sees, but the chat keeps them',
   expect(sent).toContain('second')
 })
 
+test('Fill context adds a sample chat near the limit; the next request carries it', async () => {
+  const fetchMock = vi.fn().mockImplementation(async () => new Response(sse({ choices: [{ delta: { content: 'Your name is Ana.' } }] })))
+  vi.stubGlobal('fetch', fetchMock)
+  render(<App />)
+  await userEvent.click(screen.getByRole('radio', { name: 'API' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Connect' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Fill context' }))
+
+  const main = within(screen.getByRole('main'))
+  expect(main.getByRole('note')).toHaveTextContent(/Added a sample conversation/)
+  expect(main.getByText(/My name is Ana/)).toBeInTheDocument()
+  const pct = Number(screen.getByLabelText('Context window used').getAttribute('value')) / 8192
+  expect(pct).toBeGreaterThan(0.75)
+  expect(pct).toBeLessThanOrEqual(0.8)
+  expect(screen.getByRole('button', { name: 'Compact context…' })).toBeEnabled()
+
+  await userEvent.type(screen.getByLabelText('Message'), 'what is my name?{Enter}')
+  await main.findByText('Your name is Ana.')
+  const sent = JSON.parse(fetchMock.mock.calls[0][1].body).messages
+  expect(sent.some((m: { content: string }) => m.content.startsWith('<tool_response>'))).toBe(true)
+})
+
 test('shows API errors', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('nope', { status: 500 })))
   render(<App />)

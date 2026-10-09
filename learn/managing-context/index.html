@@ -121,7 +121,7 @@
         <aside class="try">
           <h2 id="try">Try it</h2>
           <ol>
-            <li>Open the <a href="/app/">playground</a>. Tell the model your name, then ask it to search Wikipedia for something, then chat a little more.</li>
+            <li>Open the <a href="/app/">playground</a>, connect a model and press <strong>Fill context</strong>. It adds a sample chat (your name in the first message, tool calls, a big tool result) up to ~80% of the window. With an API model, set a small context window such as 8,192 first.</li>
             <li>Press <strong>Compact context…</strong> under the context meter. Compare <strong>Before</strong> and <strong>After</strong> for each strategy: what's struck through, and how many tokens are left?</li>
             <li>Apply <strong>Drop oldest messages</strong>, then ask <em>What is my name?</em> The chat still shows it; the model no longer knows it.</li>
             <li>Start over and apply <strong>Summary + keep last N</strong> instead. Ask the same question. Did the summary keep your name?</li>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { estimateTokens, historyTokens, summarize } from './agent/compact'
 import { runAgent, type Step } from './agent/loop'
+import { fillHistory } from './agent/sampleChat'
 import { composeSystemPrompt } from './agent/prompt'
 import { splitThink } from './agent/parseToolCall'
 import AppShell from './components/AppShell'
@@ -188,6 +189,20 @@ export default function App() {
     setCompactOpen(false)
   }
 
+  /** Learning shortcut: append a sample chat up to ~80% of the window, so compacting can be tried right away. */
+  function fillContext(contextWindow: number) {
+    const sys = estimateTokens(systemText)
+    const { history: next, shown } = fillHistory(history, Math.round(contextWindow * 0.8) - sys)
+    const after = sys + historyTokens(next)
+    setHistory(next)
+    setCtxEstimate(after)
+    setMessages((m) => [
+      ...m,
+      { role: 'notice', content: `Added a sample conversation: context is now ≈${after.toLocaleString()} tokens. Your next message sends all of it. Try "Compact context…".` },
+      ...shown,
+    ])
+  }
+
   return (
     <AppShell
       sidebar={
@@ -284,9 +299,23 @@ export default function App() {
           {provider && (
             <section aria-label="Stats" className="stats">
               <ContextMeter used={ctxUsed} total={provider.contextWindow} />
-              <button type="button" className="btn btn--sm" onClick={() => setCompactOpen(true)} disabled={!history.length || streaming !== undefined}>
-                Compact context…
-              </button>
+              <div className="ctx-actions">
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--sm"
+                  onClick={() => fillContext(provider.contextWindow)}
+                  disabled={streaming !== undefined}
+                  title="Add a sample conversation (facts, tool calls, a big tool result) up to ~80% of the window"
+                >
+                  Fill context
+                </button>
+                <button type="button" className="btn btn--sm" onClick={() => setCompactOpen(true)} disabled={!history.length || streaming !== undefined}>
+                  Compact context…
+                </button>
+              </div>
+              {provider.contextWindow > 16384 && (
+                <small className="ctx-tip">Tip: lower the context window in settings (e.g. 8192) so a full window stays cheap and under API rate limits.</small>
+              )}
               {(lastModel || live) && <SpeedStats usage={lastModel?.usage ?? { promptTokens: 0, completionTokens: 0 }} ms={lastModel?.ms ?? 0} live={live} />}
             </section>
           )}
